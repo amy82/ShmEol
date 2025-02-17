@@ -632,7 +632,7 @@ void CLightDlg::ShowLightData()
 }
 void CLightDlg::ShowOCLightData()
 {
-	TCHAR szData[SIZE_OF_100BYTE];
+	//TCHAR szData[SIZE_OF_100BYTE];
 	ocLux = g_clModelData[m_nUnit].m_LxData[oc_CHANNEL];
 	ocVal = g_clModelData[m_nUnit].m_LxVal;
 	OC_LX_Change(ocLux);

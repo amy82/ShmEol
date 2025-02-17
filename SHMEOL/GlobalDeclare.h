@@ -13,6 +13,7 @@
 #include "KeyPadDlg.h"
 #include "KeyBoardDlg.h"
 #include "Data.h"
+#include "MesData.h"
 #include "AXTDefine.h"
 #include "AxlMotorSet.h"
 #include "DioControl.h"
@@ -32,29 +33,34 @@
 #include "Utility\Device\Light\LightControl.h"
 #include "Utility\Device\Light\OCControl.h"
 
+#include "ReportClass.h"
+
 extern CAutoInspDlg* g_pCarAABonderDlg;
+
+
 extern CMessagePopupDlg* g_pMessagePopupDlg[MAX_POPUP_COUNT];
 extern CMessagePopupDlg* g_pMessageClosePopupDlg;
+
+extern CMessageInput* m_clTeminalMessageDlg[MAX_TERMINAL_COUNT];
+
 extern int g_nPopupIndex;
+extern int g_nTerminalIindex;
+
 extern CModelList ModelList;
-extern CModelType g_clModelType;
+//extern CModelType g_clModelType;
 extern CSystemData g_clSysData;
 extern CModelData g_clModelData[2];
 extern CMarkData g_clMarkData[2];
 extern CTaskWork g_clTaskWork[2];
-
-//extern CSFRTeachingData g_clSFRTeacingData;
+extern CReportClass g_clReportData;
 
 extern CVision g_clVision;
 extern CModelFinder g_clModelFinder;
 extern CAxlMotorSet g_clMotorSet;
 extern CDioControl	g_clDioControl;
 
-//extern CSimpleAdo g_clAdo;
-
 extern CLaonGrabberWrapper g_clLaonGrabberWrapper[MAX_UNIT_COUNT];
 
-//extern CInspection_Alg g_clAlg[MAX_UNIT_COUNT];
 extern CAps_Insp g_clPriInsp[MAX_UNIT_COUNT];
 
 extern CMandoSfrSpec g_clMandoSfrSpec[MAX_UNIT_COUNT];
@@ -69,22 +75,12 @@ extern CLightControl		LightLeftChartControl[MAX_UNIT_COUNT];		//Left Side Chart
 extern CLightControl		LightRightChartControl[MAX_UNIT_COUNT];		//Right Side Chart
 
 
-
-//extern CeepromData			eepromData[MAX_UNIT_COUNT];
-extern CVerifyData EEpromVerifyData;
-
 extern CInterLockDlg* InterLockDlg;
-
-extern CCMSMESSocket* g_clCMSMESSocket;
-//extern CQueue<STRUC_LOG_NODE*> g_clLogQueue;
 
 extern bool bCurrentConnect;
 extern bool MesSpecLoadCheck;
 
-extern int MesMaxCount1;
-extern int MesMaxCount2;
-extern int MesMaxCount3;
-extern int MesMaxCount4;
+
 //-----------------------------------------------------------------------------
 //
 //
@@ -99,14 +95,13 @@ void ResultSavePath(TCHAR* sPath, CString logStr);
 //
 unsigned int g_GetCurrentPath(TCHAR* pPath);
 void AddLog_old(TCHAR* szLog, int nLogType, int nUnit, bool bBuzzer = false);
+void g_ShowMsgPopup(CString sTitle, CString sMsg, COLORREF bgColor, int TimeClose = 0, int bBuzzer = 0);
 
+void g_ShowTerminalPopup(CString sTitle, CString sMsg, int nTid, COLORREF bgColor, int TimeClose = 0, int bBuzzer = 0);
 
-void g_ShowMsgPopup(CString sTitle, CString sMsg, COLORREF bgColor , int TimeClose = 0);
 
 void g_ShowCloseMsgPopup(CString sTitle, CString sMsg, bool bShow);
-
-
-bool g_ShowMsgModal(CString sTitle, CString sMsg, COLORREF bgColor);
+bool g_ShowMsgModal(CString sTitle, CString sMsg, COLORREF bgColor, CString sYesBtn = _T("Yes"), CString sNoBtn = _T("No"));
 int g_ShowMsgAsk(CString sTitle, CString sMsg, COLORREF bgColor, int nAskCount, TCHAR* pszAsk[]);
 
 bool g_GetIllumination(int nUnit, BYTE* RawImage, double &dShiftX, double &dShiftY);			//MAIN , NARROW 이물광원 보정

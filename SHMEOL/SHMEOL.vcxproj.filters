@@ -257,9 +257,6 @@
     <ClCompile Include="LensAxisThread.cpp">
       <Filter>Thread</Filter>
     </ClCompile>
-    <ClCompile Include="LensProcess.cpp">
-      <Filter>Process</Filter>
-    </ClCompile>
     <ClCompile Include="ModelSelectDlg.cpp">
       <Filter>Thread</Filter>
     </ClCompile>
@@ -294,6 +291,30 @@
     </ClCompile>
     <ClCompile Include="Aps_Insp.cpp">
       <Filter>_New\Algorithm\INSP</Filter>
+    </ClCompile>
+    <ClCompile Include="UbiGem.cpp">
+      <Filter>Mes</Filter>
+    </ClCompile>
+    <ClCompile Include="MainDlg.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ReportClass.cpp">
+      <Filter>Mes</Filter>
+    </ClCompile>
+    <ClCompile Include="MesData.cpp">
+      <Filter>_New\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="IdlePopupDlg.cpp">
+      <Filter>Dlg</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility\xml\Markup.cpp">
+      <Filter>_New\Utility\xml</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageInput.cpp">
+      <Filter>Dlg</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageLot.cpp">
+      <Filter>Dlg</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -652,9 +673,6 @@
     <ClInclude Include="LensAxisThread.h">
       <Filter>Thread</Filter>
     </ClInclude>
-    <ClInclude Include="LensProcess.h">
-      <Filter>Process</Filter>
-    </ClInclude>
     <ClInclude Include="ModelSelectDlg.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -871,6 +889,33 @@
     <ClInclude Include="Aps_Insp.h">
       <Filter>_New\Algorithm\INSP</Filter>
     </ClInclude>
+    <ClInclude Include="DriverHelper.h">
+      <Filter>Mes</Filter>
+    </ClInclude>
+    <ClInclude Include="UbiGem.h">
+      <Filter>Mes</Filter>
+    </ClInclude>
+    <ClInclude Include="MainDlg.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ReportClass.h">
+      <Filter>Mes</Filter>
+    </ClInclude>
+    <ClInclude Include="MesData.h">
+      <Filter>_New\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="IdlePopupDlg.h">
+      <Filter>Dlg</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\xml\Markup.h">
+      <Filter>_New\Utility\xml</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageInput.h">
+      <Filter>Dlg</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageLot.h">
+      <Filter>Dlg</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -1034,6 +1079,12 @@
     </Filter>
     <Filter Include="_New\Algorithm\LGIT\LibACMISSoftISPBasic">
       <UniqueIdentifier>{d95119d0-68ab-4c01-ade5-da69c28dfd5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Mes">
+      <UniqueIdentifier>{f1560f53-e83a-45cd-87fa-1add98497f9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_New\Utility\xml">
+      <UniqueIdentifier>{d7881dcf-1d3d-4c34-8568-dbfd5b348e59}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

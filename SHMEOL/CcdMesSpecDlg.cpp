@@ -106,6 +106,7 @@ void CCcdMesSpecDlg::InitCtrl()
 //-----------------------------------------------------------------------------
 void CCcdMesSpecDlg::InitMesGridCtrl1()
 {
+#if 0
     TCHAR* pszCol[] = { _T("No"), _T("Item"), _T("Min"), _T("Max") };
 
     CRect rect;
@@ -182,6 +183,7 @@ void CCcdMesSpecDlg::InitMesGridCtrl1()
 			}
         }
     }
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -216,19 +218,19 @@ void CCcdMesSpecDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 //-----------------------------------------------------------------------------
 void CCcdMesSpecDlg::GetMesSpec()
 {
-	int i = 0;
-	CString tmpStr = "";
-	for (i = 0; i < MES_VERIFY_SPEC_COUNT; i++)
-	{
-		tmpStr = m_clGridMesSpec1.GetItemText(i + 1, 2);	//Min Spec
-		_stprintf_s(EEpromVerifyData.vMinData[i], SIZE_OF_100BYTE, tmpStr);
-		tmpStr = m_clGridMesSpec1.GetItemText(i + 1, 3);	//Max Spec
-		_stprintf_s(EEpromVerifyData.vMaxData[i], SIZE_OF_100BYTE, tmpStr);
+	//int i = 0;
+	//CString tmpStr = "";
+	//for (i = 0; i < MES_VERIFY_SPEC_COUNT; i++)
+	//{
+	//	tmpStr = m_clGridMesSpec1.GetItemText(i + 1, 2);	//Min Spec
+	//	_stprintf_s(EEpromVerifyData.vMinData[i], SIZE_OF_100BYTE, tmpStr);
+	//	tmpStr = m_clGridMesSpec1.GetItemText(i + 1, 3);	//Max Spec
+	//	_stprintf_s(EEpromVerifyData.vMaxData[i], SIZE_OF_100BYTE, tmpStr);
 
 
 
-	}
-	tmpStr.Empty();
+	//}
+//	tmpStr.Empty();
 }
 //-----------------------------------------------------------------------------
 //
@@ -237,21 +239,15 @@ void CCcdMesSpecDlg::GetMesSpec()
 //-----------------------------------------------------------------------------
 void CCcdMesSpecDlg::ShowMesGridSpec()
 {
-	TCHAR szData[SIZE_OF_100BYTE];
-	int i = 0;
-	int mMesval1 = 0;
-	for (i = 0; i < MES_VERIFY_SPEC_COUNT; i++)//for (i = 0; i < MesMaxCount1; i++)
-	{
-		/*mMesval1 = (_ttoi(EEpromVerifyData.vMinData[i]));
-		m_clGridMesSpec1.SetItemText(i + 1, 1, mMesval1,6);
-
-		mMesval1 = (_ttoi(EEpromVerifyData.vMaxData[i]));
-		m_clGridMesSpec1.SetItemText(i + 1, 2, mMesval1,6);*/
-
-		m_clGridMesSpec1.SetItemText(i + 1, 2, EEpromVerifyData.vMinData[i]);
-		m_clGridMesSpec1.SetItemText(i + 1, 3, EEpromVerifyData.vMaxData[i]);
-	}
-	m_clGridMesSpec1.Invalidate();
+	//TCHAR szData[SIZE_OF_100BYTE];
+	//int i = 0;
+	//int mMesval1 = 0;
+	//for (i = 0; i < MES_VERIFY_SPEC_COUNT; i++)//for (i = 0; i < MesMaxCount1; i++)
+	//{
+	//	m_clGridMesSpec1.SetItemText(i + 1, 2, EEpromVerifyData.vMinData[i]);
+	//	m_clGridMesSpec1.SetItemText(i + 1, 3, EEpromVerifyData.vMaxData[i]);
+	//}
+	//m_clGridMesSpec1.Invalidate();
 }
 #if 0
 //-----------------------------------------------------------------------------
@@ -265,11 +261,11 @@ void CCcdMesSpecDlg::GetLcbSpec()
     CString sData = _T("");
     int i;
 
-    for (i = 0; i < g_StainLcbcount; i++)
+    /*for (i = 0; i < g_StainLcbcount; i++)
     {
         sData = m_clGridMesSpec2.GetItemText(i + 1, 1);
         g_clModelData[m_nUnit].m_LcbSpec[i] = _ttof((TCHAR*)(LPCTSTR)sData);
-    }
+    }*/
     g_clSysData.sDSave();
 }
 void CCcdMesSpecDlg::GetYmeanSpec()
@@ -361,28 +357,28 @@ void CCcdMesSpecDlg::OnNMDblClickedMesGrid1(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 	if ((nRow >= 1 ) && nCol >= 2)	//ApsSpecRow 빼기 1 한건 Epoxy 값은 사용안해서 제외
     {
-        sData = m_clGridMesSpec1.GetItemText(nRow, nCol);
-        CKeyPadDlg* pDlg = new CKeyPadDlg(sData, 10);
-        if (pDlg != NULL)
-        {
-            if (pDlg->DoModal() == IDOK)
-            {
-				if (nRow == 3 || nRow == 4)//if (nRow == 67 || nRow == 68)
-				{
-					sData.Format(_T("%.0lf"), pDlg->GetReturnVal());
-				}
-				else
-				{
-					sData.Format(_T("%.06lf"), pDlg->GetReturnVal());
-				}
-               
-				m_clGridMesSpec1.SetItemText(nRow, nCol, sData);
+    //    sData = m_clGridMesSpec1.GetItemText(nRow, nCol);
+    //    CKeyPadDlg* pDlg = new CKeyPadDlg(sData, 10);
+    //    if (pDlg != NULL)
+    //    {
+    //        if (pDlg->DoModal() == IDOK)
+    //        {
+				//if (nRow == 3 || nRow == 4)//if (nRow == 67 || nRow == 68)
+				//{
+				//	sData.Format(_T("%.0lf"), pDlg->GetReturnVal());
+				//}
+				//else
+				//{
+				//	sData.Format(_T("%.06lf"), pDlg->GetReturnVal());
+				//}
+    //           
+				//m_clGridMesSpec1.SetItemText(nRow, nCol, sData);
 
-				m_clGridMesSpec1.Invalidate();
-            }
+				//m_clGridMesSpec1.Invalidate();
+    //        }
 
-            delete pDlg;
-        }
+    //        delete pDlg;
+    //    }
     }
 }
 #if 0

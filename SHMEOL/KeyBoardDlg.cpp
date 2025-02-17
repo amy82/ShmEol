@@ -27,6 +27,8 @@ void CKeyBoardDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_STATIC_KEYBOARD_TOP_BAR, m_clColorStaticTopBar);
 	DDX_Control(pDX, IDC_STATIC_KEYBOARD_VAL, m_clColorStaticVal);
+	DDX_Control(pDX, IDC_EDIT_KEYBOARD_VAL, m_edtKeyBoardVal);
+
 	DDX_Control(pDX, IDC_BUTTON_KEYBOARD_NUM0, m_clColorButtonNum[0]);
 	DDX_Control(pDX, IDC_BUTTON_KEYBOARD_NUM1, m_clColorButtonNum[1]);
 	DDX_Control(pDX, IDC_BUTTON_KEYBOARD_NUM2, m_clColorButtonNum[2]);
@@ -155,6 +157,26 @@ void CKeyBoardDlg::InitCtrl()
 
 	m_clColorStaticVal.SetWindowText(m_sVal);
 	m_clColorStaticVal.Invalidate();
+
+
+	CFont m_font;
+	// 폰트 설정 (Arial, 크기 20)
+	m_font.CreatePointFont(145, _T("맑은 고딕"));  // 크기 20포인트는 200 단위 사용
+	m_edtKeyBoardVal.SetFont(&m_font);
+	///m_edtKeyBoardVal.ModifyStyle(0, ES_MULTILINE | ES_AUTOVSCROLL | ES_WANTRETURN);
+	m_edtKeyBoardVal.SetWindowTextA(m_sVal);
+
+	CClientDC dc(GetDlgItem(IDC_EDIT_KEYBOARD_VAL));
+	CRect rt;
+	GetDlgItem(IDC_EDIT_KEYBOARD_VAL)->GetClientRect(&rt);
+	rt.left += 5;
+	rt.right -= 5;
+	rt.top += 10;
+	rt.bottom -= 10;
+
+	((CEdit*)GetDlgItem(IDC_EDIT_KEYBOARD_VAL))->SetRect(&rt);
+
+	m_edtKeyBoardVal.Invalidate();
 }
 
 //-----------------------------------------------------------------------------
@@ -171,10 +193,14 @@ void CKeyBoardDlg::OnBnClickedButtonKeyboardDash()
 	m_sVal += _T('-');
 	m_sHiddenVal += _T('*');
 
-	if (m_bPasswd == true)
+	if (m_bPasswd == true) {
 		m_clColorStaticVal.SetWindowText(m_sHiddenVal);
-	else
+		m_edtKeyBoardVal.SetWindowText(m_sHiddenVal);
+	}
+	else {
 		m_clColorStaticVal.SetWindowText(m_sVal);
+		m_edtKeyBoardVal.SetWindowText(m_sVal);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -191,10 +217,15 @@ void CKeyBoardDlg::OnBnClickedButtonKeyboardDot()
 	m_sVal += _T('.');
 	m_sHiddenVal += _T('*');
 
-	if (m_bPasswd == true)
+	if (m_bPasswd == true) {
 		m_clColorStaticVal.SetWindowText(m_sHiddenVal);
+		m_edtKeyBoardVal.SetWindowText(m_sHiddenVal);
+	}
 	else
+	{
 		m_clColorStaticVal.SetWindowText(m_sVal);
+		m_edtKeyBoardVal.SetWindowText(m_sVal);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -210,10 +241,15 @@ void CKeyBoardDlg::OnBnClickedButtonKeyboardDel()
 		m_sVal = m_sVal.Left(m_sVal.GetLength() - 1);
 		m_sHiddenVal = m_sHiddenVal.Left(m_sHiddenVal.GetLength() - 1);
 
-		if (m_bPasswd == true)
+		if (m_bPasswd == true) {
 			m_clColorStaticVal.SetWindowText(m_sHiddenVal);
+			m_edtKeyBoardVal.SetWindowText(m_sHiddenVal);
+		}
 		else
+		{
 			m_clColorStaticVal.SetWindowText(m_sVal);
+			m_edtKeyBoardVal.SetWindowText(m_sVal);
+		}
 	}
 }
 
@@ -251,9 +287,15 @@ void CKeyBoardDlg::OnBnClickedButtonKeyboardClear()
 	m_sHiddenVal = _T("");
 
 	if (m_bPasswd == true)
+	{
 		m_clColorStaticVal.SetWindowText(m_sHiddenVal);
+		m_edtKeyBoardVal.SetWindowText(m_sHiddenVal);
+	}
 	else
+	{
 		m_clColorStaticVal.SetWindowText(m_sVal);
+		m_edtKeyBoardVal.SetWindowText(m_sVal);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -285,9 +327,15 @@ void CKeyBoardDlg::OnBnClickedButtonKeyboardNum(UINT nID)
 	}
 
 	if (m_bPasswd == true)
+	{
 		m_clColorStaticVal.SetWindowText(m_sHiddenVal);
+		m_edtKeyBoardVal.SetWindowText(m_sHiddenVal);
+	}
 	else
+	{
 		m_clColorStaticVal.SetWindowText(m_sVal);
+		m_edtKeyBoardVal.SetWindowText(m_sVal);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -335,9 +383,15 @@ void CKeyBoardDlg::OnBnClickedButtonKeyboardAlpha(UINT nID)
 	}
 
 	if (m_bPasswd == true)
+	{
 		m_clColorStaticVal.SetWindowText(m_sHiddenVal);
+		m_edtKeyBoardVal.SetWindowText(m_sHiddenVal);
+	}
 	else
+	{
 		m_clColorStaticVal.SetWindowText(m_sVal);
+		m_edtKeyBoardVal.SetWindowText(m_sVal);
+	}
 }
 
 //-----------------------------------------------------------------------------

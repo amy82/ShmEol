@@ -19,12 +19,6 @@ public:
     int AutoChartInsp(int nStep);			    //  CHART검사					(80000 ~ 90000)
 	int AutoEOLFinalSFR(int nStep);				//  Final SFR					(110000 ~ 120000)
 	
-	//OQA
-	int OqaHomeProcess(int nStep);					//  원점					(10000 ~ 20000)
-	int OqaAutoReadyProcess(int nStep);				//  운전준비				(20000 ~ 30000)
-	int OqaAuto_M_PCBLoading(int nStep);			//  MAIN -> PCB 로딩            (30000 ~ 40000)			
-	int OqaAuto_OC_Insp(int nStep);					//	이물검사				(60000 ~ 70000)
-	int OqaAutoEOLFinalSFR(int nStep);				//  Final SFR				(110000 ~ 120000)
 	//-------------------------------------------------------------------------------------------------------------------
 	//AA
 	int AutoChartMoving(int nStep);				//  Pcb , Lens 동시 Chart이동		(60000 ~ 70000)
@@ -33,33 +27,10 @@ public:
 	int AutoLensLoading(int nStep);				//  Lens Loading					(50000 ~ 60000)
 	
 	
-
-	//EOL
-	int AutoEpoxyLensLaser(int nStep);				//  Pcb Epoxy , Lens Laser동시		(60000 ~ 70000)
-	int HomeProcess_IMAGE(int nStep);			//  원점(10000 ~ 20000)	화상장비
-	int Auto_DarkImage_Get(int nStep);			//90000 ~ 99000
-	//완제품검사
-
-	int AutoBrightInsp(int nStep);			//이물광원 밝기 검사 (SATURATION , IR FILTER)
-
-
-
-
-	int AutoPcbAlign(int nStep);				//  Holder Align                (40000 ~ 50000)
-	int AutoPcbBcr(int nStep);					//  Holder BCR                (50000 ~ 60000)
-    int AutoPcbLaserTilt(int nStep);			//  LaserTilt->Holder Align     (50000 ~ 60000)		//사용 XXXXXXXXXXXXX
-    //
-    int AutoDarkInsp(int nStep);			    //  Dark 검사     (60000 ~ 70000)
-    int AutoOC6500KInsp(int nStep);			    //  Defect , stain,RI,Color Uniformity, R/C,B/C,Cr/Cb 검사     (70000 ~ 80000)
-    //
-
-	
-
-    //
-	//ColorSensitivity = 검사만 5000k , 6500k 
-	//
-	
-
+	bool nRunOnlineControlState;		//true = Online , false = Offline 
+	int nRunTimeOutSec;			//Default = 60;
+	int nLotProcessingComplete_ACK;
+	//g_clMesCommunication[m_nUnit].ConversationTimeoutCount
 	//
 	int VaccumRetry;
 	bool m_nDiffTestOk;

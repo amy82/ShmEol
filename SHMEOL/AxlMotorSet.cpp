@@ -4216,7 +4216,16 @@ bool CAxlMotorSet::MovePcbXYTMotor(int nUnit, int nPosi, double dOffsetX /*= 0.0
 			return false;
 		}
 	}
+	//if (nPosi == CHART_POS || nPosi == DARK_POS || nPosi == OC_LIGHT_POS)		//, ,
+	//{
+	//	if (g_clDioControl.PcbSocketUpCheck(nUnit, false) == false)
+	//	{
+	//		_stprintf_s(szLog, SIZE_OF_1K, _T("[INFO] SOCKET 상승 상태입니다."));
+	//		AddLog(szLog, 1, nUnit, (g_clTaskWork[nUnit].m_nAutoFlag == MODE_AUTO) ? true : false);
 
+	//		return false;
+	//	}
+	
 	
 
 	nAxis[0] = MOTOR_PCB_X;

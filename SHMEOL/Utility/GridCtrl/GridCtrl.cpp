@@ -191,7 +191,8 @@ UINT GetMouseScrollLines()
 
 void CGridCtrl::SetReference_Setting()
 {
-	SetEditable(FALSE);	
+	SetEditable(FALSE);
+	///SetEditable(TRUE);//SetEditable(FALSE);	
 	EnableDragAndDrop(FALSE);
 	SetRowResize(FALSE);
 	SetColumnResize(FALSE);

@@ -470,7 +470,7 @@ void CLaonGrabberWrapper::BoardtInitialize()
     pfnGetBoardControl fnGetInterface = (pfnGetBoardControl)GetProcAddress(m_hBoardLibrary, "GetBoardControl");
     if (fnGetInterface)
     {
-        m_pBoard = (*fnGetInterface)(BOARD_TYPE_LAON);
+        m_pBoard = (*fnGetInterface)(BOARD_TYPE_LAON);//BOARD_TYPE_LAON1000OP
         if (m_pBoard == NULL)
         {
             //AfxMessageBox("[ERROR] GetBoardControl Load Failed!");

@@ -603,47 +603,6 @@ void CCcdRIThresholdSpecDlg::ShowRIThresholdSpec()
 
 
 
-   /* for (i = 0; i < RIThresholdMaxCount - 1; i++)
-    {
-        m_clGridRIThresholdSpec2.SetItemText(1, i + 1, g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][4], 3);
-        m_clGridRIThresholdSpec2.SetItemText(2, i + 1, g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][5], 3);
-        m_clGridRIThresholdSpec2.SetItemText(3, i + 1, g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][6], 3);
-        m_clGridRIThresholdSpec2.SetItemText(4, i + 1, g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][7], 3);
-        RiThresholdGridCount++;
-    }
-    for (i = 0; i < RIThresholdMaxCount - 1; i++)
-    {
-        m_clGridRIThresholdSpec3.SetItemText(1, i + 1, g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][4], 3);
-        m_clGridRIThresholdSpec3.SetItemText(2, i + 1, g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][5], 3);
-        m_clGridRIThresholdSpec3.SetItemText(3, i + 1, g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][6], 3);
-        m_clGridRIThresholdSpec3.SetItemText(4, i + 1, g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][7], 3);
-        RiThresholdGridCount++;
-    }
-    for (i = 0; i < RIThresholdMaxCount - 1; i++)
-    {
-        m_clGridRIThresholdSpec4.SetItemText(1, i + 1, g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][4], 3);
-        m_clGridRIThresholdSpec4.SetItemText(2, i + 1, g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][5], 3);
-        m_clGridRIThresholdSpec4.SetItemText(3, i + 1, g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][6], 3);
-        m_clGridRIThresholdSpec4.SetItemText(4, i + 1, g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][7], 3);
-        RiThresholdGridCount++;
-    }
-    for (i = 0; i < RIThresholdMaxCount - 1; i++)
-    {
-        m_clGridRIThresholdSpec5.SetItemText(1, i + 1, g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][4], 3);
-        m_clGridRIThresholdSpec5.SetItemText(2, i + 1, g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][5], 3);
-        m_clGridRIThresholdSpec5.SetItemText(3, i + 1, g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][6], 3);
-        m_clGridRIThresholdSpec5.SetItemText(4, i + 1, g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][7], 3);
-        RiThresholdGridCount++;
-    }
-*/
-
-
-
-    
-   /* m_clGridRIThresholdSpec2.Invalidate();
-    m_clGridRIThresholdSpec3.Invalidate();
-    m_clGridRIThresholdSpec4.Invalidate();
-    m_clGridRIThresholdSpec5.Invalidate();*/
 }
 
 //-----------------------------------------------------------------------------
@@ -677,55 +636,6 @@ void CCcdRIThresholdSpecDlg::GetRIThresholdSpec()
 	sData.Empty();
 
 
-    /*for (i = 0; i < RIThresholdMaxCount - 1; i++)
-    {
-        sData = m_clGridRIThresholdSpec2.GetItemText(1, i + 1);
-        g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][4] = _ttof((TCHAR*)(LPCTSTR)sData);
-        sData = m_clGridRIThresholdSpec2.GetItemText(2, i + 1);
-        g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][5] = _ttof((TCHAR*)(LPCTSTR)sData);
-        sData = m_clGridRIThresholdSpec2.GetItemText(3, i + 1);
-        g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][6] = _ttof((TCHAR*)(LPCTSTR)sData);
-        sData = m_clGridRIThresholdSpec2.GetItemText(4, i + 1);
-        g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][7] = _ttof((TCHAR*)(LPCTSTR)sData);
-        RiThresholdGridCount++;
-    }
-    for (i = 0; i < RIThresholdMaxCount - 1; i++)
-    {
-        sData = m_clGridRIThresholdSpec3.GetItemText(1, i + 1);
-        g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][4] = _ttof((TCHAR*)(LPCTSTR)sData);
-        sData = m_clGridRIThresholdSpec3.GetItemText(2, i + 1);
-        g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][5] = _ttof((TCHAR*)(LPCTSTR)sData);
-        sData = m_clGridRIThresholdSpec3.GetItemText(3, i + 1);
-        g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][6] = _ttof((TCHAR*)(LPCTSTR)sData);
-        sData = m_clGridRIThresholdSpec3.GetItemText(4, i + 1);
-        g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][7] = _ttof((TCHAR*)(LPCTSTR)sData);
-        RiThresholdGridCount++;
-    }
-    for (i = 0; i < RIThresholdMaxCount - 1; i++)
-    {
-        sData = m_clGridRIThresholdSpec4.GetItemText(1, i + 1);
-        g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][4] = _ttof((TCHAR*)(LPCTSTR)sData);
-        sData = m_clGridRIThresholdSpec4.GetItemText(2, i + 1);
-        g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][5] = _ttof((TCHAR*)(LPCTSTR)sData);
-        sData = m_clGridRIThresholdSpec4.GetItemText(3, i + 1);
-        g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][6] = _ttof((TCHAR*)(LPCTSTR)sData);
-        sData = m_clGridRIThresholdSpec4.GetItemText(4, i + 1);
-        g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][7] = _ttof((TCHAR*)(LPCTSTR)sData);
-        RiThresholdGridCount++;
-    }
-    for (i = 0; i < RIThresholdMaxCount - 1; i++)
-    {
-        sData = m_clGridRIThresholdSpec5.GetItemText(1, i + 1);
-        g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][4] = _ttof((TCHAR*)(LPCTSTR)sData);
-        sData = m_clGridRIThresholdSpec5.GetItemText(2, i + 1);
-        g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][5] = _ttof((TCHAR*)(LPCTSTR)sData);
-        sData = m_clGridRIThresholdSpec5.GetItemText(3, i + 1);
-        g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][6] = _ttof((TCHAR*)(LPCTSTR)sData);
-        sData = m_clGridRIThresholdSpec5.GetItemText(4, i + 1);
-        g_clModelData[m_nUnit].m_RirOI[RiThresholdGridCount][7] = _ttof((TCHAR*)(LPCTSTR)sData);
-        RiThresholdGridCount++;
-    }*/
-	//g_clSysData.Save();
 }
 
 //-----------------------------------------------------------------------------

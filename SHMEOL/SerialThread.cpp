@@ -767,13 +767,25 @@ void CSerialThread::ParseBcrSerial(int nUnit, unsigned char* pRecvBuff, int nRec
 			if (m_sLBcrPacketBuff[nUnit][m_nBcrBuffPosi[nUnit]] == BCR_CR)//m_sLBcrPacketBuff[nUnit][m_nBcrBuffPosi[nUnit]] == BCR_LF && m_sLBcrPacketBuff[nUnit][m_nBcrBuffPosi[nUnit] - 1] == BCR_CR)
 			{
 				m_sLBcrPacketBuff[nUnit][m_nBcrBuffPosi[nUnit]] = 0x00;
+				
 				_stprintf_s(szLog, SIZE_OF_1K, _T("[BCR] REV:%s"), (char*)m_sLBcrPacketBuff[nUnit]);
-
-				AddLog(szLog,0, nUnit, false);
-
-
+				AddLog(szLog, 0, nUnit, false);
 				_stprintf_s(g_clTaskWork[nUnit].m_szChipID, SIZE_OF_100BYTE, _T("%s"), (char*)m_sLBcrPacketBuff[nUnit]);
 				g_pCarAABonderDlg->ShowBarcode(nUnit);
+
+
+				////Idle 창이 떠있을때는 Operator ID로 값이 들어가야 된다.
+				//if (g_pCarAABonderDlg->m_clIdlePopupDlg.IsWindowVisible() == true)
+				//{
+				//	//Idle 보고창 Operator ID 에 입력
+				//	_stprintf_s(szLog, SIZE_OF_1K, _T("[OP ID] REV:%s"), (char*)m_sLBcrPacketBuff[nUnit]);
+				//	AddLog(szLog, 0, nUnit, false);
+
+				//	CString sOpid = _T("");
+				//	sOpid.Format(_T("%s"), (char*)m_sLBcrPacketBuff[nUnit]);
+				//	g_pCarAABonderDlg->m_clIdlePopupDlg.setOperatorID(sOpid);
+				//	sOpid.Empty();
+				//}
 
 				m_bBcrStxState[nUnit] = false;
 			}

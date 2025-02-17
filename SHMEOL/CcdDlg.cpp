@@ -385,15 +385,15 @@ void CCcdDlg::InitCtrl()
 	m_clColorUniformitySpecDlg.Create(IDD_DIALOG_CCD_COLOR_UNIFORMITY_SPEC, this);
 	m_clColorUniformitySpecDlg.ShowWindow(SW_HIDE);
 
-	m_clFpnSpecDlg.Create(IDD_DIALOG_CCD_FPN_SPEC, this);
-	m_clFpnSpecDlg.ShowWindow(SW_HIDE);
+	//m_clFpnSpecDlg.Create(IDD_DIALOG_CCD_FPN_SPEC, this);
+	//m_clFpnSpecDlg.ShowWindow(SW_HIDE);
 	
 	
-    m_clRiThresholdSpecDlg.Create(IDD_DIALOG_CCD_RI_THRESHOLD_SPEC, this);
-    m_clRiThresholdSpecDlg.ShowWindow(SW_HIDE);
+    //m_clRiThresholdSpecDlg.Create(IDD_DIALOG_CCD_RI_THRESHOLD_SPEC, this);
+    //m_clRiThresholdSpecDlg.ShowWindow(SW_HIDE);
 
-    m_clSnrColorSensSpecDlg.Create(IDD_DIALOG_CCD_COLORSENSITIVITY_SPEC, this);
-    m_clSnrColorSensSpecDlg.ShowWindow(SW_HIDE);
+    //m_clSnrColorSensSpecDlg.Create(IDD_DIALOG_CCD_COLORSENSITIVITY_SPEC, this);
+    //m_clSnrColorSensSpecDlg.ShowWindow(SW_HIDE);
 
 	m_clSaturationSpecDlg.Create(IDD_DIALOG_CCD_SATURATION_SPEC, this);
 	m_clSaturationSpecDlg.ShowWindow(SW_HIDE);
@@ -1738,14 +1738,14 @@ void CCcdDlg::OnBnClickedButtonCcdUniformity()
 	}
 
 
-    g_clVision.ClearOverlay(m_nUnit);
-	//Color Uniformity 5000k 검사
-	if (g_clPriInsp[m_nUnit].func_Insp_Uniformity(g_clLaonGrabberWrapper[m_nUnit].m_pFrameRawBuffer, MID_5000k_RAW, false) == false)//MID_5000k_RAW, LOW_LEVEL_RAW 
-	{
-		AddLog(_T("[수동검사] COLOR UNIFORMITY 검사 실패"), 0, m_nUnit);
-	}
+ //   g_clVision.ClearOverlay(m_nUnit);
+	////Color Uniformity 5000k 검사
+	//if (g_clPriInsp[m_nUnit].func_Insp_Uniformity(g_clLaonGrabberWrapper[m_nUnit].m_pFrameRawBuffer, MID_5000k_RAW, false) == false)//MID_5000k_RAW, LOW_LEVEL_RAW 
+	//{
+	//	AddLog(_T("[수동검사] COLOR UNIFORMITY 검사 실패"), 0, m_nUnit);
+	//}
 
-	AddLog(_T("[수동검사] COLOR UNIFORMITY 검사 완료"), 0, m_nUnit);
+	//AddLog(_T("[수동검사] COLOR UNIFORMITY 검사 완료"), 0, m_nUnit);
 }
 
 //-----------------------------------------------------------------------------
@@ -3009,8 +3009,8 @@ void CCcdDlg::OnBnClickedButtonCcdRelativeiSpec()
 void CCcdDlg::OnBnClickedButtonCcdSnrColorsSpec()
 {
     // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-    m_clSnrColorSensSpecDlg.SetUnit(m_nUnit);
-    m_clSnrColorSensSpecDlg.ShowWindow(SW_SHOW);
+    //m_clSnrColorSensSpecDlg.SetUnit(m_nUnit);
+    //m_clSnrColorSensSpecDlg.ShowWindow(SW_SHOW);
 }
 
 
@@ -3173,8 +3173,8 @@ void CCcdDlg::OnBnClickedButtonCcdSnrMarkRegist()
 void CCcdDlg::OnBnClickedButtonCcdRithresholdSpec()
 {
     // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-    m_clRiThresholdSpecDlg.SetUnit(m_nUnit);
-    m_clRiThresholdSpecDlg.ShowWindow(SW_SHOW);
+    //m_clRiThresholdSpecDlg.SetUnit(m_nUnit);
+    //m_clRiThresholdSpecDlg.ShowWindow(SW_SHOW);
 }
 
 
@@ -3805,8 +3805,6 @@ void CCcdDlg::OnBnClickedButtonCcdColorUniformitySpec()
 void CCcdDlg::OnBnClickedButtonCcdFpnSpec()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	//m_clFpnSpecDlg.SetUnit(m_nUnit);
-	//m_clFpnSpecDlg.ShowWindow(SW_SHOW);
 	TCHAR szLog[SIZE_OF_1K];
 	int nRetVal;
 

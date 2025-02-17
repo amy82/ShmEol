@@ -53,6 +53,8 @@ public:
 public:
     CLabel m_clColorStaticTopBar;
     CLabel m_clColorStaticVal;
+	CEdit m_edtKeyBoardVal;
+
 	CButtonCT m_clColorButtonNum[10];
 	CButtonCT m_clColorButtonAlpha[26];
 	CButtonCT m_clColorButtonDash;

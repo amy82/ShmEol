@@ -155,142 +155,133 @@ void CCcdDefectSpecDlg::InitCtrl()
 //-----------------------------------------------------------------------------
 void CCcdDefectSpecDlg::InitGridCtrl()
 {
-	//TCHAR* pszRow[] = { _T("") ,
- //        _T("BlockSizeDark"), _T("BlockSizeBright"),
-	//	_T("ThresholdTypeHot"), _T("ThresholdTypeDark"), _T("ThresholdTypeBright"),
-	//	_T("DefectThresholdHot"), _T("DefectThresholdDark"), _T("DefectThresholdBright"),
-	//	_T("MaxHotDefectNum"), _T("MaxDarkDefectNum"), _T("MaxBrightDefectNum"),
-	//	_T("MaxHotClusterNum") ,_T("MaxDarkClusterNum"), _T("MaxBrightClusterNum"),
-	//	_T("EnableChannel") , _T("DefectInCouplet"),     _T("DefectInCluster") ,
-	//	_T("DefectInClusterChannel"),	_T("specColumnFPN")
-	//};
-	//
-	TCHAR* pszCol[] = { _T("Defect"), _T("Spec") };
 
-	CRect rect;
-	int i, j;
-	int DLG = IDC_STATIC_CCD_DEFECT_SPEC_GRID_SPEC;
+	//TCHAR* pszCol[] = { _T("Defect"), _T("Spec") };
 
-	CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
-	int SpecRow = m_nUIDiv + 1; //sizeof(DEFECT_SPEC_NAME) / sizeof(DEFECT_SPEC_NAME[0]) + 1;//아래
-	int SpecCol = 2;//옆
-	int margin = 4;
-	int gridHeight = 25;
-	int gridWidth1 = 200;
-	int gridWidth2 = 90;
-	int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
-	//
-	pWnd->GetWindowRect(rect);
-	ScreenToClient(rect);
+	//CRect rect;
+	//int i, j;
+	//int DLG = IDC_STATIC_CCD_DEFECT_SPEC_GRID_SPEC;
 
-	rect.right = totalWidth + margin;
-	rect.bottom = (gridHeight*SpecRow) + margin;
-	pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
+	//CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
+	//int SpecRow = m_nUIDiv + 1; //sizeof(DEFECT_SPEC_NAME) / sizeof(DEFECT_SPEC_NAME[0]) + 1;//아래
+	//int SpecCol = 2;//옆
+	//int margin = 4;
+	//int gridHeight = 25;
+	//int gridWidth1 = 200;
+	//int gridWidth2 = 90;
+	//int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
+	////
+	//pWnd->GetWindowRect(rect);
+	//ScreenToClient(rect);
+
+	//rect.right = totalWidth + margin;
+	//rect.bottom = (gridHeight*SpecRow) + margin;
+	//pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
 
 
-	GetDlgItem(DLG)->GetWindowRect(rect);
-	ScreenToClient(rect);
-	m_clGridDefectSpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
+	//GetDlgItem(DLG)->GetWindowRect(rect);
+	//ScreenToClient(rect);
+	//m_clGridDefectSpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
 
-	m_clGridDefectSpec.SetTextBkColor(RGB_COLOR_WHITE);
-	m_clGridDefectSpec.SetFixedBkColor(GRID_COLOR_TITLE);
-	m_clGridDefectSpec.SetFixedTextColor(RGB_COLOR_WHITE);
-	m_clGridDefectSpec.SetReference_Setting();
-	m_clGridDefectSpec.EnableSelection(FALSE);
-	m_clGridDefectSpec.SetRowCount(SpecRow);
-	m_clGridDefectSpec.SetColumnCount(SpecCol);
-	m_clGridDefectSpec.SetFixedRowCount(1);
-	m_clGridDefectSpec.SetFixedColumnCount(1);
+	//m_clGridDefectSpec.SetTextBkColor(RGB_COLOR_WHITE);
+	//m_clGridDefectSpec.SetFixedBkColor(GRID_COLOR_TITLE);
+	//m_clGridDefectSpec.SetFixedTextColor(RGB_COLOR_WHITE);
+	//m_clGridDefectSpec.SetReference_Setting();
+	//m_clGridDefectSpec.EnableSelection(FALSE);
+	//m_clGridDefectSpec.SetRowCount(SpecRow);
+	//m_clGridDefectSpec.SetColumnCount(SpecCol);
+	//m_clGridDefectSpec.SetFixedRowCount(1);
+	//m_clGridDefectSpec.SetFixedColumnCount(1);
 
-	for (i = 0; i < SpecRow; i++)
-	{
-		m_clGridDefectSpec.SetRowHeight(i, gridHeight);
-		m_clGridDefectSpec.SetItemText(i+1, 0, DEFECT_SPEC_NAME[i]);
+	//for (i = 0; i < SpecRow; i++)
+	//{
+	//	m_clGridDefectSpec.SetRowHeight(i, gridHeight);
+	//	m_clGridDefectSpec.SetItemText(i+1, 0, DEFECT_SPEC_NAME[i]);
 
-		for (j = 0; j < SpecCol; j++)
-		{
-			if (i == 0)
-			{
-				if (j == 0)
-				{
-					m_clGridDefectSpec.SetColumnWidth(j, gridWidth1);
-				}
-				else
-				{
-					m_clGridDefectSpec.SetColumnWidth(j, gridWidth2);
-				}
+	//	for (j = 0; j < SpecCol; j++)
+	//	{
+	//		if (i == 0)
+	//		{
+	//			if (j == 0)
+	//			{
+	//				m_clGridDefectSpec.SetColumnWidth(j, gridWidth1);
+	//			}
+	//			else
+	//			{
+	//				m_clGridDefectSpec.SetColumnWidth(j, gridWidth2);
+	//			}
 
-				m_clGridDefectSpec.SetItemText(i, j, pszCol[j]);
-			}
+	//			m_clGridDefectSpec.SetItemText(i, j, pszCol[j]);
+	//		}
 
-			m_clGridDefectSpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-		}
-	}
+	//		m_clGridDefectSpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	//	}
+	//}
 }
 
 void CCcdDefectSpecDlg::InitGridCtrl2()
 {
-	TCHAR* pszCol[] = { _T("Defect"), _T("Spec") };
+	//TCHAR* pszCol[] = { _T("Defect"), _T("Spec") };
 
-	CRect rect;
-	int i, j;
-	int DLG = IDC_STATIC_CCD_UNIFORMITY_SPEC_GRID_SPEC;
+	//CRect rect;
+	//int i, j;
+	//int DLG = IDC_STATIC_CCD_UNIFORMITY_SPEC_GRID_SPEC;
 
-	CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
-	int SpecRow = (sizeof(DEFECT_SPEC_NAME) / sizeof(DEFECT_SPEC_NAME[0]) + 1) - m_nUIDiv;//아래
-	int SpecCol = 2;//옆
-	int margin = 4;
-	int gridHeight = 25;
-	int gridWidth1 = 200;
-	int gridWidth2 = 90;
-	int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
-	//
-	pWnd->GetWindowRect(rect);
-	ScreenToClient(rect);
+	//CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
+	//int SpecRow = (sizeof(DEFECT_SPEC_NAME) / sizeof(DEFECT_SPEC_NAME[0]) + 1) - m_nUIDiv;//아래
+	//int SpecCol = 2;//옆
+	//int margin = 4;
+	//int gridHeight = 25;
+	//int gridWidth1 = 200;
+	//int gridWidth2 = 90;
+	//int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
+	////
+	//pWnd->GetWindowRect(rect);
+	//ScreenToClient(rect);
 
-	rect.right = totalWidth + margin;
-	rect.bottom = (gridHeight*SpecRow) + margin;
-	pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
+	//rect.right = totalWidth + margin;
+	//rect.bottom = (gridHeight*SpecRow) + margin;
+	//pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
 
 
-	GetDlgItem(DLG)->GetWindowRect(rect);
-	ScreenToClient(rect);
-	m_clGridUniformitySpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
+	//GetDlgItem(DLG)->GetWindowRect(rect);
+	//ScreenToClient(rect);
+	//m_clGridUniformitySpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
 
-	m_clGridUniformitySpec.SetTextBkColor(RGB_COLOR_WHITE);
-	m_clGridUniformitySpec.SetFixedBkColor(GRID_COLOR_TITLE);
-	m_clGridUniformitySpec.SetFixedTextColor(RGB_COLOR_WHITE);
-	m_clGridUniformitySpec.SetReference_Setting();
-	m_clGridUniformitySpec.EnableSelection(FALSE);
-	m_clGridUniformitySpec.SetRowCount(SpecRow);
-	m_clGridUniformitySpec.SetColumnCount(SpecCol);
-	m_clGridUniformitySpec.SetFixedRowCount(1);
-	m_clGridUniformitySpec.SetFixedColumnCount(1);
+	//m_clGridUniformitySpec.SetTextBkColor(RGB_COLOR_WHITE);
+	//m_clGridUniformitySpec.SetFixedBkColor(GRID_COLOR_TITLE);
+	//m_clGridUniformitySpec.SetFixedTextColor(RGB_COLOR_WHITE);
+	//m_clGridUniformitySpec.SetReference_Setting();
+	//m_clGridUniformitySpec.EnableSelection(FALSE);
+	//m_clGridUniformitySpec.SetRowCount(SpecRow);
+	//m_clGridUniformitySpec.SetColumnCount(SpecCol);
+	//m_clGridUniformitySpec.SetFixedRowCount(1);
+	//m_clGridUniformitySpec.SetFixedColumnCount(1);
 
-	for (i = 0; i < SpecRow; i++)
-	{
-		m_clGridUniformitySpec.SetRowHeight(i, gridHeight);
-		m_clGridUniformitySpec.SetItemText(i + 1, 0, DEFECT_SPEC_NAME[i + m_nUIDiv]);
+	//for (i = 0; i < SpecRow; i++)
+	//{
+	//	m_clGridUniformitySpec.SetRowHeight(i, gridHeight);
+	//	m_clGridUniformitySpec.SetItemText(i + 1, 0, DEFECT_SPEC_NAME[i + m_nUIDiv]);
 
-		for (j = 0; j < SpecCol; j++)
-		{
-			if (i == 0)
-			{
-				if (j == 0)
-				{
-					m_clGridUniformitySpec.SetColumnWidth(j, gridWidth1);
-				}
-				else
-				{
-					m_clGridUniformitySpec.SetColumnWidth(j, gridWidth2);
-				}
+	//	for (j = 0; j < SpecCol; j++)
+	//	{
+	//		if (i == 0)
+	//		{
+	//			if (j == 0)
+	//			{
+	//				m_clGridUniformitySpec.SetColumnWidth(j, gridWidth1);
+	//			}
+	//			else
+	//			{
+	//				m_clGridUniformitySpec.SetColumnWidth(j, gridWidth2);
+	//			}
 
-				m_clGridUniformitySpec.SetItemText(i, j, pszCol[j]);
-			}
+	//			m_clGridUniformitySpec.SetItemText(i, j, pszCol[j]);
+	//		}
 
-			m_clGridUniformitySpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-		}
-	}
+	//		m_clGridUniformitySpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	//	}
+	//}
 }
 //-----------------------------------------------------------------------------
 //
@@ -326,14 +317,14 @@ void CCcdDefectSpecDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 //-----------------------------------------------------------------------------
 void CCcdDefectSpecDlg::ShowDefectSpec()
 {
-	TCHAR szData[SIZE_OF_100BYTE];
+	/*TCHAR szData[SIZE_OF_100BYTE];
 	int i;
 
 	for (i = 0; i < m_nUIDiv; i++)
 	{
 		m_clGridDefectSpec.SetItemText(i + 1, 1, g_clModelData[m_nUnit].m_DefectSpec[i], 3);
 	}
-	m_clGridDefectSpec.Invalidate();
+	m_clGridDefectSpec.Invalidate();*/
 }
 //-----------------------------------------------------------------------------
 //
@@ -342,14 +333,14 @@ void CCcdDefectSpecDlg::ShowDefectSpec()
 //-----------------------------------------------------------------------------
 void CCcdDefectSpecDlg::ShowDefectSpec2()
 {
-	TCHAR szData[SIZE_OF_100BYTE];
+	/*TCHAR szData[SIZE_OF_100BYTE];
 	int i;
 
 	for (i = 0; i < g_Defectcount - m_nUIDiv; i++)
 	{
 		m_clGridUniformitySpec.SetItemText(i + 1, 1, g_clModelData[m_nUnit].m_DefectSpec[i + m_nUIDiv], 3);
 	}
-	m_clGridUniformitySpec.Invalidate();
+	m_clGridUniformitySpec.Invalidate();*/
 }
 
 //-----------------------------------------------------------------------------
@@ -511,7 +502,7 @@ void CCcdDefectSpecDlg::OnBnClickedButtonCcdSfrSpecSave()
 //-----------------------------------------------------------------------------
 void CCcdDefectSpecDlg::GetDefectSpec()
 {
-	CString sData = _T("");
+	/*CString sData = _T("");
 	int i;
 
 	for (i = 0; i < m_nUIDiv; i++)
@@ -520,7 +511,7 @@ void CCcdDefectSpecDlg::GetDefectSpec()
 		g_clModelData[m_nUnit].m_DefectSpec[i] = _ttof((TCHAR*)(LPCTSTR)sData);
 	}
 
-	g_clSysData.sDSave();
+	g_clSysData.sDSave();*/
 }
 //-----------------------------------------------------------------------------
 //
@@ -529,7 +520,7 @@ void CCcdDefectSpecDlg::GetDefectSpec()
 //-----------------------------------------------------------------------------
 void CCcdDefectSpecDlg::GetDefectSpec2()
 {
-	CString sData = _T("");
+	/*CString sData = _T("");
 	int i;
 
 	for (i = 0; i < g_Defectcount - m_nUIDiv; i++)
@@ -537,7 +528,7 @@ void CCcdDefectSpecDlg::GetDefectSpec2()
 		sData = m_clGridUniformitySpec.GetItemText(i + 1, 1);
 		g_clModelData[m_nUnit].m_DefectSpec[i + m_nUIDiv] = _ttof((TCHAR*)(LPCTSTR)sData);
 	}
-	g_clSysData.sDSave();
+	g_clSysData.sDSave();*/
 }
 
 //-----------------------------------------------------------------------------

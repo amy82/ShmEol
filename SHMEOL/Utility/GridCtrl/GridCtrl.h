@@ -31,6 +31,8 @@
 
 #include "CellRange.h"
 #include "GridCell.h"
+#include "GridCellCombo.h"
+#include "GridCellCheck.h"
 #include <afxtempl.h>
 #include <vector>
 

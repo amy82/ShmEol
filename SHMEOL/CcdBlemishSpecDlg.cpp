@@ -302,44 +302,44 @@ void CCcdBlemishSpecDlg::InitCtrl()
 //-----------------------------------------------------------------------------
 void CCcdBlemishSpecDlg::InitBlemishGridCtrl()
 {
-    TCHAR* pszCol[] = { _T("FDF"), _T("Spec") };
+ //   TCHAR* pszCol[] = { _T("FDF"), _T("Spec") };
 
-    CRect rect;
-    int i, j;
-    int DLG = IDC_STATIC_CCD_BLEMISH_SPEC_GRID_SPEC;
+ //   CRect rect;
+ //   int i, j;
+ //   int DLG = IDC_STATIC_CCD_BLEMISH_SPEC_GRID_SPEC;
 
-    CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
-	int SpecRow = g_StainFdfcount + 1;// sizeof(STAIN_FDF_SPEC_NAME) / sizeof(STAIN_FDF_SPEC_NAME[0]) + 1;//아래
-    int SpecCol = 2;//옆
-    int margin = 4;
-    int gridHeight = 25;
-    int gridWidth1 = 140;
-    int gridWidth2 = 90;
-    int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
-    //
-    pWnd->GetWindowRect(rect);
-    ScreenToClient(rect);
+ //   CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
+	//int SpecRow = g_StainFdfcount + 1;// sizeof(STAIN_FDF_SPEC_NAME) / sizeof(STAIN_FDF_SPEC_NAME[0]) + 1;//아래
+ //   int SpecCol = 2;//옆
+ //   int margin = 4;
+ //   int gridHeight = 25;
+ //   int gridWidth1 = 140;
+ //   int gridWidth2 = 90;
+ //   int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
+ //   //
+ //   pWnd->GetWindowRect(rect);
+ //   ScreenToClient(rect);
 
-    rect.right = totalWidth + margin;
-    rect.bottom = (gridHeight*SpecRow) + margin;
-    pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
+ //   rect.right = totalWidth + margin;
+ //   rect.bottom = (gridHeight*SpecRow) + margin;
+ //   pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
 
 
-    GetDlgItem(DLG)->GetWindowRect(rect);
-    ScreenToClient(rect);
-    m_clGridBlemishSpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
+ //   GetDlgItem(DLG)->GetWindowRect(rect);
+ //   ScreenToClient(rect);
+ //   m_clGridBlemishSpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
 
-    m_clGridBlemishSpec.SetTextBkColor(RGB_COLOR_WHITE);
-    m_clGridBlemishSpec.SetFixedBkColor(GRID_COLOR_TITLE);
-    m_clGridBlemishSpec.SetFixedTextColor(RGB_COLOR_WHITE);
-    m_clGridBlemishSpec.SetReference_Setting();
-    m_clGridBlemishSpec.EnableSelection(FALSE);
-    m_clGridBlemishSpec.SetRowCount(SpecRow);
-    m_clGridBlemishSpec.SetColumnCount(SpecCol);
-    m_clGridBlemishSpec.SetFixedRowCount(1);
-    m_clGridBlemishSpec.SetFixedColumnCount(1);
+ //   m_clGridBlemishSpec.SetTextBkColor(RGB_COLOR_WHITE);
+ //   m_clGridBlemishSpec.SetFixedBkColor(GRID_COLOR_TITLE);
+ //   m_clGridBlemishSpec.SetFixedTextColor(RGB_COLOR_WHITE);
+ //   m_clGridBlemishSpec.SetReference_Setting();
+ //   m_clGridBlemishSpec.EnableSelection(FALSE);
+ //   m_clGridBlemishSpec.SetRowCount(SpecRow);
+ //   m_clGridBlemishSpec.SetColumnCount(SpecCol);
+ //   m_clGridBlemishSpec.SetFixedRowCount(1);
+ //   m_clGridBlemishSpec.SetFixedColumnCount(1);
 
-    for (i = 0; i < SpecRow; i++)
+    /*for (i = 0; i < SpecRow; i++)
     {
         m_clGridBlemishSpec.SetRowHeight(i, gridHeight);
         m_clGridBlemishSpec.SetItemText(i + 1, 0, STAIN_FDF_SPEC_NAME[i]);
@@ -362,48 +362,48 @@ void CCcdBlemishSpecDlg::InitBlemishGridCtrl()
 
             m_clGridBlemishSpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
         }
-    }
+    }*/
 }
 void CCcdBlemishSpecDlg::InitLcbGridCtrl()
 {
-    TCHAR* pszCol[] = { _T("Lcb"), _T("Spec") };
+ //   TCHAR* pszCol[] = { _T("Lcb"), _T("Spec") };
 
-    CRect rect;
-    int i, j;
-    int DLG = IDC_STATIC_CCD_LCB_SPEC_GRID_SPEC;
+ //   CRect rect;
+ //   int i, j;
+ //   int DLG = IDC_STATIC_CCD_LCB_SPEC_GRID_SPEC;
 
-    CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
-	int SpecRow = g_StainLcbcount + 1;// sizeof(STAIN_LCB_SPEC_NAME) / sizeof(STAIN_LCB_SPEC_NAME[0]) + 1;//아래
-    int SpecCol = 2;//옆
-    int margin = 4;
-    int gridHeight = 25;
-    int gridWidth1 = 140;
-    int gridWidth2 = 90;
-    int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
-    //
-    pWnd->GetWindowRect(rect);
-    ScreenToClient(rect);
+ //   CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
+	//int SpecRow = g_StainLcbcount + 1;// sizeof(STAIN_LCB_SPEC_NAME) / sizeof(STAIN_LCB_SPEC_NAME[0]) + 1;//아래
+ //   int SpecCol = 2;//옆
+ //   int margin = 4;
+ //   int gridHeight = 25;
+ //   int gridWidth1 = 140;
+ //   int gridWidth2 = 90;
+ //   int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
+ //   //
+ //   pWnd->GetWindowRect(rect);
+ //   ScreenToClient(rect);
 
-    rect.right = totalWidth + margin;
-    rect.bottom = (gridHeight*SpecRow) + margin;
-    pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
+ //   rect.right = totalWidth + margin;
+ //   rect.bottom = (gridHeight*SpecRow) + margin;
+ //   pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
 
 
-    GetDlgItem(DLG)->GetWindowRect(rect);
-    ScreenToClient(rect);
-    m_clGridLcbSpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
+ //   GetDlgItem(DLG)->GetWindowRect(rect);
+ //   ScreenToClient(rect);
+ //   m_clGridLcbSpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
 
-    m_clGridLcbSpec.SetTextBkColor(RGB_COLOR_WHITE);
-    m_clGridLcbSpec.SetFixedBkColor(GRID_COLOR_TITLE);
-    m_clGridLcbSpec.SetFixedTextColor(RGB_COLOR_WHITE);
-    m_clGridLcbSpec.SetReference_Setting();
-    m_clGridLcbSpec.EnableSelection(FALSE);
-    m_clGridLcbSpec.SetRowCount(SpecRow);
-    m_clGridLcbSpec.SetColumnCount(SpecCol);
-    m_clGridLcbSpec.SetFixedRowCount(1);
-    m_clGridLcbSpec.SetFixedColumnCount(1);
+ //   m_clGridLcbSpec.SetTextBkColor(RGB_COLOR_WHITE);
+ //   m_clGridLcbSpec.SetFixedBkColor(GRID_COLOR_TITLE);
+ //   m_clGridLcbSpec.SetFixedTextColor(RGB_COLOR_WHITE);
+ //   m_clGridLcbSpec.SetReference_Setting();
+ //   m_clGridLcbSpec.EnableSelection(FALSE);
+ //   m_clGridLcbSpec.SetRowCount(SpecRow);
+ //   m_clGridLcbSpec.SetColumnCount(SpecCol);
+ //   m_clGridLcbSpec.SetFixedRowCount(1);
+ //   m_clGridLcbSpec.SetFixedColumnCount(1);
 
-    for (i = 0; i < SpecRow; i++)
+    /*for (i = 0; i < SpecRow; i++)
     {
         m_clGridLcbSpec.SetRowHeight(i, gridHeight);
         m_clGridLcbSpec.SetItemText(i + 1, 0, STAIN_LCB_SPEC_NAME[i]);
@@ -426,82 +426,82 @@ void CCcdBlemishSpecDlg::InitLcbGridCtrl()
 
             m_clGridLcbSpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
         }
-    }
+    }*/
 }
 void CCcdBlemishSpecDlg::InitYmeanGridCtrl()
 {
-    TCHAR* pszRow[] = { _T("") ,
-        _T("AnEdgeSize"), _T("AdCenterThreshold"), _T("AdEdgeThreshold"), _T("AdCornerThreshold"),
-        _T("AnDefecBlockSize"), _T("AnLscBlockSize"), _T("AnCalcType"),
-        _T("AnnMaxRecursiveCount"), _T("AdMaxDefectSize"), _T("AdPixelSize"),
-        _T("AbEnableCircle"), _T("AnPosOffsetX"), _T("AnPosOffsetY"),
-        _T("AdRadiusRatioX"), _T("AdRadiusRatioY"), _T("AdThresholdRatio"),
-        _T("AdROIRange"), _T("AnUsedFixedCircle"), _T("AbEnableMultiCircle"),
-        _T("dZoneSizeRatio1") ,_T("dZoneSizeRatio2"), _T("dZoneSizeRatio3"),
-        _T("dThreshold1") ,_T("dThreshold2"), _T("dThreshold3")
-    };
+    //TCHAR* pszRow[] = { _T("") ,
+    //    _T("AnEdgeSize"), _T("AdCenterThreshold"), _T("AdEdgeThreshold"), _T("AdCornerThreshold"),
+    //    _T("AnDefecBlockSize"), _T("AnLscBlockSize"), _T("AnCalcType"),
+    //    _T("AnnMaxRecursiveCount"), _T("AdMaxDefectSize"), _T("AdPixelSize"),
+    //    _T("AbEnableCircle"), _T("AnPosOffsetX"), _T("AnPosOffsetY"),
+    //    _T("AdRadiusRatioX"), _T("AdRadiusRatioY"), _T("AdThresholdRatio"),
+    //    _T("AdROIRange"), _T("AnUsedFixedCircle"), _T("AbEnableMultiCircle"),
+    //    _T("dZoneSizeRatio1") ,_T("dZoneSizeRatio2"), _T("dZoneSizeRatio3"),
+    //    _T("dThreshold1") ,_T("dThreshold2"), _T("dThreshold3")
+    //};
 
-    TCHAR* pszCol[] = { _T("Ymean"), _T("Spec") };
+    //TCHAR* pszCol[] = { _T("Ymean"), _T("Spec") };
 
-    CRect rect;
-    int i, j;
-    int DLG = IDC_STATIC_CCD_YMEAN_SPEC_GRID_SPEC;
+    //CRect rect;
+    //int i, j;
+    //int DLG = IDC_STATIC_CCD_YMEAN_SPEC_GRID_SPEC;
 
-    CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
-    int SpecRow = sizeof(STAIN_YMEAN_SPEC_NAME) / sizeof(STAIN_YMEAN_SPEC_NAME[0]) + 1;//아래
-    int SpecCol = 2;//옆
-    int margin = 4;
-    int gridHeight = 25;
-    int gridWidth1 = 140;
-    int gridWidth2 = 90;
-    int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
-    //
-    pWnd->GetWindowRect(rect);
-    ScreenToClient(rect);
+    //CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
+    //int SpecRow = sizeof(STAIN_YMEAN_SPEC_NAME) / sizeof(STAIN_YMEAN_SPEC_NAME[0]) + 1;//아래
+    //int SpecCol = 2;//옆
+    //int margin = 4;
+    //int gridHeight = 25;
+    //int gridWidth1 = 140;
+    //int gridWidth2 = 90;
+    //int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
+    ////
+    //pWnd->GetWindowRect(rect);
+    //ScreenToClient(rect);
 
-    rect.right = totalWidth + margin;
-    rect.bottom = (gridHeight*SpecRow) + margin;
-    pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
+    //rect.right = totalWidth + margin;
+    //rect.bottom = (gridHeight*SpecRow) + margin;
+    //pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
 
 
-    GetDlgItem(DLG)->GetWindowRect(rect);
-    ScreenToClient(rect);
-    m_clGridYmenaSpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
+    //GetDlgItem(DLG)->GetWindowRect(rect);
+    //ScreenToClient(rect);
+    //m_clGridYmenaSpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
 
-    m_clGridYmenaSpec.SetTextBkColor(RGB_COLOR_WHITE);
-    m_clGridYmenaSpec.SetFixedBkColor(GRID_COLOR_TITLE);
-    m_clGridYmenaSpec.SetFixedTextColor(RGB_COLOR_WHITE);
-    m_clGridYmenaSpec.SetReference_Setting();
-    m_clGridYmenaSpec.EnableSelection(FALSE);
-    m_clGridYmenaSpec.SetRowCount(SpecRow);
-    m_clGridYmenaSpec.SetColumnCount(SpecCol);
-    m_clGridYmenaSpec.SetFixedRowCount(1);
-    m_clGridYmenaSpec.SetFixedColumnCount(1);
+    //m_clGridYmenaSpec.SetTextBkColor(RGB_COLOR_WHITE);
+    //m_clGridYmenaSpec.SetFixedBkColor(GRID_COLOR_TITLE);
+    //m_clGridYmenaSpec.SetFixedTextColor(RGB_COLOR_WHITE);
+    //m_clGridYmenaSpec.SetReference_Setting();
+    //m_clGridYmenaSpec.EnableSelection(FALSE);
+    //m_clGridYmenaSpec.SetRowCount(SpecRow);
+    //m_clGridYmenaSpec.SetColumnCount(SpecCol);
+    //m_clGridYmenaSpec.SetFixedRowCount(1);
+    //m_clGridYmenaSpec.SetFixedColumnCount(1);
 
-    for (i = 0; i < SpecRow; i++)
-    {
-        m_clGridYmenaSpec.SetRowHeight(i, gridHeight);
-        m_clGridYmenaSpec.SetItemText(i + 1, 0, STAIN_YMEAN_SPEC_NAME[i]);
+    //for (i = 0; i < SpecRow; i++)
+    //{
+    //    m_clGridYmenaSpec.SetRowHeight(i, gridHeight);
+    //    m_clGridYmenaSpec.SetItemText(i + 1, 0, STAIN_YMEAN_SPEC_NAME[i]);
 
-        for (j = 0; j < SpecCol; j++)
-        {
-            if (i == 0)
-            {
-                if (j == 0)
-                {
-                    m_clGridYmenaSpec.SetColumnWidth(j, gridWidth1);
-                }
-                else
-                {
-                    m_clGridYmenaSpec.SetColumnWidth(j, gridWidth2);
-                }
+    //    for (j = 0; j < SpecCol; j++)
+    //    {
+    //        if (i == 0)
+    //        {
+    //            if (j == 0)
+    //            {
+    //                m_clGridYmenaSpec.SetColumnWidth(j, gridWidth1);
+    //            }
+    //            else
+    //            {
+    //                m_clGridYmenaSpec.SetColumnWidth(j, gridWidth2);
+    //            }
 
-                m_clGridYmenaSpec.SetItemText(i, j, pszCol[j]);
-            }
+    //            m_clGridYmenaSpec.SetItemText(i, j, pszCol[j]);
+    //        }
 
-            m_clGridYmenaSpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-        }
-    }
+    //        m_clGridYmenaSpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+    //    }
+    //}
 }
 //-----------------------------------------------------------------------------
 //
@@ -542,26 +542,28 @@ void CCcdBlemishSpecDlg::ShowFdfSpec()
 	int i;
 
 
-	for (i = 0; i < g_StainFdfcount; i++)
+	/*for (i = 0; i < g_StainFdfcount; i++)
 	{
 		m_clGridBlemishSpec.SetItemText(i + 1, 1, g_clModelData[m_nUnit].m_FDFSpec[i], 3);
-	}
+	}*/
+	//m_clGridBlemishSpec.Invalidate();
+
 	m_clFdfOffset.SetAddress(g_clModelData[m_nUnit].m_FDFOffsetSpec[0], g_clModelData[m_nUnit].m_FDFOffsetSpec[1], g_clModelData[m_nUnit].m_FDFOffsetSpec[2], g_clModelData[m_nUnit].m_FDFOffsetSpec[3]);
 
-	m_clGridBlemishSpec.Invalidate();
 }
 void CCcdBlemishSpecDlg::ShowLcbSpec()
 {
     TCHAR szData[SIZE_OF_100BYTE];
     int i;
 
-    for (i = 0; i < g_StainLcbcount; i++)
+    /*for (i = 0; i < g_StainLcbcount; i++)
     {
         m_clGridLcbSpec.SetItemText(i + 1, 1, g_clModelData[m_nUnit].m_LcbSpec[i], 3);
-    }
+    }*/
+
+   // m_clGridLcbSpec.Invalidate();
 
 	m_clLcbOffset.SetAddress(g_clModelData[m_nUnit].m_LcbOffsetSpec[0], g_clModelData[m_nUnit].m_LcbOffsetSpec[1], g_clModelData[m_nUnit].m_LcbOffsetSpec[2], g_clModelData[m_nUnit].m_LcbOffsetSpec[3]);
-    m_clGridLcbSpec.Invalidate();
 }
 void CCcdBlemishSpecDlg::ShowYmeanSpec()
 {
@@ -569,12 +571,14 @@ void CCcdBlemishSpecDlg::ShowYmeanSpec()
 	CButton* pButton;
     int i;
 
-    for (i = 0; i < g_StainYmeancount; i++)
+    /*for (i = 0; i < g_StainYmeancount; i++)
     {
         m_clGridYmenaSpec.SetItemText(i + 1, 1, g_clModelData[m_nUnit].m_YmeanSpec[i], 3);
-    }
+    }*/
+    //m_clGridYmenaSpec.Invalidate();
+
+
 	m_clYmeanOffset.SetAddress(g_clModelData[m_nUnit].m_YmeanOffsetSpec[0], g_clModelData[m_nUnit].m_YmeanOffsetSpec[1], g_clModelData[m_nUnit].m_YmeanOffsetSpec[2], g_clModelData[m_nUnit].m_YmeanOffsetSpec[3]);
-    m_clGridYmenaSpec.Invalidate();
 
 	pButton = (CButton*)GetDlgItem(IDC_CHECK_CCD_BLEMISH_8BITUSE);
 	if (g_clModelData[m_nUnit].m_nBlemish8BitUse == 1)
@@ -602,11 +606,11 @@ void CCcdBlemishSpecDlg::GetFdfSpec()
     CString sData = _T("");
     int i;
 
-	for (i = 0; i < g_StainFdfcount; i++)
+	/*for (i = 0; i < g_StainFdfcount; i++)
 	{
 		sData = m_clGridBlemishSpec.GetItemText(i + 1, 1);
 		g_clModelData[m_nUnit].m_FDFSpec[i] = _ttof((TCHAR*)(LPCTSTR)sData);
-	}
+	}*/
 
 	BYTE ipData[4];
 	m_clFdfOffset.GetAddress(ipData[0], ipData[1], ipData[2], ipData[3]);
@@ -622,11 +626,11 @@ void CCcdBlemishSpecDlg::GetLcbSpec()
     CString sData = _T("");
     int i;
 
-    for (i = 0; i < g_StainLcbcount; i++)
+    /*for (i = 0; i < g_StainLcbcount; i++)
     {
         sData = m_clGridLcbSpec.GetItemText(i + 1, 1);
         g_clModelData[m_nUnit].m_LcbSpec[i] = _ttof((TCHAR*)(LPCTSTR)sData);
-    }
+    }*/
 	BYTE ipData[4];
 	m_clLcbOffset.GetAddress(ipData[0], ipData[1], ipData[2], ipData[3]);
 	for (i = 0; i < 4; i++)
@@ -640,11 +644,11 @@ void CCcdBlemishSpecDlg::GetYmeanSpec()
     CString sData = _T("");
 	CButton* pButton;
     int i;
-    for (i = 0; i < g_StainYmeancount; i++)
+    /*for (i = 0; i < g_StainYmeancount; i++)
     {
         sData = m_clGridYmenaSpec.GetItemText(i + 1, 1);
         g_clModelData[m_nUnit].m_YmeanSpec[i] = _ttof((TCHAR*)(LPCTSTR)sData);
-    }
+    }*/
 	BYTE ipData[4];
 	m_clYmeanOffset.GetAddress(ipData[0], ipData[1], ipData[2], ipData[3]);
 	for (i = 0; i < 4; i++)
@@ -849,7 +853,7 @@ void CCcdBlemishSpecDlg::OnBnClickedButtonCcdSfrSpecClose()
 //-----------------------------------------------------------------------------
 void CCcdBlemishSpecDlg::OnNMDblClickedSfrBlockspot(NMHDR* pNMHDR, LRESULT* pResult)
 {
-    NM_GRIDVIEW* pNMGridView = (NM_GRIDVIEW*)pNMHDR;
+    /*NM_GRIDVIEW* pNMGridView = (NM_GRIDVIEW*)pNMHDR;
     CString sData = _T("");
     int nRow, nCol;
 
@@ -872,12 +876,12 @@ void CCcdBlemishSpecDlg::OnNMDblClickedSfrBlockspot(NMHDR* pNMHDR, LRESULT* pRes
 
             delete pDlg;
         }
-    }
+    }*/
 }
 
 void CCcdBlemishSpecDlg::OnNMDblClickedSfrLcb(NMHDR* pNMHDR, LRESULT* pResult)
 {
-    NM_GRIDVIEW* pNMGridView = (NM_GRIDVIEW*)pNMHDR;
+    /*NM_GRIDVIEW* pNMGridView = (NM_GRIDVIEW*)pNMHDR;
     CString sData = _T("");
     int nRow, nCol;
 
@@ -900,12 +904,12 @@ void CCcdBlemishSpecDlg::OnNMDblClickedSfrLcb(NMHDR* pNMHDR, LRESULT* pResult)
 
             delete pDlg;
         }
-    }
+    }*/
 }
 
 void CCcdBlemishSpecDlg::OnNMDblClickedSfrYmean(NMHDR* pNMHDR, LRESULT* pResult)
 {
-    NM_GRIDVIEW* pNMGridView = (NM_GRIDVIEW*)pNMHDR;
+    /*NM_GRIDVIEW* pNMGridView = (NM_GRIDVIEW*)pNMHDR;
     CString sData = _T("");
     int nRow, nCol;
 
@@ -928,7 +932,7 @@ void CCcdBlemishSpecDlg::OnNMDblClickedSfrYmean(NMHDR* pNMHDR, LRESULT* pResult)
 
             delete pDlg;
         }
-    }
+    }*/
 }
 
 //-----------------------------------------------------------------------------

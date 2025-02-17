@@ -153,75 +153,67 @@ void CCcdSnrColorSensSpecDlg::InitCtrl()
 
 void CCcdSnrColorSensSpecDlg::InitColorSensitivityGridCtrl()
 {
-	/*TCHAR* pszRow[] = { _T(""), 
-        _T("dSpecDevMinR"),	_T("dSpecDevMaxR"),
-		_T("dSpecDevMinGr"),	_T("dSpecDevMaxGr"), 
-		_T("dSpecDevMinGb"),	_T("dSpecDevMaxGb"),
-		_T("dSpecDevMinB"),	_T("dSpecDevMaxB"),
-		_T("nAdjustType"),		_T("nTypicalValueType")
-	};*/
+	//TCHAR* pszCol[] = { _T("Color Sensitivity"), _T("3000k"), _T("5000k"), _T("Dark") };
 
-	TCHAR* pszCol[] = { _T("Color Sensitivity"), _T("3000k"), _T("5000k"), _T("Dark") };
+	//CRect rect;
+	//int i, j;
+	//int DLG = IDC_STATIC_CCD_COLORSENS_SPEC_GRID_SPEC;
 
-	CRect rect;
-	int i, j;
-	int DLG = IDC_STATIC_CCD_COLORSENS_SPEC_GRID_SPEC;
+	//CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
+	//int SpecRow = g_ColorSenscount + 1;// ColorSensitivityMaxCount;//아래
+	//int SpecCol = 4;//옆
+	//int margin = 4;
+	//int gridHeight = 25;
+	//int gridWidth1 = 135;
+	//int gridWidth2 = 70;
+	//int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
+	////
+	//pWnd->GetWindowRect(rect);
+	//ScreenToClient(rect);
 
-	CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
-	int SpecRow = g_ColorSenscount + 1;// ColorSensitivityMaxCount;//아래
-	int SpecCol = 4;//옆
-	int margin = 4;
-	int gridHeight = 25;
-	int gridWidth1 = 135;
-	int gridWidth2 = 70;
-	int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
-	//
-	pWnd->GetWindowRect(rect);
-	ScreenToClient(rect);
-
-	rect.right = totalWidth + margin;
-	rect.bottom = (gridHeight*SpecRow) + margin;
-	pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
+	//rect.right = totalWidth + margin;
+	//rect.bottom = (gridHeight*SpecRow) + margin;
+	//pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
 
 
-	GetDlgItem(DLG)->GetWindowRect(rect);
-	ScreenToClient(rect);
-    m_clGridColorSensitivitySpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
+	//GetDlgItem(DLG)->GetWindowRect(rect);
+	//ScreenToClient(rect);
+ //   m_clGridColorSensitivitySpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
 
-	m_clGridColorSensitivitySpec.SetTextBkColor(RGB_COLOR_WHITE);
-	m_clGridColorSensitivitySpec.SetFixedBkColor(GRID_COLOR_TITLE);
-	m_clGridColorSensitivitySpec.SetFixedTextColor(RGB_COLOR_WHITE);
-	m_clGridColorSensitivitySpec.SetReference_Setting();
-	m_clGridColorSensitivitySpec.EnableSelection(FALSE);
-	m_clGridColorSensitivitySpec.SetRowCount(SpecRow);
-	m_clGridColorSensitivitySpec.SetColumnCount(SpecCol);
-	m_clGridColorSensitivitySpec.SetFixedRowCount(1);
-	m_clGridColorSensitivitySpec.SetFixedColumnCount(1);
+	//m_clGridColorSensitivitySpec.SetTextBkColor(RGB_COLOR_WHITE);
+	//m_clGridColorSensitivitySpec.SetFixedBkColor(GRID_COLOR_TITLE);
+	//m_clGridColorSensitivitySpec.SetFixedTextColor(RGB_COLOR_WHITE);
+	//m_clGridColorSensitivitySpec.SetReference_Setting();
+	//m_clGridColorSensitivitySpec.EnableSelection(FALSE);
+	//m_clGridColorSensitivitySpec.SetRowCount(SpecRow);
+	//m_clGridColorSensitivitySpec.SetColumnCount(SpecCol);
+	//m_clGridColorSensitivitySpec.SetFixedRowCount(1);
+	//m_clGridColorSensitivitySpec.SetFixedColumnCount(1);
 
-	for (i = 0; i < SpecRow; i++)
-	{
-        m_clGridColorSensitivitySpec.SetRowHeight(i, gridHeight);
-		m_clGridColorSensitivitySpec.SetItemText(i + 1, 0, COLOR_SENS_SPEC_NAME[i]);// pszRow[i]);
+	//for (i = 0; i < SpecRow; i++)
+	//{
+ //       m_clGridColorSensitivitySpec.SetRowHeight(i, gridHeight);
+	//	m_clGridColorSensitivitySpec.SetItemText(i + 1, 0, COLOR_SENS_SPEC_NAME[i]);// pszRow[i]);
 
-		for (j = 0; j < SpecCol; j++)
-		{
-			if (i == 0)
-			{
-				if (j == 0)
-				{
-                    m_clGridColorSensitivitySpec.SetColumnWidth(j, gridWidth1);
-				}
-				else
-				{
-                    m_clGridColorSensitivitySpec.SetColumnWidth(j, gridWidth2);
-				}
+	//	for (j = 0; j < SpecCol; j++)
+	//	{
+	//		if (i == 0)
+	//		{
+	//			if (j == 0)
+	//			{
+ //                   m_clGridColorSensitivitySpec.SetColumnWidth(j, gridWidth1);
+	//			}
+	//			else
+	//			{
+ //                   m_clGridColorSensitivitySpec.SetColumnWidth(j, gridWidth2);
+	//			}
 
-                m_clGridColorSensitivitySpec.SetItemText(i, j, pszCol[j]);
-			}
+ //               m_clGridColorSensitivitySpec.SetItemText(i, j, pszCol[j]);
+	//		}
 
-            m_clGridColorSensitivitySpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-		}
-	}
+ //           m_clGridColorSensitivitySpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	//	}
+	//}
 }
 //-----------------------------------------------------------------------------
 //
@@ -273,7 +265,7 @@ void CCcdSnrColorSensSpecDlg::ShowSnrSpec()
 //-----------------------------------------------------------------------------
 void CCcdSnrColorSensSpecDlg::ShowColorSensitivitySpec()
 {
-	TCHAR szData[SIZE_OF_100BYTE];
+	/*TCHAR szData[SIZE_OF_100BYTE];
 	int i;
 
 	for (i = 0; i < g_ColorSenscount; i++)
@@ -282,7 +274,7 @@ void CCcdSnrColorSensSpecDlg::ShowColorSensitivitySpec()
 		m_clGridColorSensitivitySpec.SetItemText(i + 1, 2, g_clModelData[m_nUnit].m_ColorSensitivitySpec[1][i], 3);
 		m_clGridColorSensitivitySpec.SetItemText(i + 1, 3, g_clModelData[m_nUnit].m_ColorSensitivitySpec[2][i], 3);
 	}
-    m_clGridColorSensitivitySpec.Invalidate();
+    m_clGridColorSensitivitySpec.Invalidate();*/
 }
 //-----------------------------------------------------------------------------
 //
@@ -291,7 +283,7 @@ void CCcdSnrColorSensSpecDlg::ShowColorSensitivitySpec()
 //-----------------------------------------------------------------------------
 void CCcdSnrColorSensSpecDlg::GetColorSensitivitySpec()
 {
-	CString sData = _T("");
+	/*CString sData = _T("");
 	int i;
 
 	for (i = 0; i < g_ColorSenscount; i++)
@@ -303,7 +295,7 @@ void CCcdSnrColorSensSpecDlg::GetColorSensitivitySpec()
 		sData = m_clGridColorSensitivitySpec.GetItemText(i + 1, 3);
 		g_clModelData[m_nUnit].m_ColorSensitivitySpec[2][i] = _ttof((TCHAR*)(LPCTSTR)sData);
 	}
-	g_clSysData.sDSave();
+	g_clSysData.sDSave();*/
 }
 
 //-----------------------------------------------------------------------------

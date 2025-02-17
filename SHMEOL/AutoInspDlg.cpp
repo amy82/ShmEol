@@ -128,8 +128,11 @@ CAutoInspDlg::CAutoInspDlg(CWnd* pParent /*=NULL*/)
 	{
 		g_pMessagePopupDlg[i] = NULL;
 	}
-
-	g_pMessageClosePopupDlg = NULL;
+	for (i = 0; i < MAX_TERMINAL_COUNT; i++)
+	{
+		m_clTeminalMessageDlg[i] = NULL;
+	}
+	
 	g_nPopupIndex = 0;
 
 	for (i = 0; i < 2; i++)
@@ -362,6 +365,7 @@ BEGIN_MESSAGE_MAP(CAutoInspDlg, CDialogEx)
 	ON_STN_CLICKED(IDC_STATIC_MAIN_PIN_VAL1, &CAutoInspDlg::OnStnClickedStaticMainPinVal1)
 	ON_STN_CLICKED(IDC_STATIC_MAIN_CURR_MODE3, &CAutoInspDlg::OnStnClickedStaticMainCurrMode3)
 	ON_BN_CLICKED(IDC_BUTTON_MAIN_DOOR1, &CAutoInspDlg::OnBnClickedButtonMainDoor1)
+//	ON_WM_LBUTTONDOWN()
 END_MESSAGE_MAP()
 
 
@@ -440,7 +444,43 @@ void CAutoInspDlg::OnTimer(UINT_PTR nIDEvent)
 	case WM_UI_CM_TIMER:
 		//this->InformationState();
 		break;
-	
+	case WM_IDLE_REASON_TIMER:
+		KillTimer(WM_IDLE_REASON_TIMER);
+
+		if (g_clModelData[0].m_nIdleReasonPass == 1)
+		{
+			TCHAR szLog[SIZE_OF_1K];
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[INFO] Idle Reason Report Pass"));
+			AddLog(szLog, 0, 0);
+			//_stprintf_s(g_clTaskWork[0].m_szIdleStartTime, SIZE_OF_100BYTE, _T("%s"),);
+			return;
+		}
+		
+
+		//Scenario 
+		//1.2-Idle or 6-Pause 상태가 IdleSetTimeInterval 를 초과할 경우
+
+		//spec
+		//1.lot완공 후 다음 Bcr Scan 시점까지의 IdleReasonTimerInterval보다 긴경우
+		//2.일시정지 후 IdleReasonTimerInterval보다 긴경우
+		CTime cTime = CTime::GetCurrentTime();
+		CString strData;
+		strData.Format(_T("%02d%02d%02d%02d%02d%02d"),
+			cTime.GetYear(),
+			cTime.GetMonth(),
+			cTime.GetDay(),
+			cTime.GetHour(),
+			cTime.GetMinute(),
+			cTime.GetSecond());
+
+
+		_stprintf_s(g_clTaskWork[0].m_szIdleStartTime, SIZE_OF_100BYTE, _T("%s"), strData);		//timer  팝업 뜨는 시간인지 idle 로 바뀐 시간인지 확인필요
+
+		m_clIdlePopupDlg.ShowWindow(SW_SHOW);			//WM_IDLE_REASON_TIMER
+		EnableWindow(FALSE);
+		g_clTaskWork[0].bIdleTimeExceed = true;		//OnTimer IdleReasonTimerInterval
+		
+		break;
 		
 	}
 	CDialogEx::OnTimer(nIDEvent);
@@ -551,8 +591,15 @@ void CAutoInspDlg::InitializeService()
 	m_clLogThread.StartThread();
 	// MODEL TYPE LOAD
 	ModelList.ModelListLoad();
-	g_clModelType.mTLoad();
 
+	ModelList.iniRecipeListLoad();
+	ModelList.RecipeModelLoad();
+
+
+
+	//g_clModelType.mTLoad();
+
+	
 
     // 시스템 데이터 로드
 	g_clSysData.sDLoad();
@@ -584,11 +631,12 @@ void CAutoInspDlg::InitializeService()
         g_clLaonGrabberWrapper[i].UiconfigLoad(INI_RAW_IMAGE);		//pg start
         g_clLaonGrabberWrapper[i].SelectSensor();
 
-       
+		g_clMesCommunication[i].secsGemLoad();
 
+		g_clMesCommunication[i].vPPRecipeSpecEquip = g_clMesCommunication[i].RecipeIniLoad(g_clMesCommunication[i].m_sMesPPID);
+		
         g_clMarkData[i].SetUnit(i);
         g_clMarkData[i].LoadData(g_clSysData.m_szModelName);
-
 
 		g_clModelData[i].LotDataLoad();
 		
@@ -844,7 +892,7 @@ void CAutoInspDlg::InitializeService()
 
 	g_clPriInsp[0].func_Insp_Firmware_BinFile_Read(false);		//pg start
 
-	m_nCurrentDlg = DLG_MANUAL;
+	m_nCurrentDlg = DLG_MAIN;// DLG_MANUAL;
 	this->ShowDialog(m_nCurrentDlg);
 	
 
@@ -953,7 +1001,16 @@ void CAutoInspDlg::CreateSubDlg()
             g_pMessagePopupDlg[i]->ShowWindow(SW_HIDE);
         }
     }
-
+	for (i = 0; i < MAX_TERMINAL_COUNT; i++)
+	{
+		m_clTeminalMessageDlg[i] = new CMessageInput;
+		if (m_clTeminalMessageDlg[i] != NULL)
+		{
+			m_clTeminalMessageDlg[i]->Create(IDD_DIALOG_MESSAGE_TYPE1, this);
+			m_clTeminalMessageDlg[i]->ShowWindow(SW_HIDE);
+		}
+	}
+	
 
 	g_pMessageClosePopupDlg = new CMessagePopupDlg;
 	if (g_pMessageClosePopupDlg != NULL)
@@ -962,13 +1019,18 @@ void CAutoInspDlg::CreateSubDlg()
 		g_pMessageClosePopupDlg->ShowWindow(SW_HIDE);
 	}
 
-
 	if (InterLockDlg == NULL) {
 		InterLockDlg = new CInterLockDlg;
 		InterLockDlg->Create(IDD_DIALOG_INTERLOCK);
 		InterLockDlg->ShowWindow(SW_HIDE);
 		InterLockDlg->Invalidate();
 	}
+
+	//Main 다이얼로그
+	m_clMainDlg.Create(IDD_DIALOG_MAIN, this);
+	m_clMainDlg.SetWindowPos(NULL, 960, 2, 0, 0, SWP_NOSIZE);
+	m_clMainDlg.ShowWindow(SW_HIDE);
+	
 
 
     // 수동 다이얼로그
@@ -1005,6 +1067,26 @@ void CAutoInspDlg::CreateSubDlg()
     m_clConfigDlg.Create(IDD_DIALOG_CONFIG, this);
     m_clConfigDlg.SetWindowPos(NULL, 960, 2, 0, 0, SWP_NOSIZE);
     m_clConfigDlg.ShowWindow(SW_HIDE);
+
+
+	//유비샘
+	m_clUbiGemDlg.Create(IDD_DIALOG_UBIGEM, this);
+	m_clUbiGemDlg.SetWindowPos(NULL, 960, 2, 0, 0, SWP_NOSIZE);
+	m_clUbiGemDlg.ShowWindow(SW_HIDE);
+	
+
+	//idle 보고
+	m_clIdlePopupDlg.Create(IDD_DIALOG_IDLE_POPUP, this);
+	m_clIdlePopupDlg.SetUnit(0);
+	m_clIdlePopupDlg.ShowWindow(SW_HIDE);
+
+	//Terminal Message
+	//m_clMessageInput.Create(IDD_DIALOG_MESSAGE_TYPE1, this);
+	//m_clMessageInput.ShowWindow(SW_HIDE);
+	
+	m_clMessageLot.Create(IDD_DIALOG_MESSAGE_TYPE2, this);// , GetDesktopWindow());
+	m_clMessageLot.ShowWindow(SW_HIDE);
+	
 
 	// MODEL 선택 다이얼로그
 	//m_clModelSelectDlg.Create(IDD_DIALOG_MODEL_SELECT, this);
@@ -1413,6 +1495,7 @@ void CAutoInspDlg::InitCtrl()
         m_clColorStaticBcr[i].SetFontBold(TRUE).SetBkColor(RGB_COLOR_WHITE);
 		m_clColorStaticBcrVal[i].SetBkColor(RGB_COLOR_WHITE);
 		m_clColorStaticBcrVal[i].SetFont(&m_clFontMid);
+		m_clColorStaticBcrVal[i].SetFontSize(16);
 		GetDlgItem(IDC_STATIC_MAIN_BCR_VAL1 + i)->GetWindowRect(&vvv);
 		BcrPosX1[i] = vvv.left;
 
@@ -2182,7 +2265,7 @@ void CAutoInspDlg::_DrawBarGraph(int nUnit)
     double sfrValue = 0.0;
 	int xGap = 10;
 	int textGap = 20;
-	for (int i = 0; i < 9; i++)// for (int i = 0; i < 5; i++)
+	for (int i = 0; i < MAX_LAST_INSP_COUNT; i++)// for (int i = 0; i < 5; i++)
     {
         sfrValue = g_clTaskWork[nUnit].m_stSfrInsp._fAverSfr[i];
 		if (sfrValue < 0.0) sfrValue = 0.0;
@@ -2261,142 +2344,6 @@ void CAutoInspDlg::_DrawBarGraph(int nUnit)
 
     pDC.SelectObject(pOldFont);
     font_Value.DeleteObject();
-    font_LimitVal.DeleteObject();
-    font_BarName.DeleteObject();
-
-    pDC.Detach();
-    ::ReleaseDC(hWnd, hDC);
-}
-void CAutoInspDlg::DrawBarGraph(int nUnit)
-{
-    CString sTemp;
-    HWND hWnd = GetDlgItem(IDC_STATIC_MAIN_BAR_GRAPH1 + nUnit)->m_hWnd;
-    CDC pDC;
-    HDC hDC = ::GetDC(hWnd);
-
-    pDC.Attach(hDC);
-
-    CRect rcClient;
-    GetDlgItem(IDC_STATIC_MAIN_BAR_GRAPH1 + nUnit)->GetClientRect(rcClient);
-
-    CBrush Brush;
-    CBrush* pOldBrush;
-    Brush.CreateSolidBrush(RGB(255, 255, 255));
-    pOldBrush = pDC.SelectObject(&Brush);
-
-    pDC.FillRect(rcClient, &Brush);
-
-    int iSizeX_Client = rcClient.right - rcClient.left;
-    int iSizeY_Client = rcClient.bottom - rcClient.top;
-    int iOffsetY = 20;
-
-    CPen* pOldPen;
-    CPen pen_LineBase;
-    CPen pen_LineVertical;
-    CPen pen_LineLimitCen;
-    CPen pen_LineLimitSide;
-
-    CFont font_LimitVal;
-    CFont font_BarName;
-    CFont* pOldFont;
-
-    pen_LineBase.CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
-    pen_LineVertical.CreatePen(PS_DOT, 1, RGB(0, 0, 0));
-    pen_LineLimitCen.CreatePen(PS_SOLID, 1, RGB(128, 0, 0));
-    pen_LineLimitSide.CreatePen(PS_SOLID, 1, RGB(128, 0, 128));
-
-    pOldPen = pDC.SelectObject(&pen_LineBase);
-
-    pDC.MoveTo(5, iSizeY_Client - iOffsetY);
-    pDC.LineTo(iSizeX_Client - 5, iSizeY_Client - iOffsetY);
-
-    pOldPen = pDC.SelectObject(&pen_LineVertical);
-
-    pDC.MoveTo(5, 0);
-    pDC.LineTo(iSizeX_Client - 5, 0);
-
-    pDC.MoveTo(5, (iSizeY_Client - iOffsetY) / 4 * 1);
-    pDC.LineTo(iSizeX_Client - 5, (iSizeY_Client - iOffsetY) / 4 * 1);
-
-    pDC.MoveTo(5, (iSizeY_Client - iOffsetY) / 4 * 2);
-    pDC.LineTo(iSizeX_Client - 5, (iSizeY_Client - iOffsetY) / 4 * 2);
-
-    pDC.MoveTo(5, (iSizeY_Client - iOffsetY) / 4 * 3);
-    pDC.LineTo(iSizeX_Client - 5, (iSizeY_Client - iOffsetY) / 4 * 3);
-
-    font_LimitVal.CreateFont(10, 6, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, _T("Airal"));
-    pOldFont = pDC.SelectObject(&font_LimitVal);
-
-    // AA모드일때만 최종 SFR 그래프 그리기
-    pOldPen = pDC.SelectObject(&pen_LineLimitCen);
-    pDC.MoveTo(5, (iSizeY_Client - iOffsetY) - (int)(g_clModelData[nUnit].m_dLimitSFRCent * (iSizeY_Client - iOffsetY) + 0.5));
-    pDC.LineTo(iSizeX_Client - 5, (iSizeY_Client - iOffsetY) - (int)(g_clModelData[nUnit].m_dLimitSFRCent * (iSizeY_Client - iOffsetY) + 0.5));
-    sTemp.Format(_T("%.02lf"), g_clModelData[nUnit].m_dLimitSFRCent);
-    pDC.SetTextColor(RGB(128, 0, 0));
-    pDC.TextOut(iSizeX_Client - 30, (iSizeY_Client - iOffsetY) - (int)(g_clModelData[nUnit].m_dLimitSFRCent * (iSizeY_Client - iOffsetY) + 0.5) - 12, sTemp);
-
-    pOldPen = pDC.SelectObject(&pen_LineLimitSide);
-    pDC.MoveTo(5, (iSizeY_Client - iOffsetY) - (int)(g_clModelData[nUnit].m_dLimitSFRSide * (iSizeY_Client - iOffsetY) + 0.5));
-    pDC.LineTo(iSizeX_Client - 5, (iSizeY_Client - iOffsetY) - (int)(g_clModelData[nUnit].m_dLimitSFRSide * (iSizeY_Client - iOffsetY) + 0.5));
-    sTemp.Format(_T("%.02lf"), g_clModelData[nUnit].m_dLimitSFRSide);
-    pDC.SetTextColor(RGB(128, 0, 128));
-    pDC.TextOut(iSizeX_Client - 30, (iSizeY_Client - iOffsetY) - (int)(g_clModelData[nUnit].m_dLimitSFRSide * (iSizeY_Client - iOffsetY) + 0.5) - 12, sTemp);
-
-    CPen pen_Cen, pen_LeftUpper, pen_RightUpper, pen_LeftLower, pen_RightLower;
-    pen_Cen.CreatePen(PS_SOLID, 4, RGB(0, 0, 255));
-    pen_LeftUpper.CreatePen(PS_SOLID, 4, RGB(255, 0, 0));
-    pen_RightUpper.CreatePen(PS_SOLID, 4, RGB(0, 255, 0));
-    pen_LeftLower.CreatePen(PS_SOLID, 4, RGB(63, 0, 153));
-    pen_RightLower.CreatePen(PS_SOLID, 4, RGB(0, 216, 255));
-
-    font_BarName.CreateFont(12, 7, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, _T("Arial"));
-    pOldFont = pDC.SelectObject(&font_BarName);
-    pDC.SetTextColor(RGB(0, 0, 0));
-
-    // // 20150526 LHC - cen, 0.4f, 0.7f  Min값 그래프로 나타내기
-    float sfrValue = 0.0;
-    for (int i = 0; i < MAX_MTF_COUNT; i++)
-    {
-        switch (i)
-        {
-        case MTF_CENTER:		pOldPen = pDC.SelectObject(&pen_Cen);			break;
-        case MTF_LEFT_UPPER:	pOldPen = pDC.SelectObject(&pen_LeftUpper);		break;
-        case MTF_RIGHT_UPPER:	pOldPen = pDC.SelectObject(&pen_RightUpper);	break;
-        case MTF_LEFT_BOTTOM:	pOldPen = pDC.SelectObject(&pen_LeftLower);		break;
-        case MTF_RIGHT_BOTTOM:	pOldPen = pDC.SelectObject(&pen_RightLower);	break;
-        }
-        sfrValue = g_clTaskWork[nUnit].m_stSfrInsp._fAverSfr[i];
-        //g_clTaskWork[nUnit].m_stSfrInsp._fAverSfr[i]
-        // AA모드일때만 최종 SFR 그래프 그리기
-        pDC.MoveTo((iSizeX_Client - 5) / 6 * (i + 1), iSizeY_Client - iOffsetY);
-        pDC.LineTo((iSizeX_Client - 5) / 6 * (i + 1), (iSizeY_Client - iOffsetY) - (int)(sfrValue * (iSizeY_Client - iOffsetY) + 0.5));
-        sTemp.Format(_T("%.3lf"), sfrValue);
-        pDC.TextOut((iSizeX_Client - 5) / 6 * (i + 1) - 15, (iSizeY_Client - iOffsetY) - (int)(sfrValue * (iSizeY_Client - iOffsetY) + 0.5) - 10, sTemp);
-    }
-
-    pDC.TextOut((iSizeX_Client - 5) / 6 - 13, (iSizeY_Client - iOffsetY) + 5, _T("CEN"));
-    pDC.TextOut((iSizeX_Client - 5) / 6 * 2 - 10, (iSizeY_Client - iOffsetY) + 5, _T("L/U"));
-    pDC.TextOut((iSizeX_Client - 5) / 6 * 3 - 10, (iSizeY_Client - iOffsetY) + 5, _T("R/U"));
-    pDC.TextOut((iSizeX_Client - 5) / 6 * 4 - 10, (iSizeY_Client - iOffsetY) + 5, _T("L/L"));
-    pDC.TextOut((iSizeX_Client - 5) / 6 * 5 - 10, (iSizeY_Client - iOffsetY) + 5, _T("R/L"));
-    // 20150526 LHC - cen, 0.4f, 0.7f  Min값 그래프로 나타내기
-
-    pDC.SelectObject(pOldPen);
-    pen_LineBase.DeleteObject();
-    pen_LineVertical.DeleteObject();
-    pen_LineLimitCen.DeleteObject();
-    pen_LineLimitSide.DeleteObject();
-
-    pen_Cen.DeleteObject();
-    pen_LeftUpper.DeleteObject();
-    pen_RightUpper.DeleteObject();
-    pen_LeftLower.DeleteObject();
-    pen_RightLower.DeleteObject();
-
-    pDC.SelectObject(pOldBrush);
-    Brush.DeleteObject();
-
-    pDC.SelectObject(pOldFont);
     font_LimitVal.DeleteObject();
     font_BarName.DeleteObject();
 
@@ -3111,7 +3058,7 @@ void CAutoInspDlg::ShowDialog(int nDlg)
     switch (nDlg)
     {
     case DLG_MAIN:
-        this->MoveMainUI(SHOW_ALL);
+		this->MoveMainUI(nMoveType);// SHOW_ALL);
 
         m_clManualDlg.ShowWindow(SW_HIDE);
         m_clTeachingDlg.ShowWindow(SW_HIDE);
@@ -3121,12 +3068,16 @@ void CAutoInspDlg::ShowDialog(int nDlg)
         m_clAlarmDlg.ShowWindow(SW_HIDE);
         m_clConfigDlg.ShowWindow(SW_HIDE);
 
+
+		m_clMainDlg.SetUnit(m_nCurrentUnit);
+		m_clMainDlg.ShowWindow(SW_SHOW);
 		m_clColorButtonMain.state = 1;
 
         break;
     case DLG_MANUAL:
         this->MoveMainUI(nMoveType);
 
+		m_clMainDlg.ShowWindow(SW_HIDE);
         m_clTeachingDlg.ShowWindow(SW_HIDE);
         m_clCcdDlg.ShowWindow(SW_HIDE);
         m_clDioDlg.ShowWindow(SW_HIDE);
@@ -3169,6 +3120,7 @@ void CAutoInspDlg::ShowDialog(int nDlg)
 		//g_clVision.DrawOverlayAll(m_nCurrentUnit);
         this->MoveMainUI(nMoveType);
 
+		m_clMainDlg.ShowWindow(SW_HIDE);
         m_clManualDlg.ShowWindow(SW_HIDE);
         m_clCcdDlg.ShowWindow(SW_HIDE);
         m_clDioDlg.ShowWindow(SW_HIDE);
@@ -3199,6 +3151,7 @@ void CAutoInspDlg::ShowDialog(int nDlg)
     case DLG_CCD:
         this->MoveMainUI(nMoveType);
 
+		m_clMainDlg.ShowWindow(SW_HIDE);
         m_clManualDlg.ShowWindow(SW_HIDE);
         m_clTeachingDlg.ShowWindow(SW_HIDE);
         m_clDioDlg.ShowWindow(SW_HIDE);
@@ -3239,6 +3192,7 @@ void CAutoInspDlg::ShowDialog(int nDlg)
     case DLG_DIO:
         this->MoveMainUI(nMoveType);
 
+		m_clMainDlg.ShowWindow(SW_HIDE);
         m_clManualDlg.ShowWindow(SW_HIDE);
         m_clTeachingDlg.ShowWindow(SW_HIDE);
         m_clCcdDlg.ShowWindow(SW_HIDE);
@@ -3253,6 +3207,7 @@ void CAutoInspDlg::ShowDialog(int nDlg)
     case DLG_LIGHT:
         this->MoveMainUI(nMoveType);
 
+		m_clMainDlg.ShowWindow(SW_HIDE);
         m_clManualDlg.ShowWindow(SW_HIDE);
         m_clTeachingDlg.ShowWindow(SW_HIDE);
         m_clCcdDlg.ShowWindow(SW_HIDE);
@@ -3268,6 +3223,7 @@ void CAutoInspDlg::ShowDialog(int nDlg)
     case DLG_ALARM:
         this->MoveMainUI(nMoveType);
 
+		m_clMainDlg.ShowWindow(SW_HIDE);
         m_clManualDlg.ShowWindow(SW_HIDE);
         m_clTeachingDlg.ShowWindow(SW_HIDE);
         m_clCcdDlg.ShowWindow(SW_HIDE);
@@ -3286,6 +3242,7 @@ void CAutoInspDlg::ShowDialog(int nDlg)
     case DLG_CONFIG:
         this->MoveMainUI(nMoveType);
 
+		m_clMainDlg.ShowWindow(SW_HIDE);
         m_clManualDlg.ShowWindow(SW_HIDE);
         m_clTeachingDlg.ShowWindow(SW_HIDE);
         m_clCcdDlg.ShowWindow(SW_HIDE);
@@ -3473,6 +3430,7 @@ bool CAutoInspDlg::StartHomeProcess(int nUnit)
 		{
 			sMsg.Format(_T("[FAIL] [%s] 모터 SERVO ON 동작 실패"), MOTOR_NAME[i]);
 			AddLog((TCHAR*)(LPCTSTR)sMsg, 1, nUnit);
+			return false;
 		}
 	}
 
@@ -3615,10 +3573,10 @@ bool CAutoInspDlg::StartAutoReadyProcess(int nUnit)
 
     for (int i = ULD_ITF_CHK; i < MAX_ULD_IF_COUNT; i++)
         g_clTaskWork[nUnit].m_bUldSocketIF[i] = false;
-
-    for (i = 0; i < MAX_MTF_COUNT; i++)
+	
+    for (i = 0; i < MAX_LAST_INSP_COUNT; i++)			//MAX_MTF_COUNT
     {
-        g_clTaskWork[nUnit].m_stSfrInsp.fSFR_AVR_N4[g_clTaskWork[nUnit].m_nDrawBarStep - 1][i] = 0.0;
+        ////g_clTaskWork[nUnit].m_stSfrInsp.fSFR_AVR_N4[g_clTaskWork[nUnit].m_nDrawBarStep - 1][i] = 0.0;
         g_clTaskWork[nUnit].m_stSfrInsp._fAverSfr[i] = 0.0;
     }
 	m_clColorButtonAutoRun[nUnit].state = 0;
@@ -3692,8 +3650,6 @@ bool CAutoInspDlg::StartAutoProcess(int nUnit)
         return false;
     }
 	g_clTaskWork[nUnit].m_nEmissionRun = false;
-
-
 	//if (g_clAdo.GetAccessDbConnect() == false)
 	//{
 	//	//_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\EEPROM_DATABASE_1ST.mdb"), BASE_DATA_PATH);	//1호기는 1st 2호기는 2st로 정해라
@@ -3790,12 +3746,27 @@ bool CAutoInspDlg::StartAutoProcess(int nUnit)
 
 				}
 			}
-            //_stprintf_s(g_clTaskWork[nUnit].m_szLotID, SIZE_OF_100BYTE, _T("%s"), g_clTaskWork[nUnit].m_szLotID);//200718 주석처리 머지???????
-            //this->ShowBarcode();
+			//
+			//Alarm Clear
+			m_clUbiGemDlg.AlarmClearSendFn();
+			//
+			//
+			//if (g_clMesCommunication[nUnit].m_bLgit_Pause_req == true)		//AUTO RUN BUTTON
+			if(g_clMesCommunication[nUnit].m_dProcessState[1] != eEXECUTING)
+			{
+				//S6F11 Process State Change Report (EXECUTING)
+				g_clMesCommunication[nUnit].m_dProcessState[0] = g_clMesCommunication[nUnit].m_dProcessState[1];
+				g_clMesCommunication[nUnit].m_dProcessState[1] = eEXECUTING;
+
+				g_clMesCommunication[nUnit].m_uAlarmList.clear();
+
+				m_clUbiGemDlg.EventReportSendFn(PROCESS_STATE_CHANGED_REPORT_10401, "");
+			}
 
 			g_clTaskWork[nUnit].m_nCurrentPcbStep = abs(g_clTaskWork[nUnit].m_nCurrentPcbStep);
 			//g_clTaskWork[nUnit].m_nCurrentLensStep = abs(g_clTaskWork[nUnit].m_nCurrentLensStep);
 
+			
 			g_clTaskWork[nUnit].m_nAutoFlag = MODE_AUTO;
 
 			g_clDioControl.SetTowerLamp(LAMP_GREEN, true);
@@ -3829,27 +3800,6 @@ bool CAutoInspDlg::StartAutoProcess(int nUnit)
             return false;
         }
 	}
-	else
-	{
-		//if (g_clDioControl.PcbSensorCheck(nUnit, true) == true)
-		//{
-		//	if (g_clTaskWork[nUnit].m_nEmission == 1)
-		//	{
-		//		g_clTaskWork[nUnit].m_nEmissionRun = true;
-		//		g_clMesCommunication[nUnit].m_nMesFinalResult = 1;	//수동 양품 배출
-		//		g_clTaskWork[nUnit].m_nCurrentPcbStep = 119200;
-		//		//양품 배출
-		//	}
-		//	else if (g_clTaskWork[nUnit].m_nEmission == 2)
-		//	{
-		//		g_clTaskWork[nUnit].m_nEmissionRun = true;
-		//		g_clMesCommunication[nUnit].m_nMesFinalResult = 0;	//수동 NG 배출
-		//		g_clTaskWork[nUnit].m_nCurrentPcbStep = 119200;
-		//		//NG 배출
-		//	}
-		//	
-		//}
-	}
 
 	
     // 모터 구동중인지 체크
@@ -3880,30 +3830,7 @@ bool CAutoInspDlg::StartAutoProcess(int nUnit)
 		return false;
 	}
 
-  //  if (g_pCarAABonderDlg->ConnectAAMain() == false)
-  //  {
-  //      _stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] MAIN PC와 연결되지 않았습니다."));
-  //      //AddLog(szLog, 1, 999, false);
-  //      AddLog(szLog, 999, 0);
-  //      AddLog(szLog, 999, 1);
-		//g_ShowMsgPopup(_T("ERROR"), szLog, RGB_COLOR_RED);
-  //      return false;
-  //  }
-	 
-	//if (g_clDioControl.PcbSocketCheck(nUnit, true) == false)
-	//{
-	//	if (g_clDioControl.PcbGrip(nUnit, false, true) == true)
-	//	{// Grip 후진
-	//		_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PCB GRIP 후진 성공"));
-	//		AddLog(szLog, 0, nUnit);
-	//	}
-	//	else
-	//	{
-	//		_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PCB GRIP 후진 실패"));
-	//		AddLog(szLog, 1, nUnit, true);
-	//		return false;
-	//	}
-	//}
+
     m_nCurrentDlg = 0;
 
 	///*m_clColorStaticBcrVal[nUnit].GetWindowText(sData);
@@ -3953,9 +3880,11 @@ bool CAutoInspDlg::StartAutoProcess(int nUnit)
 	g_clDioControl.SetTowerLamp(LAMP_GREEN, true);
 
 	g_clMandoInspLog[nUnit].m_bInspRes = true;
+	m_clUbiGemDlg.AlarmClearSendFn();
 	g_clTaskWork[nUnit].m_nAutoFlag = MODE_AUTO;
 
-    
+    //Alarm Clear
+	m_clUbiGemDlg.AlarmClearSendFn();
 
 	if (m_clActiveAlignThread[nUnit].StartThread() == false)
 	{
@@ -3965,6 +3894,12 @@ bool CAutoInspDlg::StartAutoProcess(int nUnit)
 		return false;
 	}
 	
+
+
+
+
+
+
 
     //m_clColorButtonStartingPoint[nUnit].ChangeColor(0);
     m_clColorButtonAutoReady[nUnit].state = 0;
@@ -3980,6 +3915,12 @@ bool CAutoInspDlg::StartAutoProcess(int nUnit)
     m_clColorButtonAutoRun[nUnit].Invalidate();
     m_clColorButtonAutoPause[nUnit].Invalidate();
     m_clColorButtonAutoStop[nUnit].Invalidate();
+
+	
+
+	g_clMesCommunication[nUnit].m_dEqupOperationMode[0] = 1;	//1 = Full-Auto Mode, 9 = Manual Mode
+	g_clMesCommunication[nUnit].m_dEqupOperationMode[1] = 0;
+	m_clUbiGemDlg.EventReportSendFn(EQUIPMENT_OPERATION_MODE_CHANGED_REPORT);
 
 	sData.Empty();
     return true;
@@ -4039,7 +3980,6 @@ bool CAutoInspDlg::StopAutoProcess(int nUnit)
 		m_clCustomThread[nUnit].EndThread(); 
 	}
 	
-
 	g_clTaskWork[nUnit].m_bFirmwareStop = false;		//Firmware 검사 길어져서 추가
 
 
@@ -4067,6 +4007,11 @@ bool CAutoInspDlg::StopAutoProcess(int nUnit)
 
 
 	g_clTaskWork[nUnit].m_nAutoFlag = MODE_STOP;
+
+	g_clMesCommunication[nUnit].m_dEqupOperationMode[0] = 9;	//1 = Full-Auto Mode, 9 = Manual Mode
+	g_clMesCommunication[nUnit].m_dEqupOperationMode[1] = 0;
+	m_clUbiGemDlg.EventReportSendFn(EQUIPMENT_OPERATION_MODE_CHANGED_REPORT);
+
 	AddLog(_T("[STOP] 자동 운전 정지"), 0, nUnit);
     return true;
 }
@@ -5776,6 +5721,8 @@ void CAutoInspDlg::OnBnClickedButtonMainStartingPoint1()
     if (g_ShowMsgModal(_T("확인"), _T("전체 원점복귀 하시겠습니까 ?"), RGB_COLOR_RED) == false)
         return;
 
+
+	m_clUbiGemDlg.AlarmClearSendFn();
     this->StartHomeProcess(UNIT_AA1);
 }
 
@@ -5787,37 +5734,7 @@ void CAutoInspDlg::OnBnClickedButtonMainStartingPoint1()
 void CAutoInspDlg::OnBnClickedButtonMainAutoReady1()
 {
     // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	/*TCHAR szLog[SIZE_OF_1K];
 	
-	if (g_clModelData[UNIT_AA1].m_nInspOKPass == 1 && g_clModelData[UNIT_AA1].m_nMasterModeUse == 1)
-	{
-		_stprintf_s(szLog, SIZE_OF_1K, _T("운전 MODE 확인 바랍니다."));
-		InterLockMsg(_T("주의"), szLog, MESSAGE_BG_COLOR, true);
-	}
-	else if (g_clModelData[UNIT_AA1].m_nInspOKPass == 1)
-	{
-		_stprintf_s(szLog, SIZE_OF_1K, _T("운전 MODE 확인 바랍니다."));
-		InterLockMsg(_T("주의"), szLog, MESSAGE_BG_COLOR, true);
-	}
-	else if (g_clModelData[UNIT_AA1].m_nMasterModeUse == 1)
-	{
-		_stprintf_s(szLog, SIZE_OF_1K, _T("운전 MODE 확인 바랍니다."));
-		InterLockMsg(_T("주의"), szLog, MESSAGE_BG_COLOR, true);
-	}
-	else if (g_clModelData[UNIT_AA1].m_nInspOKPass == 1)
-	{
-		_stprintf_s(szLog, SIZE_OF_1K, _T("EOL PASS MODE 입니다."));
-		InterLockMsg(_T("주의"), szLog, MESSAGE_BG_COLOR, true);
-	}
-	else if (g_clModelData[UNIT_AA1].m_nMasterModeUse == 1)
-	{
-		_stprintf_s(szLog, SIZE_OF_1K, _T("MASTER MODE 입니다."));
-		InterLockMsg(_T("주의"), szLog, MESSAGE_BG_COLOR, true);
-	}
-	else
-	{
-		InterLockMsg(_T("주의"), szLog, MESSAGE_BG_COLOR, false);
-	}*/
 	
 	if (g_clTaskWork[UNIT_AA1].m_nAutoFlag == MODE_AUTO)
 	{
@@ -5837,6 +5754,7 @@ void CAutoInspDlg::OnBnClickedButtonMainAutoReady1()
 			return;
 		}
 	}
+	m_clUbiGemDlg.AlarmClearSendFn();
 	this->StartAutoReadyProcess(UNIT_AA1);
     
 }
@@ -6306,11 +6224,11 @@ void CAutoInspDlg::OnBnClickedButtonMainMain()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	//m_nCurrentUnit = SHOW_ALL;
 
-	return;
-	if (MAX_UNIT_COUNT < 2)
-	{
-		return;
-	}
+	//return;
+	//if (MAX_UNIT_COUNT < 2)
+	//{
+	//	return;
+	//}
 	m_nCurrentDlg = DLG_MAIN;
 
 	this->ShowDialog(m_nCurrentDlg);
@@ -6437,6 +6355,8 @@ void CAutoInspDlg::OnBnClickedButtonMainExit()
 
 		delete pDlg;
 	}
+
+
 #ifdef _DEBUG
 	//_CrtSetBreakAlloc(2098);
 	//_CrtMemDumpAllObjectsSince(0);
@@ -6567,60 +6487,13 @@ void CAutoInspDlg::OnStnClickedStaticMainPin2()
 void CAutoInspDlg::OnStnClickedStaticMainVersion1()
 {
 #ifdef _DEBUG
-	
-
-
 	//TCHAR szLog[SIZE_OF_1K];
 	//m_clButtonExArea[0].state = 0;// 11;
 	//m_clButtonExArea[0].Invalidate();
 
-	//g_clTaskWork[0].m_bAreaSensorRun = !g_clTaskWork[0].m_bAreaSensorRun;
-	/*
-	g_clVision.ClearOverlay(0);
-	g_FindCirclePos(0, g_clVision.m_pImgBuff[0][1], g_clModelData[0].m_clSfrInfo.m_clRectCircle);
-	g_clVision.DrawOverlayAll(0);
-	double m_dMesUvAfterRotate = g_CalcImageAlign(0);
-
-	_stprintf_s(szLog, SIZE_OF_1K, _T("rotation :%lf"), m_dMesUvAfterRotate);
-	AddLog(szLog, 0, 0);
-	double count =  1 - (4 * 0.1);
-
-	g_clMotorSet.MovePcbTMotor(0, m_dMesUvAfterRotate * count, true);
-*/
-	/*byte WData[1];
-	WData[0] = 0x07;
-
-	int index = 2;
-	byte ndata = (WData[0] & (1 << index)) >> index;
-	_stprintf_s(szLog, SIZE_OF_1K, _T("Start Data :%d"), WData[0]);
-	AddLog(szLog, 0, 0);
-	for (size_t i = 0; i < 4; i++)
-	{
-		ndata = (WData[0] & (1 << i)) >> i;
-		_stprintf_s(szLog, SIZE_OF_1K, _T("Data :%d"), ndata);
-		AddLog(szLog, 0, 0);
-	}
-	byte data = WData[0];
-	ndata = 0;
-	data <<= index;
-	data >>= 7;*/
-
-//bit얻기
-//return (data & (1 << n번째)) >>n번째;
-//data <<= n번째;
-//data >>=7;
-//return data
-//g_clVision.ClearOverlay(0);
-//g_OpencvFindCirclePos(0, g_clLaonGrabberWrapper[0].m_pFrameRawBuffer, g_clModelData[0].m_clSfrInfo.m_clRectCircle, false);
-//g_clVision.DrawOverlayAll(0);
-	//int i = 0;
-	//for (i = 0; i < 10; i++)
-	//{
-	//	g_AvrGetSFR(g_clLaonGrabberWrapper[0].m_pFrameRawBuffer, i);//g_clTaskWork[m_nUnit].m_nRawSumCount);
-	//}
-	//g_DiffReset();
-	//g_clMesCommunication[0].g_FinalEolLog(0);
 	
+
+ 
 	
 #else
 
@@ -6628,27 +6501,86 @@ void CAutoInspDlg::OnStnClickedStaticMainVersion1()
 
 
 #ifdef NORINDA_MODE
-	//int m_nUnit = 0;
-	TCHAR szLog[SIZE_OF_1K];
+	CString strValue;
+	//int opCallType = 0;
+	//strValue.Format(_T("[LGIT_OP_CALL] %s/%d"), g_clReportData.rCtrlOp_Call.OpCall_Code, opCallType);
+	//g_ShowMsgPopup(strValue, g_clReportData.rCtrlOp_Call.OpCall_Text, RGB_COLOR_RED, 0, opCallType);
+
+	//g_pCarAABonderDlg->m_clMessageLot.setMode(eLGIT_OP_CALL);
+
+	//g_pCarAABonderDlg->m_clMessageLot.setLotID(_T("OPCALL CODE"), g_clReportData.rCtrlOp_Call.OpCall_Code);
+	//g_pCarAABonderDlg->m_clMessageLot.setContent(g_clReportData.rCtrlOp_Call.OpCall_Text);
+
+
+
+	//g_pCarAABonderDlg->m_clMessageLot.ShowWindow(SW_SHOW);		//test
+
+	//g_clMesCommunication[0].m_dEqupOperationMode[0] = 1;	//1 = Full-Auto Mode, 9 = Manual Mode
+	//g_clMesCommunication[0].m_dEqupOperationMode[1] = 0;
+	//m_clUbiGemDlg.EventReportSendFn(EQUIPMENT_OPERATION_MODE_CHANGED_REPORT);
+	SetTimer(WM_IDLE_REASON_TIMER, 1000, NULL);		//30000 Step
+
+	return;
 	int m_nUnit = 0;
+	//g_clMesCommunication[m_nUnit].RecipeIniSave(g_clMesCommunication[m_nUnit].vPPRecipeSpecEquip);
+	int mI2c_SpecMax = (int)g_clMesCommunication[m_nUnit].mapKeyRtn(RECIPE_PARAM_NAME[4]);
+	double mCurrent_SpecMin = g_clMesCommunication[m_nUnit].mapKeyRtn(RECIPE_PARAM_NAME[0]);
+	TCHAR szLog[SIZE_OF_1K];
 
-	sprintf_s(szLog, "Checking Firmware");
-	AddLog(szLog, 0, m_nUnit);
+	//_stprintf_s(szLog, SIZE_OF_1K, _T("RECIPE ID:%s \nLGIT_PP_UPLOAD_FAIL\nCode :%s\nText:%s\n재시도 하시겠습니까?"),
+		//g_clMesCommunication[m_nUnit].m_sRecipeId, g_clMesCommunication[m_nUnit].m_sErcmdCode, g_clMesCommunication[m_nUnit].m_sErcmdText);
 
-	g_clVision.ClearOverlay(m_nUnit);
-
-	g_clVision.DrawMOverlayText(0, g_clModelData[m_nUnit].m_nWidth * 0.1, 300, szLog, M_COLOR_YELLOW, _T("Arial"), 40, 80);
-	g_clVision.DrawOverlayAll(m_nUnit);
-
-
-	//g_ShowMsgPopup(_T("INFO"), _T("[AUTO] Firmware 검사 진행중입니다."), RGB_COLOR_RED, 3);
-	g_ShowCloseMsgPopup(_T("INFO"), _T("[AUTO] Firmware 검사 진행중입니다."), true);
+	//m_clIdlePopupDlg.ShowWindow(SW_SHOW);		//NORINDA_MODE
+	//EnableWindow(FALSE);
+	//g_ShowMsgModal(_T("[INFO]"), szLog, RGB_COLOR_BLUE, _T("RETRY"), _T("PAUSE"));
+	//g_pCarAABonderDlg->m_clMessageLot.setMode(1);
+	//g_pCarAABonderDlg->m_clMessageLot.setLotTitle("");
 
 
-	g_ShowCloseMsgPopup(_T("INFO"), _T("[AUTO] Firmware 검사 진행중입니다."), false);
+	//g_pCarAABonderDlg->m_clMessageLot.ShowWindow(SW_SHOW);		//test
 
+	//g_ShowMsgModal(_T("확인"), _T("SNR/COLOR SPEC \n데이터를 저장하시겠습니까?"), RGB_COLOR_BLUE);
+	//g_clMesCommunication[0].RecipeIniSave(g_clMesCommunication[0].vPPRecipeSpecEquip);	//MainGrid Save Button 저장 버튼
+	//CTime cTime = CTime::GetCurrentTime();
+	//CString strData;
+	//strData.Format(_T("%02d%02d%02d%02d%02d%02d"),
+	//	cTime.GetYear(),
+	//	cTime.GetMonth(),
+	//	cTime.GetDay(),
+	//	cTime.GetHour(),
+	//	cTime.GetMinute(),
+	//	cTime.GetSecond());
+
+	//g_ShowMsgPopup(_T("[LGIT_OP_CALL] command received from Host!!!"), _T("11111111 \r\n 1222222"), RGB_COLOR_RED);
+
+
+
+	//m_clMessageLot.setLotID(_T("setLotID"));
+	//m_clMessageLot.setLotTitle(_T("setLotTitle\nsetLotTitle"));
+	//g_clMesCommunication[0].m_dIspData[0] = 0x12;
+	//g_clMesCommunication[0].m_dIspData[1] = 0xAB;
+	//char buffer[6];  // 충분한 크기의 버퍼
+
+	//std::snprintf(buffer, sizeof(buffer), "%02X", g_clMesCommunication[0].m_dIspData[0]);
+	//g_clMesCommunication[0].vMesApdData.push_back(buffer);
+	//std::snprintf(buffer, sizeof(buffer), "%02X", g_clMesCommunication[0].m_dIspData[1]);
+	//g_clMesCommunication[0].vMesApdData.push_back(buffer);
+
+	//TCHAR* pszVerify[] = {
+	//	_T("File Save"),_T(" "),
+	//	_T("Original READ"),_T("SetWPDisable"),_T("GetCatMultiRegister"),_T("SetWPEnable"),_T("Verify") };
+	//char strbuffer[100];  // 버퍼 크기는 예상 문자열 길이에 따라 조정
+	//std::snprintf(strbuffer, sizeof(strbuffer), "FAIL(%s),", pszVerify[g_clMesCommunication[0].m_nMesFirmwareVerifyResult]);
+	//g_clMesCommunication[0].vMesApdData.push_back(strbuffer);
+
+	////g_clMesCommunication[0].vMesApdData.push_back(std::to_string(static_cast<int>(g_clMesCommunication[0].m_dIspData[0])));
+	//g_clMesCommunication[0].g_FinalEolLog(0);
+
+	//g_pCarAABonderDlg->m_clMessageLot.ShowWindow(SW_SHOW);		//test
+	//EnableWindow(FALSE);
+	 
 	//g_clMesCommunication[0].g_FinalEolLog(0); 
-	
+	//g_ShowMsgPopup(_T("INFO"), _T("[AUTO] 전체 원점 복귀 완료\n dddd"), RGB_COLOR_RED);
 	/*int i = 0;
 	for (i = 0; i < 10; i++)
 	{
@@ -6832,21 +6764,30 @@ void CAutoInspDlg::FinishService()
 			g_pMessagePopupDlg[i] = NULL;
 		}
 	}
+	for (i = 0; i < MAX_TERMINAL_COUNT; i++)
+	{
+		if (m_clTeminalMessageDlg[i] != NULL)
+		{
+			delete m_clTeminalMessageDlg[i];
+			m_clTeminalMessageDlg[i] = NULL;
+		}
+	}
 	if (g_pMessageClosePopupDlg != NULL)
 	{
 		delete g_pMessageClosePopupDlg;
 		g_pMessageClosePopupDlg = NULL;
 	}
-	
+
 	if (InterLockDlg != NULL)
 	{
 		delete InterLockDlg;
 	}
+
 	
-	if (g_clCMSMESSocket != NULL)
+	/*if (g_clCMSMESSocket != NULL)
 	{
 		delete g_clCMSMESSocket;
-	}
+	}*/
 	
 	m_clCtrlPos[0].RemoveAll();
 	
@@ -7546,113 +7487,7 @@ void CAutoInspDlg::DisConnectMes()
 }
 void CAutoInspDlg::SendCMSMESMessage(int message, int mAlarmIndex)
 {
-	CString strPacket = _T("");
-	CString m_strSTX = _T("$");
-	CString m_strETX = _T("\r");
-	switch (message)
-	{
-	case eMES_CHECK_ONLINE:
-	{
-		strPacket.Format(_T("%s,0000,Check Online,,%s"), m_strSTX, m_strETX);
-		g_clCMSMESSocket->doSendCmd(strPacket);
-	}
-	break;
-
-	case eMES_ALARM:
-	{
-		m_nAlarmOccured = 1;
-		m_nAlarmcode = mAlarmIndex;
-		strPacket.Format(_T("%s,0001,Alarm Report,%d@%d,%s"), m_strSTX, m_nAlarmcode, m_nAlarmOccured, m_strETX);
-		g_clCMSMESSocket->doSendCmd(strPacket);
-	}
-	break;
-	case eMES_ALARM_RESET:	//알람 초기화
-	{
-		m_nAlarmOccured = 0;
-		m_nAlarmcode = mAlarmIndex;
-		strPacket.Format(_T("%s,0001,Alarm Report,%d@%d,%s"), m_strSTX, m_nAlarmcode, m_nAlarmOccured, m_strETX);
-		g_clCMSMESSocket->doSendCmd(strPacket);
-	}
-	break;
-
-	case eMES_TRACK_IN:
-	{
-		strPacket.Format(_T("%s,0002,Track In Request,%s,%s"), m_strSTX, g_clCMSMESSocket->m_strBarcode, m_strETX);
-		g_clCMSMESSocket->doSendCmd(strPacket);
-	}
-	break;
-
-	case eMES_TRACK_OUT:
-	{
-		CString Result = _T("");
-		CString str46HA_Sensor = _T("");	// = _T("46HA_Sensor_Value");
-		CString str83HB_Sensor = _T("");	// = _T("83HB_Sensor_Value");
-		CString str46HA_Main = _T("");		// = _T("46HA_Main_Value");
-		CString str83HB_Main = _T("");		// = _T("83HB_Main_Value");
-		int InspData = 0;
-
-		//const float absolute_upper_limit = m_pclsConfig->IniFileReadFloat(_T("LIMITS"), _T("ID_UPPER_LIMIT"), ABSOLUTE_UPPER_LIMIT);	//1
-		//const float absolute_lower_limit = m_pclsConfig->IniFileReadFloat(_T("LIMITS"), _T("ID_LOWER_LIMIT"), ABSOLUTE_LOWER_LIMIT);	//-1
-
-		//if (g_clMesCommunication.dMES_MainPitch > absolute_upper_limit)
-		//{
-		//	g_clMesCommunication.iMES_FinalResult = 0;
-		//}
-		//if (g_clMesCommunication.dMES_MainPitch < absolute_lower_limit)
-		//{
-		//	g_clMesCommunication.iMES_FinalResult = 0;
-		//}
-
-		//if (g_clMesCommunication.iMES_FinalResult == 1)
-		//{
-		//	Result.Format(_T("OK"));
-		//	InspData = 1;
-		//}
-		//else
-		//{
-		//	Result.Format(_T("NG"));
-		//	InspData = 0;
-		//}
-		//str46HA_Sensor.Format(_T("%s"), g_clTaskWork.m_46HA_Sensor);
-		//str83HB_Sensor.Format(_T("%s"), g_clTaskWork.m_83HB_Sensor);
-		//str46HA_Main.Format(_T("%.3lf"), g_clMesCommunication.dMES_NarrowPitch);
-		//str83HB_Main.Format(_T("%.3lf"), g_clMesCommunication.dMES_MainPitch);
-
-		strPacket.Format(_T("%s,0003,Track OUT Request,%d@%s@%s@%s@%s@%s@%s@%s@%s@%s@%s,%s"),
-			m_strSTX,
-			InspData,
-			g_clCMSMESSocket->m_strBarcode,
-			g_clCMSMESSocket->m_strLotID,
-			g_clCMSMESSocket->m_strProdID,
-			g_clCMSMESSocket->m_strProCID,
-			g_clCMSMESSocket->m_strBarcode,
-			str46HA_Sensor,
-			str83HB_Sensor,
-			Result,
-			str46HA_Main,
-			str83HB_Main,
-			m_strETX);
-		g_clCMSMESSocket->doSendCmd(strPacket);
-		//
-		//
-		str46HA_Sensor.Empty();
-		str83HB_Sensor.Empty();
-		Result.Empty();
-		str46HA_Main.Empty();
-		str83HB_Main.Empty();
-
-	/*	if (g_clMesCommunication.iMES_FinalResult == 1)
-		{
-			g_clCMSMESSocket->m_strBarcode = _T("EMPTY");
-		}*/
-	}
-	break;
-
-	default:
-		break;
-	}
-	strPacket.Empty();
-
+	
 
 }
 
@@ -7701,15 +7536,16 @@ void CAutoInspDlg::OnBnClickedButtonMainMes1()
 		AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA2);
 		return;
 	}
+	m_clUbiGemDlg.ShowWindow(SW_SHOW);
 
-	if (m_bMesConnect == true)
+	/*if (m_bMesConnect == true)
 	{
 		this->DisConnectMes();
 	}
 	else
 	{
 		this->ConnectMes();
-	}
+	}*/
 }
 
 
@@ -7821,10 +7657,10 @@ void CAutoInspDlg::OnBnClickedButtonLensLoading2()
 	}
 	else
 	{
-		g_clTaskWork[UNIT_AA2].m_nLensLoading = 1;
+		/*g_clTaskWork[UNIT_AA2].m_nLensLoading = 1;
 		m_clColorButtonLensLoading[UNIT_AA2].SetWindowTextA(_T("LENS 넘김 완료"));
 		m_clColorButtonLensLoading[UNIT_AA2].state = 1;
-		AddLog(_T("[INFO] LENS 넘김 완료 선택"), 1, UNIT_AA2);
+		AddLog(_T("[INFO] LENS 넘김 완료 선택"), 1, UNIT_AA2);*/
 	}
 	m_clColorButtonLensLoading[UNIT_AA2].Invalidate();
 }
@@ -7841,11 +7677,19 @@ BOOL CAutoInspDlg::PreTranslateMessage(MSG* pMsg)
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
 	if (pMsg->message == WM_LBUTTONDOWN)
 	{
+		//뜨면 바로 띄우나
+		////if (g_clTaskWork[0].bIdleTimeExceed == true)	//IdleSetTimeInterval 초과하면  WM_LBUTTONDOWN
+		////{
+		////	g_clTaskWork[0].bIdleTimeExceed = false;
+		////	m_clIdlePopupDlg.ShowWindow(SW_SHOW);			//WM_LBUTTONDOWN
 
+		////	// 메인 다이얼로그 비활성화
+		////	EnableWindow(FALSE);
+		////}
 	}
 	else if (pMsg->message == WM_LBUTTONUP)
 	{
-
+		
 	}
 
 	if (pMsg->message == WM_KEYDOWN)
@@ -8196,3 +8040,4 @@ void CAutoInspDlg::OnBnClickedButtonMainDoor1()
 {
 	// TODO: Add your control notification handler code here
 }
+

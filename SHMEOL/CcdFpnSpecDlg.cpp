@@ -157,7 +157,7 @@ void CCcdFpnSpecDlg::InitCtrl()
 
 void CCcdFpnSpecDlg::InitFpnGridCtrl()
 {
-
+#if 0
 	TCHAR* pszCol[] = { _T("FPN"), _T("Spec") };
 
 	CRect rect;
@@ -221,6 +221,8 @@ void CCcdFpnSpecDlg::InitFpnGridCtrl()
 			m_clGridFpnSpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 		}
 	}
+
+#endif
 }
 
 
@@ -232,7 +234,7 @@ void CCcdFpnSpecDlg::InitFpnGridCtrl()
 
 void CCcdFpnSpecDlg::InitFpnSpecGridCtrl()
 {
-
+#if 0
 	TCHAR* pszCol[] = { _T("SPEC"), _T("5000k") , _T("Dark") };
 
 	CRect rect;
@@ -271,32 +273,7 @@ void CCcdFpnSpecDlg::InitFpnSpecGridCtrl()
 	m_clGridFpnTestSpec.SetFixedRowCount(1);
 	m_clGridFpnTestSpec.SetFixedColumnCount(1);
 
-	//m_clGridFpnTestSpec.SetItemText(1, 0, "SNR R MIN");
-	//m_clGridFpnTestSpec.SetItemText(2, 0, "SNR R MAX");
-	//m_clGridFpnTestSpec.SetItemText(3, 0, "SNR Gr MIN");
-	//m_clGridFpnTestSpec.SetItemText(4, 0, "SNR Gr MAX");
-	//m_clGridFpnTestSpec.SetItemText(5, 0, "SNR Gb MIN");
-	//m_clGridFpnTestSpec.SetItemText(6, 0, "SNR Gb MAX");
-	//m_clGridFpnTestSpec.SetItemText(7, 0, "SNR B MIN");
-	//m_clGridFpnTestSpec.SetItemText(8, 0, "SNR B MAX");
-	////
-	//m_clGridFpnTestSpec.SetItemText(9, 0, "C FPN R MIN");
-	//m_clGridFpnTestSpec.SetItemText(10, 0, "C FPN R MAX");
-	//m_clGridFpnTestSpec.SetItemText(11, 0, "C FPN Gr MIN");
-	//m_clGridFpnTestSpec.SetItemText(12, 0, "C FPN Gr MAX");
-	//m_clGridFpnTestSpec.SetItemText(13, 0, "C FPN Gb MIN");
-	//m_clGridFpnTestSpec.SetItemText(14, 0, "C FPN Gb MAX");
-	//m_clGridFpnTestSpec.SetItemText(15, 0, "C FPN B MIN");
-	//m_clGridFpnTestSpec.SetItemText(16, 0, "C FPN B MAX");
-	////
-	//m_clGridFpnTestSpec.SetItemText(17, 0, "SNR R MIN");
-	//m_clGridFpnTestSpec.SetItemText(18, 0, "R FPN R MAX");
-	//m_clGridFpnTestSpec.SetItemText(19, 0, "R FPN Gr MIN");
-	//m_clGridFpnTestSpec.SetItemText(20, 0, "R FPN Gr MAX");
-	//m_clGridFpnTestSpec.SetItemText(21, 0, "R FPN Gb MIN");
-	//m_clGridFpnTestSpec.SetItemText(22, 0, "R FPN Gb MAX");
-	//m_clGridFpnTestSpec.SetItemText(23, 0, "R FPN B MIN");
-	//m_clGridFpnTestSpec.SetItemText(24, 0, "R FPN B MAX");
+	
 	for (i = 0; i < SpecRow; i++)
 	{
 		m_clGridFpnTestSpec.SetRowHeight(i, gridHeight);
@@ -320,6 +297,7 @@ void CCcdFpnSpecDlg::InitFpnSpecGridCtrl()
 			m_clGridFpnTestSpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 		}
 	}
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -356,22 +334,22 @@ void CCcdFpnSpecDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 //-----------------------------------------------------------------------------
 void CCcdFpnSpecDlg::ShowFpnSpec()
 {
-	TCHAR szData[SIZE_OF_100BYTE];
-	int i = 0;
-	int riTotal = 15;//
-	for (i = 0; i < riTotal; i++)	//g_Fpncount
-	{
-		m_clGridFpnSpec.SetItemText(i + 1, 1, g_clModelData[m_nUnit].m_FpnSpec[i], 3);
-	}
-	int mFpnStart = riTotal;
-	for (i = mFpnStart; i < g_Fpncount + 1; i++)
-	{
-		m_clGridFpnTestSpec.SetItemText(i - mFpnStart + 1, 1, g_clModelData[m_nUnit].m_FpnSpec[i], 3);
-		m_clGridFpnTestSpec.SetItemText(i - mFpnStart + 1, 2, g_clModelData[m_nUnit].m_FpnSpec[i + 24], 3);
-	}
+	//TCHAR szData[SIZE_OF_100BYTE];
+	//int i = 0;
+	//int riTotal = 15;//
+	//for (i = 0; i < riTotal; i++)	//g_Fpncount
+	//{
+	//	m_clGridFpnSpec.SetItemText(i + 1, 1, g_clModelData[m_nUnit].m_FpnSpec[i], 3);
+	//}
+	//int mFpnStart = riTotal;
+	//for (i = mFpnStart; i < g_Fpncount + 1; i++)
+	//{
+	//	m_clGridFpnTestSpec.SetItemText(i - mFpnStart + 1, 1, g_clModelData[m_nUnit].m_FpnSpec[i], 3);
+	//	m_clGridFpnTestSpec.SetItemText(i - mFpnStart + 1, 2, g_clModelData[m_nUnit].m_FpnSpec[i + 24], 3);
+	//}
 
-	m_clGridFpnSpec.Invalidate();
-	m_clGridFpnTestSpec.Invalidate();
+	//m_clGridFpnSpec.Invalidate();
+	//m_clGridFpnTestSpec.Invalidate();
 }
 //-----------------------------------------------------------------------------
 //
@@ -381,26 +359,26 @@ void CCcdFpnSpecDlg::ShowFpnSpec()
 
 void CCcdFpnSpecDlg::GetFpnSpec()
 {
-	CString sData = _T("");
-	int i;
-	int _x = 0;
-	int _y = 0;
-	int riTotal = 15;//g_Fpncount sizeof(FPN_SPEC_NAME) / sizeof(FPN_SPEC_NAME[0]);
-	for (i = 0; i < riTotal; i++)
-	{
-		sData = m_clGridFpnSpec.GetItemText(i + 1, 1);
-		g_clModelData[m_nUnit].m_FpnSpec[i] = _ttof((TCHAR*)(LPCTSTR)sData);
-	}
-	//15부터 min,max 스펙이다
-	int mFpnEnd = 24;	//24개만 2열 반복이라서
-	for (i = 0; i < mFpnEnd; i++)
-	{
-		sData = m_clGridFpnTestSpec.GetItemText(i + 1, 1);
-		g_clModelData[m_nUnit].m_FpnSpec[i + riTotal] = _ttof((TCHAR*)(LPCTSTR)sData);
+	//CString sData = _T("");
+	//int i;
+	//int _x = 0;
+	//int _y = 0;
+	//int riTotal = 15;//g_Fpncount sizeof(FPN_SPEC_NAME) / sizeof(FPN_SPEC_NAME[0]);
+	//for (i = 0; i < riTotal; i++)
+	//{
+	//	sData = m_clGridFpnSpec.GetItemText(i + 1, 1);
+	//	g_clModelData[m_nUnit].m_FpnSpec[i] = _ttof((TCHAR*)(LPCTSTR)sData);
+	//}
+	////15부터 min,max 스펙이다
+	//int mFpnEnd = 24;	//24개만 2열 반복이라서
+	//for (i = 0; i < mFpnEnd; i++)
+	//{
+	//	sData = m_clGridFpnTestSpec.GetItemText(i + 1, 1);
+	//	g_clModelData[m_nUnit].m_FpnSpec[i + riTotal] = _ttof((TCHAR*)(LPCTSTR)sData);
 
-		sData = m_clGridFpnTestSpec.GetItemText(i + 1, 2);
-		g_clModelData[m_nUnit].m_FpnSpec[i + riTotal + 24] = _ttof((TCHAR*)(LPCTSTR)sData);
-	}
+	//	sData = m_clGridFpnTestSpec.GetItemText(i + 1, 2);
+	//	g_clModelData[m_nUnit].m_FpnSpec[i + riTotal + 24] = _ttof((TCHAR*)(LPCTSTR)sData);
+	//}
 }
 //-----------------------------------------------------------------------------
 //

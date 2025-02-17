@@ -346,6 +346,7 @@ void CCcdSfrSpecDlg::InitCtrl()
 //-----------------------------------------------------------------------------
 void CCcdSfrSpecDlg::InitGridCtrl()
 {
+#if 0
 	TCHAR* pszRow[MAX_SFR_INSP_COUNT + 1] = { _T(""),
 		_T("[0] C_OF_T"), 
 		_T("[1] C_OF_B"),
@@ -441,6 +442,7 @@ void CCcdSfrSpecDlg::InitGridCtrl()
 	sData.Format(_T("%.5f"), g_clMandoSfrSpec[m_nUnit].m_dSfrOffsetMultiply);
 	
 	GetDlgItem(IDC_STATIC_CCD_SFR_SPEC_DATA_PLUS_VAL)->SetWindowText(sData);
+#endif
 
 }
 
@@ -483,23 +485,11 @@ void CCcdSfrSpecDlg::GetSfrSpec()
 	CButton* pButton;
     int i;
 
-	for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
+	/*for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
     {
 		sData = m_clGridSfrSpec.GetItemText(i + 1, 1);
 		g_clMandoSfrSpec[m_nUnit].m_dAASFR_Spec[i][0] = _ttof((TCHAR*)(LPCTSTR)sData);
-    }
-
-	GetDlgItem(IDC_STATIC_CCD_CURRENT_SPEC_MIN_VAL)->GetWindowText(sData);
-	g_clModelData[m_nUnit].m_CurrentSpec[0] = _ttof((TCHAR*)(LPCTSTR)sData);
-
-	GetDlgItem(IDC_STATIC_CCD_CURRENT_SPEC_MAX_VAL)->GetWindowText(sData);
-	g_clModelData[m_nUnit].m_CurrentSpec[1] = _ttof((TCHAR*)(LPCTSTR)sData);
-
-	GetDlgItem(IDC_STATIC_CCD_SFR_SPEC_7VAR_MIN_VAL)->GetWindowText(sData);
-	g_clModelData[m_nUnit].m_7FVariation[0] = _ttof((TCHAR*)(LPCTSTR)sData);
-
-	GetDlgItem(IDC_STATIC_CCD_SFR_SPEC_7VAR_MAX_VAL)->GetWindowText(sData);
-	g_clModelData[m_nUnit].m_7FVariation[1] = _ttof((TCHAR*)(LPCTSTR)sData);
+    }*/
 
 	
 	GetDlgItem(IDC_STATIC_CCD_SFR_BLACKLEVEL_VAL)->GetWindowText(sData);
@@ -545,28 +535,12 @@ void CCcdSfrSpecDlg::ShowSfrSpec()
 	CButton* pButton;
 	int i;
 
-
-	_stprintf_s(szData, SIZE_OF_100BYTE, _T("%.03lf"), g_clModelData[m_nUnit].m_CurrentSpec[0]);
-	m_clColorStaticCurrentMinVal.SetWindowText(szData);
-
-	_stprintf_s(szData, SIZE_OF_100BYTE, _T("%.03lf"), g_clModelData[m_nUnit].m_CurrentSpec[1]);
-	m_clColorStaticCurrentMaxVal.SetWindowText(szData);
-
-	_stprintf_s(szData, SIZE_OF_100BYTE, _T("%.03lf"), g_clModelData[m_nUnit].m_7FVariation[0]);
-	m_clColorStatic7VariationMinVal.SetWindowText(szData);
-
-	_stprintf_s(szData, SIZE_OF_100BYTE, _T("%.03lf"), g_clModelData[m_nUnit].m_7FVariation[1]);
-	m_clColorStatic7VariationMaxVal.SetWindowText(szData);
 	
-	for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
+	/*for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
 	{
 		m_clGridSfrSpec.SetItemText(i + 1, 1, g_clMandoSfrSpec[m_nUnit].m_dAASFR_Spec[i][0], 3);
-	}
-
-
-
-
-	m_clGridSfrSpec.Invalidate();
+	}*/
+	//m_clGridSfrSpec.Invalidate();
 	
 	pButton = (CButton*)GetDlgItem(IDC_CHECK_CCD_SFR_8BITUSE);
 	if (g_clModelData[m_nUnit].m_nSfr8BitUse == 1)
@@ -755,7 +729,7 @@ void CCcdSfrSpecDlg::OnBnClickedButtonCcdSfrSpecClose()
 //-----------------------------------------------------------------------------
 void CCcdSfrSpecDlg::OnNMDblClickedSfrSpec(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	NM_GRIDVIEW* pNMGridView = (NM_GRIDVIEW*)pNMHDR;
+	/*NM_GRIDVIEW* pNMGridView = (NM_GRIDVIEW*)pNMHDR;
 	CString sData = _T("");
 	int nRow, nCol;
 
@@ -778,7 +752,7 @@ void CCcdSfrSpecDlg::OnNMDblClickedSfrSpec(NMHDR* pNMHDR, LRESULT* pResult)
 
 			delete pDlg;
 		}
-	}
+	}*/
 }
 
 

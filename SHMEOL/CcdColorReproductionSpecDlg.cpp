@@ -91,7 +91,7 @@ BOOL CCcdColorReproductionSpecDlg::OnInitDialog()
 	this->InitCtrl();
 
 	// 그리드 초기화
-	this->InitChartGridCtrl();
+	///this->InitChartGridCtrl();
 	this->CenterWindow();
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
@@ -232,11 +232,7 @@ void CCcdColorReproductionSpecDlg::InitCtrl()
 //-----------------------------------------------------------------------------
 void CCcdColorReproductionSpecDlg::InitChartGridCtrl()
 {
-	/*TCHAR* pszRow[] = { _T("") ,
-		_T("dRealGapX"), _T("dRealGapY"), _T("nFiducialMarkType"),
-		_T("dModuleChartDistance"), _T("nDistortionAlrotithmType") 
-	};*/
-	
+
 	TCHAR* pszCol[] = { _T("Chart"), _T("spec") };
 
 	CRect rect;
@@ -376,10 +372,10 @@ void CCcdColorReproductionSpecDlg::ShowColorReproductionSpec()
 	m_clColorStaticHRotationVal.SetWindowText(szData);
 	
    
-	for (i = 0; i < ColorReproductionMaxCount -1; i++)
+	/*for (i = 0; i < ColorReproductionMaxCount -1; i++)
 	{
 		m_clGridColorReproductionSpec.SetItemText(i + 1, 1, g_clModelData[m_nUnit].m_ColorReproductionSpec[i],6);
-	}
+	}*/
 	
 	pButton = (CButton*)GetDlgItem(IDC_CHECK_CCD_COLOR_8BITUSE);
 	if (g_clModelData[m_nUnit].m_nColor8BitUse == 1)
@@ -395,7 +391,7 @@ void CCcdColorReproductionSpecDlg::ShowColorReproductionSpec()
 	m_CcdColorComboSensorType.SetCurSel(g_clModelData[m_nUnit].colorParameter[2]);
 	m_CcdColorComboDemosaic.SetCurSel(g_clModelData[m_nUnit].colorParameter[3]);
 
-	m_clGridColorReproductionSpec.Invalidate();
+	//m_clGridColorReproductionSpec.Invalidate();
 }
 
 //-----------------------------------------------------------------------------
@@ -443,11 +439,11 @@ void CCcdColorReproductionSpecDlg::GetColorReproductionSpec()
 	CButton* pButton;
 	int i;
 
-	for (i = 0; i < ColorReproductionMaxCount -1; i++)
+	/*for (i = 0; i < ColorReproductionMaxCount -1; i++)
 	{
 		sData = m_clGridColorReproductionSpec.GetItemText(i + 1, 1);
 		g_clModelData[m_nUnit].m_ColorReproductionSpec[i] = _ttof((TCHAR*)(LPCTSTR)sData);
-	}
+	}*/
 	m_clColorStaticHRotationVal.GetWindowText(sData);
 	g_clModelData[m_nUnit].m_dChartRotation = _ttof((TCHAR*)(LPCTSTR)sData);
 
@@ -492,7 +488,7 @@ void CCcdColorReproductionSpecDlg::OnBnClickedButtonCcdColorReproductionSpecClos
 //-----------------------------------------------------------------------------
 void CCcdColorReproductionSpecDlg::OnNMDblClickedColorReproductSpec(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	NM_GRIDVIEW* pNMGridView = (NM_GRIDVIEW*)pNMHDR;
+	/*NM_GRIDVIEW* pNMGridView = (NM_GRIDVIEW*)pNMHDR;
 	CString sData = _T("");
 	int nRow, nCol;
 
@@ -515,7 +511,7 @@ void CCcdColorReproductionSpecDlg::OnNMDblClickedColorReproductSpec(NMHDR* pNMHD
 
 			delete pDlg;
 		}
-	}
+	}*/
 }
 
 //-----------------------------------------------------------------------------
