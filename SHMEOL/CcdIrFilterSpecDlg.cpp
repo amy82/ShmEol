@@ -110,77 +110,77 @@ void CCcdIrFilterSpecDlg::InitCtrl()
 //-----------------------------------------------------------------------------
 void CCcdIrFilterSpecDlg::InitIrFilterGridCtrl()
 {
-	TCHAR* pszRow[] = { _T("") ,
-		_T("dMinThreshold"), _T("dMaxThreshold"), _T("dROIVarThreshold"),
-		_T("nRoiLeft"), _T("nRoiTop"), 
-		_T("nRoiRight"), _T("nRoiBottom"),
-		_T("dFullBrightAvgMin"), _T("dFullBrightAvgMax"),
-		_T("dRoiBrightAvgMin"), _T("dRoiBrightAvgMax"),
-		_T("dRoiBrightVarMin"), _T("dRoiBrightVarMax")
+	//TCHAR* pszRow[] = { _T("") ,
+	//	_T("dMinThreshold"), _T("dMaxThreshold"), _T("dROIVarThreshold"),
+	//	_T("nRoiLeft"), _T("nRoiTop"), 
+	//	_T("nRoiRight"), _T("nRoiBottom"),
+	//	_T("dFullBrightAvgMin"), _T("dFullBrightAvgMax"),
+	//	_T("dRoiBrightAvgMin"), _T("dRoiBrightAvgMax"),
+	//	_T("dRoiBrightVarMin"), _T("dRoiBrightVarMax")
 
-	};
-	
-	TCHAR* pszCol[] = { _T("IR"), _T("spec") };
-
-	CRect rect;
-	int i, j;
-	int DLG = IDC_STATIC_CCD_IRFILTER_GRID_SPEC;
-
-	CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
-	int SpecRow = g_Ircount + 1;// IrFilterMaxCount;//아래
-	int SpecCol = 2;//옆
-	int margin = 4;
-	int gridHeight = 25;
-	int gridWidth1 = 180;
-	int gridWidth2 = 110;
-	int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
+	//};
 	//
-	pWnd->GetWindowRect(rect);
-	ScreenToClient(rect);
+	//TCHAR* pszCol[] = { _T("IR"), _T("spec") };
 
-	rect.right = totalWidth + margin;
-	rect.bottom = (gridHeight*SpecRow) + margin;
-	pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
+	//CRect rect;
+	//int i, j;
+	//int DLG = IDC_STATIC_CCD_IRFILTER_GRID_SPEC;
+
+	//CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
+	//int SpecRow = g_Ircount + 1;// IrFilterMaxCount;//아래
+	//int SpecCol = 2;//옆
+	//int margin = 4;
+	//int gridHeight = 25;
+	//int gridWidth1 = 180;
+	//int gridWidth2 = 110;
+	//int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
+	////
+	//pWnd->GetWindowRect(rect);
+	//ScreenToClient(rect);
+
+	//rect.right = totalWidth + margin;
+	//rect.bottom = (gridHeight*SpecRow) + margin;
+	//pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
 
 
-	GetDlgItem(DLG)->GetWindowRect(rect);
-	ScreenToClient(rect);
-	m_clGridIrFilterSpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
+	//GetDlgItem(DLG)->GetWindowRect(rect);
+	//ScreenToClient(rect);
+	//m_clGridIrFilterSpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
 
-	m_clGridIrFilterSpec.SetTextBkColor(RGB_COLOR_WHITE);
-	m_clGridIrFilterSpec.SetFixedBkColor(GRID_COLOR_TITLE);
-	m_clGridIrFilterSpec.SetFixedTextColor(RGB_COLOR_WHITE);
-	m_clGridIrFilterSpec.SetReference_Setting();
-	m_clGridIrFilterSpec.EnableSelection(FALSE);
-	m_clGridIrFilterSpec.SetRowCount(SpecRow);
-	m_clGridIrFilterSpec.SetColumnCount(SpecCol);
-	m_clGridIrFilterSpec.SetFixedRowCount(1);
-	m_clGridIrFilterSpec.SetFixedColumnCount(1);
+	//m_clGridIrFilterSpec.SetTextBkColor(RGB_COLOR_WHITE);
+	//m_clGridIrFilterSpec.SetFixedBkColor(GRID_COLOR_TITLE);
+	//m_clGridIrFilterSpec.SetFixedTextColor(RGB_COLOR_WHITE);
+	//m_clGridIrFilterSpec.SetReference_Setting();
+	//m_clGridIrFilterSpec.EnableSelection(FALSE);
+	//m_clGridIrFilterSpec.SetRowCount(SpecRow);
+	//m_clGridIrFilterSpec.SetColumnCount(SpecCol);
+	//m_clGridIrFilterSpec.SetFixedRowCount(1);
+	//m_clGridIrFilterSpec.SetFixedColumnCount(1);
 
-	for (i = 0; i < SpecRow; i++)
-	{
-		m_clGridIrFilterSpec.SetRowHeight(i, gridHeight);
-		m_clGridIrFilterSpec.SetItemText(i, 0, pszRow[i]);
+	//for (i = 0; i < SpecRow; i++)
+	//{
+	//	m_clGridIrFilterSpec.SetRowHeight(i, gridHeight);
+	//	m_clGridIrFilterSpec.SetItemText(i, 0, pszRow[i]);
 
-		for (j = 0; j < SpecCol; j++)
-		{
-			if (i == 0)
-			{
-				if (j == 0)
-				{
-					m_clGridIrFilterSpec.SetColumnWidth(j, gridWidth1);
-				}
-				else
-				{
-					m_clGridIrFilterSpec.SetColumnWidth(j, gridWidth2);
-				}
+	//	for (j = 0; j < SpecCol; j++)
+	//	{
+	//		if (i == 0)
+	//		{
+	//			if (j == 0)
+	//			{
+	//				m_clGridIrFilterSpec.SetColumnWidth(j, gridWidth1);
+	//			}
+	//			else
+	//			{
+	//				m_clGridIrFilterSpec.SetColumnWidth(j, gridWidth2);
+	//			}
 
-				m_clGridIrFilterSpec.SetItemText(i, j, pszCol[j]);
-			}
+	//			m_clGridIrFilterSpec.SetItemText(i, j, pszCol[j]);
+	//		}
 
-			m_clGridIrFilterSpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-		}
-	}
+	//		m_clGridIrFilterSpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	//	}
+	//}
 }
 //-----------------------------------------------------------------------------
 //
@@ -215,7 +215,7 @@ void CCcdIrFilterSpecDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 //-----------------------------------------------------------------------------
 void CCcdIrFilterSpecDlg::ShowIrFilterSpec()
 {
-	TCHAR szData[SIZE_OF_100BYTE];
+	/*TCHAR szData[SIZE_OF_100BYTE];
 	int i = 0;
 
    
@@ -224,7 +224,7 @@ void CCcdIrFilterSpecDlg::ShowIrFilterSpec()
 		m_clGridIrFilterSpec.SetItemText(i + 1, 1, g_clModelData[m_nUnit].m_IrFilterSpec[i],3);
 	}
 
-	m_clGridIrFilterSpec.Invalidate();
+	m_clGridIrFilterSpec.Invalidate();*/
 }
 
 //-----------------------------------------------------------------------------
@@ -268,7 +268,7 @@ void CCcdIrFilterSpecDlg::OnBnClickedButtonCcdIrFilterSpecSave()
 //-----------------------------------------------------------------------------
 void CCcdIrFilterSpecDlg::GetIrFilterSpec()
 {
-	CString sData = _T("");
+	/*CString sData = _T("");
 	int i;
 
 	for (i = 0; i < g_Ircount; i++)
@@ -278,7 +278,7 @@ void CCcdIrFilterSpecDlg::GetIrFilterSpec()
 	}
 
 
-	g_clSysData.sDSave();
+	g_clSysData.sDSave();*/
 }
 
 //-----------------------------------------------------------------------------

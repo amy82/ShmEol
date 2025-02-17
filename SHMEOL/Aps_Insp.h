@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Library/Inspection/Include/LibACMISCommon/ACMISCommon.h"
 #include "Library/Inspection/Include/LibACMISSoftISP/SoftISP.h"
 #include "Library/Inspection/Include/LibACMISResolution/ACMISResolutionSFR.h"

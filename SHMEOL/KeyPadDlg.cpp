@@ -16,7 +16,7 @@ CKeyPadDlg::CKeyPadDlg(CString sVal, int nMaxCount, CWnd* pParent /*=NULL*/)
 {
 	m_sVal = sVal;
 	m_nMaxCount = nMaxCount;
-	m_bInit = true;
+	m_bInit = false;// true; //true면 입력시 초기화
 }
 
 CKeyPadDlg::~CKeyPadDlg()

@@ -2,9 +2,9 @@
 #include "Data.h"
 CModelType::CModelType()
 {
-	m_nModelIndex = MODERATE_MODEL;		//NARROW
+	//m_nModelIndex = MODERATE_MODEL;		//NARROW
 
-	_tcscpy_s(m_szModelTypeName, SIZE_OF_100BYTE, _T("MOBIS"));
+	//_tcscpy_s(m_szModelTypeName, SIZE_OF_100BYTE, _T("SHM"));
 }
 
 CModelType::~CModelType()
@@ -44,20 +44,81 @@ CModelList::~CModelList()
 //	Model List 로드
 //
 //-----------------------------------------------------------------------------
+void CModelList::ModelListSave()
+{
+	TCHAR szPath[SIZE_OF_1K];
+	TCHAR szIniIndex[SIZE_OF_100BYTE];
+	TCHAR szIniBuff[SIZE_OF_1K];
+	TCHAR szData[SIZE_OF_1K];
+	CModelInfo clModelInfo;
+	int i = 0;
+
+	CFileFind clFinder;
+
+	if (clFinder.FindFile(BASE_SECSGEM_PATH) == FALSE)
+	{
+		CreateDirectory(BASE_SECSGEM_PATH, NULL);
+	}
+	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\ModelList.ini"), BASE_SECSGEM_PATH);// BASE_DATA_PATH);
+
+	m_nTotalCount = m_clModelList.GetCount();
+	if (m_nTotalCount > g_MaxModelCount)
+	{
+		m_nTotalCount = g_MaxModelCount;
+	}
+	if (m_nCurrentNo < 1)
+	{
+		m_nCurrentNo = 1;
+	}
+	if (m_nCurrentNo  > m_nTotalCount)
+	{
+		m_nCurrentNo = m_nTotalCount;
+	}
+	_stprintf_s(szData, SIZE_OF_1K, _T("%d"), m_nTotalCount);
+	WritePrivateProfileString(_T("ModelList"), _T("Total"), szData, szPath);
+
+	_stprintf_s(szData, SIZE_OF_1K, _T("%d"), m_nCurrentNo);
+	WritePrivateProfileString(_T("ModelList"), _T("ModelNo"), szData, szPath);
+
+
+	
+	for (i = 0; i < g_MaxModelCount; i++)		//MAX_MODEL_COUNT
+	{
+		_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("Model%02d"), i + 1);
+		if (i < m_nTotalCount)
+		{
+			_stprintf_s(szIniBuff, SIZE_OF_1K, _T("%s"), m_clModelList[i].m_szName);
+		}
+		else
+		{
+			_stprintf_s(szIniBuff, SIZE_OF_1K, _T(""));
+		}
+		WritePrivateProfileString(_T("ModelList"), szIniIndex, szIniBuff, szPath);
+	}
+
+}
+
+
+//-----------------------------------------------------------------------------
+//
+//	Model List 로드
+//
+//-----------------------------------------------------------------------------
 void CModelList::ModelListLoad()
 {
 	TCHAR szPath[SIZE_OF_1K];
 	TCHAR szIniIndex[SIZE_OF_100BYTE];
 	TCHAR szIniBuff[SIZE_OF_1K];
 	CModelInfo clModelInfo;
-	int i;
+	int i = 0;
 
-	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\ModelList.ini"), BASE_DATA_PATH);
+	m_clModelList.RemoveAll();
+	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\ModelList.ini"), BASE_SECSGEM_PATH);// BASE_DATA_PATH);
 
 	m_nTotalCount = GetPrivateProfileInt(_T("ModelList"), _T("Total"), 0, szPath);
 	m_nCurrentNo = GetPrivateProfileInt(_T("ModelList"), _T("ModelNo"), 0, szPath);
-
-	for (i = 0; i < MAX_MODEL_COUNT; i++)
+	
+	for (i = 0; i < g_MaxModelCount; i++)		//MAX_MODEL_COUNT
 	{
 		_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("Model%02d"), i + 1);
 		GetPrivateProfileString(_T("ModelList"), szIniIndex, _T(""), szIniBuff, sizeof(szIniBuff), szPath);
@@ -68,17 +129,258 @@ void CModelList::ModelListLoad()
 			m_clModelList.Add(clModelInfo);
 		}
 	}
+	int mCount = m_clModelList.GetCount();
 
-	if ((m_clModelList.GetCount() > 0) && (m_nCurrentNo > 0)) 
+	if ((mCount > 0) && (m_nCurrentNo > 0))
 	{
-		_tcscpy_s(g_clSysData.m_szModelName, SIZE_OF_100BYTE, m_clModelList[m_nCurrentNo - 1].m_szName);
+		_tcscpy_s(m_szCurrentModel, SIZE_OF_100BYTE, m_clModelList[m_nCurrentNo - 1].m_szName);
 	}
 	else 
 	{
-		_tcscpy_s(g_clSysData.m_szModelName, SIZE_OF_100BYTE, _T("TEST"));
+		_tcscpy_s(m_szCurrentModel, SIZE_OF_100BYTE, _T("00000000001"));
 	}
 }
 
+int CModelList::iniRecipeListLoad()
+{
+	TCHAR szPath[SIZE_OF_1K];
+	CString folderPath;
+	folderPath.Format(_T("%s"), BASE_RECIPE_PATH);
+
+	CFileFind finder;
+	CString searchPattern = folderPath + _T("\\*.ini");//_T("\\*.xml");
+
+	BOOL bWorking = finder.FindFile(searchPattern);
+
+	m_vRecipeVec.clear();
+	int cnt = 0;
+	while (bWorking) 
+	{
+		bWorking = finder.FindNextFile();
+
+		if (!finder.IsDots() && !finder.IsDirectory()) 
+		{
+			//CString fileName = finder.GetFileName();	//.xml 포함
+			CString fileName = finder.GetFileTitle();
+			m_vRecipeVec.push_back(fileName.GetString());
+		}
+
+		cnt++;
+
+		if (cnt > 200)
+		{
+			break;
+		}
+	}
+	finder.Close();
+
+	folderPath.Empty();
+	searchPattern.Empty();
+
+	int nSize = m_vRecipeVec.size();
+	return nSize;
+}
+
+
+void CModelList::xmlRecipeCreate(CString copyPPid, CString createPPid)
+{
+	TCHAR szPath[SIZE_OF_1K];
+	CString folderPath;
+	folderPath.Format(_T("%s"), BASE_RECIPE_PATH);
+
+	CFileFind finder;
+	CString searchPattern = folderPath + _T("\\*.xml");
+	CString createFileFullPath;// = finder.GetFilePath();	//.xml 포함
+
+	createFileFullPath.Format(_T("%s\\%s.xml"), folderPath, createPPid);
+
+	BOOL bWorking = finder.FindFile(searchPattern);
+
+	m_vRecipeVec.clear();
+	int cnt = 0;
+	while (bWorking)
+	{
+		bWorking = finder.FindNextFile();
+
+		if (!finder.IsDots() && !finder.IsDirectory())
+		{
+			//
+			CString fileName = finder.GetFileTitle();
+			if (fileName == copyPPid)
+			{
+				CString scrFilePath = finder.GetFilePath();	//.xml 포함
+
+				CopyFile(scrFilePath, createFileFullPath, TRUE);
+
+
+				TCHAR szLog[SIZE_OF_1K];
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[INFO]%s-Create ok"), createFileFullPath);
+				AddLog(szLog, 0, 0);
+				break;
+			}
+		}
+
+		cnt++;
+
+		if (cnt > 200)
+		{
+			break;
+		}
+	}
+	finder.Close();
+}
+void CModelList::xmlRecipeDelete(CString PPid)
+{
+	TCHAR szPath[SIZE_OF_1K];
+	CString folderPath;
+	folderPath.Format(_T("%s"), BASE_RECIPE_PATH);
+
+	CFileFind finder;
+	CString searchPattern = folderPath + _T("\\*.xml");
+
+	BOOL bWorking = finder.FindFile(searchPattern);
+
+	m_vRecipeVec.clear();
+	int cnt = 0;
+	while (bWorking)
+	{
+		bWorking = finder.FindNextFile();
+
+		if (!finder.IsDots() && !finder.IsDirectory())
+		{
+			//
+			CString fileName = finder.GetFileTitle();
+			if (fileName == PPid)
+			{
+				//CString fileName = finder.GetFileName();	//.xml 포함
+				CString fileFullPath = finder.GetFilePath();	//.xml 포함
+				//CFile::Remove(fileFullPath);
+				BOOL bRtn = DeleteFileA(fileFullPath);
+				TCHAR szLog[SIZE_OF_1K];
+				if (bRtn)
+				{
+					_stprintf_s(szLog, SIZE_OF_1K, _T("[INFO]%s-Delete ok"), fileFullPath);
+					AddLog(szLog, 0, 0);
+				}
+				else
+				{
+					_stprintf_s(szLog, SIZE_OF_1K, _T("[INFO]%s-Delete fail"), fileFullPath);
+					AddLog(szLog, 0, 0);
+				}
+			}
+		}
+
+		cnt++;
+
+		if (cnt > 200)
+		{
+			break;
+		}
+	}
+	finder.Close();
+}
+//-----------------------------------------------------------------------------
+//
+//	
+//
+//-----------------------------------------------------------------------------
+void CModelList::RecipeModelLoad()
+{
+	TCHAR szPath[SIZE_OF_1K];
+	TCHAR szIniIndex[SIZE_OF_100BYTE];
+	TCHAR szIniBuff[SIZE_OF_1K];
+
+
+	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\RecipelList.ini"), BASE_SECSGEM_PATH);
+
+
+#if (____MACHINE_NAME ==  MODEL_FRONT_100)
+	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("FRONT"));
+#else
+	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("OHC"));
+#endif
+	
+	
+
+
+	GetPrivateProfileString(_T("RECIPE_MODEL"), szIniIndex, _T(""), szIniBuff, sizeof(szIniBuff), szPath);
+	if (_tcslen(szIniBuff) > 0)
+	{
+		g_clMesCommunication[0].m_sMesPPID.Format(_T("%s"), szIniBuff);
+		g_clMesCommunication[0].m_sRecipeId.Format(_T("%s"), szIniBuff);		//RecipeModelLoad ini 파일 로드
+	}
+
+	
+}
+void CModelList::RecipeModelSave()
+{
+	TCHAR szPath[SIZE_OF_1K];
+	TCHAR szIniIndex[SIZE_OF_100BYTE];
+	TCHAR szIniBuff[SIZE_OF_1K];
+	TCHAR szData[SIZE_OF_1K];
+	int i = 0;
+	
+	CFileFind clFinder;
+	
+	if (clFinder.FindFile(BASE_SECSGEM_PATH) == FALSE)
+	{
+		CreateDirectory(BASE_SECSGEM_PATH, NULL);
+	}
+
+	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\RecipelList.ini"), BASE_SECSGEM_PATH);
+	
+
+#if (____MACHINE_NAME ==  MODEL_FRONT_100)
+	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("FRONT"));
+#else
+	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("OHC"));
+#endif
+	
+
+	_stprintf_s(szIniBuff, SIZE_OF_1K, _T("%s"), g_clMesCommunication[0].m_sMesPPID);
+	WritePrivateProfileString(_T("RECIPE_MODEL"), szIniIndex, szIniBuff, szPath);
+}
+
+//-----------------------------------------------------------------------------
+//
+//	RECIPE List 로드
+//
+//-----------------------------------------------------------------------------
+void CModelList::RecipeListLoad()
+{
+
+}
+void CModelList::RecipeListSave()
+{
+
+}
+
+bool CModelList::RecipeModelDel(CString PPid)
+{
+	int i = 0;
+	TCHAR szLog[SIZE_OF_1K];
+
+	if (PPid == g_clMesCommunication[0].m_sMesPPID)
+	{
+		//현재 사용중인 RECIPE 입니다.
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[INFO]%s - 현재 사용중인 RECIPE 입니다."), PPid);
+		AddLog(szLog, 0, 0);
+		return false;
+	}
+
+
+	int cnt = m_vRecipeVec.size();
+	for (int i = 0; i < cnt; ++i)
+	{
+		if (m_vRecipeVec[i].c_str() == PPid)  // CModelInfo의 == 연산자가 정의되어 있어야 합니다.
+		{
+			m_vRecipeVec.erase(m_vRecipeVec.begin() + i);
+			break;
+		}
+	}
+
+	return true;
+}
 //-----------------------------------------------------------------------------
 //
 //	MODEL TYPE 로드
@@ -386,7 +688,6 @@ void CSystemData::commonDataSave()
 	WritePrivateProfileString(_T("MAX_PIN_COUNT"), _T("Count"), szData, szPath);
 }
 
-
 //-----------------------------------------------------------------------------
 //
 //	시스템 데이터 로드
@@ -488,24 +789,24 @@ void CSystemData::sDLoad()
 		AfxExtractSubString(sToken, szIniBuff, j, _T('/'));
 		switch (j)
 		{
-		case 0:		m_nOC_IRPort[0] = _ttof((TCHAR*)(LPCTSTR)sToken);			break;
-		case 1:		m_nOC_IRPort[1] = _ttof((TCHAR*)(LPCTSTR)sToken);			break;
-		case 2:		m_nTopLightPort[0] = _ttof((TCHAR*)(LPCTSTR)sToken);		break;
-		case 3:		m_nTopLightPort[1] = _ttof((TCHAR*)(LPCTSTR)sToken);		break;
-		case 4:		m_nEzi_Port[0] = _ttof((TCHAR*)(LPCTSTR)sToken);		break;
-		case 5:		m_nEzi_Port[1] = _ttof((TCHAR*)(LPCTSTR)sToken);		break;
-		case 6:		m_nLaserPort[0] = _ttof((TCHAR*)(LPCTSTR)sToken);			break;
-		case 7:		m_nLaserPort[1] = _ttof((TCHAR*)(LPCTSTR)sToken);			break;
-		case 8:		m_nBcrPort[0] = _ttof((TCHAR*)(LPCTSTR)sToken);				break;
-		case 9:		m_nBcrPort[1] = _ttof((TCHAR*)(LPCTSTR)sToken);				break;
-		case 10:	m_nUvPort[0] = _ttof((TCHAR*)(LPCTSTR)sToken);				break;
-		case 11:	m_nUvPort[1] = _ttof((TCHAR*)(LPCTSTR)sToken);				break;
-		case 12:	m_nAlign_Oc_Port[0] = _ttof((TCHAR*)(LPCTSTR)sToken);		break;
-		case 13:	m_nAlign_Oc_Port[1] = _ttof((TCHAR*)(LPCTSTR)sToken);		break;
-		case 14:	m_nLeftLightPort[0] = _ttof((TCHAR*)(LPCTSTR)sToken);		break;
-		case 15:	m_nLeftLightPort[1] = _ttof((TCHAR*)(LPCTSTR)sToken);		break;
-		case 16:	m_nRightLightPort[0] = _ttof((TCHAR*)(LPCTSTR)sToken);		break;
-		case 17:	m_nRightLightPort[1] = _ttof((TCHAR*)(LPCTSTR)sToken);		break;
+		case 0:		m_nOC_IRPort[0] = _ttoi((TCHAR*)(LPCTSTR)sToken);			break;
+		case 1:		m_nOC_IRPort[1] = _ttoi((TCHAR*)(LPCTSTR)sToken);			break;
+		case 2:		m_nTopLightPort[0] = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
+		case 3:		m_nTopLightPort[1] = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
+		case 4:		m_nEzi_Port[0] = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
+		case 5:		m_nEzi_Port[1] = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
+		case 6:		m_nLaserPort[0] = _ttoi((TCHAR*)(LPCTSTR)sToken);			break;
+		case 7:		m_nLaserPort[1] = _ttoi((TCHAR*)(LPCTSTR)sToken);			break;
+		case 8:		m_nBcrPort[0] = _ttoi((TCHAR*)(LPCTSTR)sToken);				break;
+		case 9:		m_nBcrPort[1] = _ttoi((TCHAR*)(LPCTSTR)sToken);				break;
+		case 10:	m_nUvPort[0] = _ttoi((TCHAR*)(LPCTSTR)sToken);				break;
+		case 11:	m_nUvPort[1] = _ttoi((TCHAR*)(LPCTSTR)sToken);				break;
+		case 12:	m_nAlign_Oc_Port[0] = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
+		case 13:	m_nAlign_Oc_Port[1] = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
+		case 14:	m_nLeftLightPort[0] = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
+		case 15:	m_nLeftLightPort[1] = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
+		case 16:	m_nRightLightPort[0] = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
+		case 17:	m_nRightLightPort[1] = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
 		}
 	}
 
@@ -751,12 +1052,12 @@ CModelData::CModelData()
 	m_dTiltySpecLimit[0] = 0.0;
 	m_dTiltySpecLimit[1] = 0.0;
 
-	for (i = 0; i < g_ColorSenscount; i++)
+	/*for (i = 0; i < g_ColorSenscount; i++)
 	{
 		m_ColorSensitivitySpec[0][i] = 0.0;
 		m_ColorSensitivitySpec[1][i] = 0.0;
 		m_ColorSensitivitySpec[2][i] = 0.0;
-	}
+	}*/
 	for (i = 0; i < 4; i++)
 	{
 		m_EpoxyLineLength[i] = 0.0;
@@ -929,6 +1230,7 @@ CModelData::CModelData()
 	m_nAlignPass = 0;
 	m_nRawSavePass = 0;
 	m_nJxlSavePass = 0;
+	m_nIdleReasonPass = 0;
 	m_fFpsStopVal = 5.0;
 	m_nJxlEffort = 6;
 	m_nLaserControlLock = 0;
@@ -1026,26 +1328,19 @@ CModelData::CModelData()
 
 
 
-	for (i = 0; i < g_Defectcount; i++)
+	/*for (i = 0; i < g_Defectcount; i++)
 	{
 		m_DefectSpec[i] = 0.0;
-	}
-	for (i = 0; i < g_Ricount; i++)
+	}*/
+	/*for (i = 0; i < g_Ricount; i++)
 	{
 		m_RISpec[i] = 0.0;
-	}
-	for (i = 0; i < g_ColorShadingcount; i++)
+	}*/
+	/*for (i = 0; i < g_ColorShadingcount; i++)
 	{
 		m_ColorShadingSpec[i] = 0.0;
-	}
-	for (i = 0; i < g_ColorUniformitycount; i++)
-	{
-		m_UniformSpec[i] = 0.0;
-	}
-	for (i = 0; i < g_Fpncount; i++)
-	{
-		m_FpnSpec[i] = 0.0;
-	}
+	}*/
+
 	
 	m_d_IC_OffsetX[0] = 0.0;
 	m_d_IC_OffsetY[0] = 0.0;
@@ -1472,6 +1767,7 @@ void CModelData::Load(TCHAR* szModelName)
 	m_nAlignPass = GetPrivateProfileInt(_T("ALIGN_PASS"), _T("Use"), 0, szPath);
 	m_nRawSavePass = GetPrivateProfileInt(_T("RAW_PASS"), _T("Use"), 0, szPath);
 	m_nJxlSavePass = GetPrivateProfileInt(_T("JXL_PASS"), _T("Use"), 0, szPath);
+	m_nIdleReasonPass = GetPrivateProfileInt(_T("IDLE_PASS"), _T("Use"), 0, szPath);
 	//통합 oc광원
 	m_LxVal = GetPrivateProfileInt(_T("OC_MERGE"), _T("LxValue"), 0, szPath);
 	
@@ -1706,14 +2002,14 @@ void CModelData::Load(TCHAR* szModelName)
     for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
     {
         AfxExtractSubString(sToken, szIniBuff, i, _T('/'));
-        m_nDirection[i] = _ttof((TCHAR*)(LPCTSTR)sToken);
+        m_nDirection[i] = _ttoi((TCHAR*)(LPCTSTR)sToken);
 
     }
 	GetPrivateProfileString(_T("ASMI_SFR_SPEC"), _T("DirectionPattern"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
 	for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
 	{
 		AfxExtractSubString(sToken, szIniBuff, i, _T('/'));
-		m_nPatternDirection[i] = _ttof((TCHAR*)(LPCTSTR)sToken);
+		m_nPatternDirection[i] = _ttoi((TCHAR*)(LPCTSTR)sToken);
 
 	}
 
@@ -1730,19 +2026,19 @@ void CModelData::Load(TCHAR* szModelName)
 	{
 		GetPrivateProfileString(_T("PARAMETER_ACMIS"), _T("SFR"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
 		AfxExtractSubString(sToken, szIniBuff, i, _T('/'));
-		sfrParameter[i] = _ttof((TCHAR*)(LPCTSTR)sToken);
+		sfrParameter[i] = _ttoi((TCHAR*)(LPCTSTR)sToken);
 
 		GetPrivateProfileString(_T("PARAMETER_ACMIS"), _T("BLEMISH"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
 		AfxExtractSubString(sToken, szIniBuff, i, _T('/'));
-		blemishParameter[i] = _ttof((TCHAR*)(LPCTSTR)sToken);
+		blemishParameter[i] = _ttoi((TCHAR*)(LPCTSTR)sToken);
 
 		GetPrivateProfileString(_T("PARAMETER_ACMIS"), _T("COLOR"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
 		AfxExtractSubString(sToken, szIniBuff, i, _T('/'));
-		colorParameter[i] = _ttof((TCHAR*)(LPCTSTR)sToken);
+		colorParameter[i] = _ttoi((TCHAR*)(LPCTSTR)sToken);
 
 		GetPrivateProfileString(_T("PARAMETER_ACMIS"), _T("RI"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
 		AfxExtractSubString(sToken, szIniBuff, i, _T('/'));
-		riParameter[i] = _ttof((TCHAR*)(LPCTSTR)sToken);
+		riParameter[i] = _ttoi((TCHAR*)(LPCTSTR)sToken);
 		
 	}
 
@@ -1788,22 +2084,22 @@ void CModelData::Load(TCHAR* szModelName)
     {
         GetPrivateProfileString(_T("SFR_ROI_OFFSET"), _T("OffsetX"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
         AfxExtractSubString(sToken, szIniBuff, i, _T('/'));
-        m_MTF_ROI_Pos[0][i].x = _ttof((TCHAR*)(LPCTSTR)sToken);
+        m_MTF_ROI_Pos[0][i].x = _ttoi((TCHAR*)(LPCTSTR)sToken);
 
         GetPrivateProfileString(_T("SFR_ROI_OFFSET"), _T("OffsetY"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
         AfxExtractSubString(sToken, szIniBuff, i, _T('/'));
-        m_MTF_ROI_Pos[0][i].y = _ttof((TCHAR*)(LPCTSTR)sToken);
+        m_MTF_ROI_Pos[0][i].y = _ttoi((TCHAR*)(LPCTSTR)sToken);
     }
 
 	for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
 	{
 		GetPrivateProfileString(_T("SFR_ROI_OFFSET2"), _T("OffsetX"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
 		AfxExtractSubString(sToken, szIniBuff, i, _T('/'));
-		m_MTF_ROI_Pos[1][i].x = _ttof((TCHAR*)(LPCTSTR)sToken);
+		m_MTF_ROI_Pos[1][i].x = _ttoi((TCHAR*)(LPCTSTR)sToken);
 
 		GetPrivateProfileString(_T("SFR_ROI_OFFSET2"), _T("OffsetY"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
 		AfxExtractSubString(sToken, szIniBuff, i, _T('/'));
-		m_MTF_ROI_Pos[1][i].y = _ttof((TCHAR*)(LPCTSTR)sToken);
+		m_MTF_ROI_Pos[1][i].y = _ttoi((TCHAR*)(LPCTSTR)sToken);
 	}
     //
     //패턴 사이즈,위치
@@ -1811,28 +2107,28 @@ void CModelData::Load(TCHAR* szModelName)
     {
         GetPrivateProfileString(_T("PATTERN"), _T("PatternPosX"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
         AfxExtractSubString(sToken, szIniBuff, i, _T('/'));
-        m_nPatternPos[i].x = _ttof((TCHAR*)(LPCTSTR)sToken);
+        m_nPatternPos[i].x = _ttoi((TCHAR*)(LPCTSTR)sToken);
     }
     for (i = 0; i < MAX_LAST_INSP_COUNT; i++)
     {
 
         GetPrivateProfileString(_T("PATTERN"), _T("PatternPosY"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
         AfxExtractSubString(sToken, szIniBuff, i, _T('/'));
-        m_nPatternPos[i].y = _ttof((TCHAR*)(LPCTSTR)sToken);
+        m_nPatternPos[i].y = _ttoi((TCHAR*)(LPCTSTR)sToken);
     }
     for (i = 0; i < MAX_LAST_INSP_COUNT; i++)
     {
 
         GetPrivateProfileString(_T("PATTERN"), _T("PatternSizeX"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
         AfxExtractSubString(sToken, szIniBuff, i, _T('/'));
-        m_nPatternSize[i].x = _ttof((TCHAR*)(LPCTSTR)sToken);
+        m_nPatternSize[i].x = _ttoi((TCHAR*)(LPCTSTR)sToken);
     }
     for (i = 0; i < MAX_LAST_INSP_COUNT; i++)
     {
 
         GetPrivateProfileString(_T("PATTERN"), _T("PatternSizeY"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
         AfxExtractSubString(sToken, szIniBuff, i, _T('/'));
-        m_nPatternSize[i].y = _ttof((TCHAR*)(LPCTSTR)sToken);
+        m_nPatternSize[i].y = _ttoi((TCHAR*)(LPCTSTR)sToken);
     }
     
 
@@ -2107,7 +2403,9 @@ void CModelData::Save(TCHAR* szModelName)
 
 	_stprintf_s(szData, SIZE_OF_1K, _T("%d"), m_nJxlSavePass);
 	WritePrivateProfileString(_T("JXL_PASS"), _T("Use"), szData, szPath);
-	
+
+	_stprintf_s(szData, SIZE_OF_1K, _T("%d"), m_nIdleReasonPass);
+	WritePrivateProfileString(_T("IDLE_PASS"), _T("Use"), szData, szPath);
 	
 	// 조명값
 	for (i = 0; i < MAX_LIGHT_COUNT; i++)
@@ -2729,166 +3027,52 @@ void CModelData::AcmisDataLoad(TCHAR* szModelName)
 	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\ACMIS_DATA.ini"), BASE_DATA_PATH);
 
 	//-------------------------------------------------------------------------------------------------------------------------------------
-	// DefectSpec, stSpecAllOnsemiRCCBSpec
-	int DefectMax = g_Defectcount;// sizeof(DEFECT_SPEC_NAME) / sizeof(DEFECT_SPEC_NAME[0]);
-	for (i = 0; i < DefectMax; i++)
-	{
-		GetPrivateProfileString(_T("ACMIS_DEFECT"), DEFECT_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-		m_DefectSpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	}
-	GetPrivateProfileString(_T("ACMIS_DEFECT_LIMIT"), _T("defectCount"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-	n_DefectCountLimit = _ttoi((TCHAR*)(LPCTSTR)szIniBuff);
-
-	GetPrivateProfileString(_T("ACMIS_DEFECT_LIMIT"), _T("clusterCount"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-	n_ClusterCountLimit = _ttoi((TCHAR*)(LPCTSTR)szIniBuff);
-
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//oc
-	//
-	int OcMax = 2;
-	for (i = 0; i < OcMax; i++)
-	{
-		GetPrivateProfileString(_T("ACMIS_OC"), OC_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-        m_OcSpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	}
-	GetPrivateProfileString(_T("ACMIS_OC"), OC_SPEC_NAME[2], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-	m_dOCSpecLimit[0] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	GetPrivateProfileString(_T("ACMIS_OC"), OC_SPEC_NAME[3], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-	m_dOCSpecLimit[1] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//rotate
-	GetPrivateProfileString(_T("ACMIS_ROTATE"), ROTATE_SPEC_NAME[0], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-	m_dRotateSpecLimit[0] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	GetPrivateProfileString(_T("ACMIS_ROTATE"), ROTATE_SPEC_NAME[1], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-	m_dRotateSpecLimit[1] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//tilt
-	GetPrivateProfileString(_T("ACMIS_TILTX"), TILTX_SPEC_NAME[0], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-	m_dTiltxSpecLimit[0] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	GetPrivateProfileString(_T("ACMIS_TILTX"), TILTX_SPEC_NAME[1], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-	m_dTiltxSpecLimit[1] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-
-	GetPrivateProfileString(_T("ACMIS_TILTY"), TILTY_SPEC_NAME[0], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-	m_dTiltySpecLimit[0] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	GetPrivateProfileString(_T("ACMIS_TILTY"), TILTY_SPEC_NAME[1], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-	m_dTiltySpecLimit[1] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-    //-------------------------------------------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------------------------------------------
-    //Color Sensitivity
-    int ColorMax = g_ColorSenscount;
-	for (i = 0; i < ColorMax; i++)
-	{
-		GetPrivateProfileString(_T("ACMIS_COLOR_SENS_1"), COLOR_SENS_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-		m_ColorSensitivitySpec[0][i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	}
-	for (i = 0; i < ColorMax; i++)
-	{
-		GetPrivateProfileString(_T("ACMIS_COLOR_SENS_2"), COLOR_SENS_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-		m_ColorSensitivitySpec[1][i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	}
-	for (i = 0; i < ColorMax; i++)
-	{
-		GetPrivateProfileString(_T("ACMIS_COLOR_SENS_3"), COLOR_SENS_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-		m_ColorSensitivitySpec[2][i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	}
-    //-------------------------------------------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------------------------------------------
-    //SNR
-    int SnrMax = g_Snrcount;
-    for (i = 0; i < SnrMax; i++)
-    {
-        GetPrivateProfileString(_T("ACMIS_SNR"), SNR_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-        m_SnrSpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-    }
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//Color Uniform
-	int UniformMax = g_ColorUniformitycount;// sizeof(COLOR_UNIFORMITY_SPEC_NAME) / sizeof(COLOR_UNIFORMITY_SPEC_NAME[0]);
-	for (i = 0; i < UniformMax; i++)
-	{
-		GetPrivateProfileString(_T("ACMIS_UNIFORMITY"), COLOR_UNIFORMITY_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-		m_UniformSpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	}
-
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//Fpn
-	int FpnMax = g_Fpncount;// sizeof(FPN_SPEC_NAME) / sizeof(FPN_SPEC_NAME[0]);
-	for (i = 0; i < FpnMax; i++)
-	{
-		GetPrivateProfileString(_T("ACMIS_FPN"), FPN_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-		m_FpnSpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	}
-
-	
-	//-------------------------------------------------------------------------------------------------------------------------------------
 	//-------------------------------------------------------------------------------------------------------------------------------------
 	//Relative Illumination 
-	int IlluminationMax = g_Ricount;// sizeof(RI_SPEC_NAME) / sizeof(RI_SPEC_NAME[0]);
-	for (i = 0; i < IlluminationMax; i++)
-	{
-		GetPrivateProfileString(_T("ACMIS_RI"), RI_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-		m_RISpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	}
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//Color Shadings
-	int mColorShadingMax = g_ColorShadingcount;// sizeof(COLOR_SHADING_SPEC_NAME) / sizeof(COLOR_SHADING_SPEC_NAME[0]);
-	for (i = 0; i < mColorShadingMax; i++)
-	{
-		GetPrivateProfileString(_T("ACMIS_COLOR_SHADING"), COLOR_SHADING_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-		m_ColorShadingSpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	}
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//Illumination Center
-	int icMax = g_Iccount;// sizeof(IC_SPEC_NAME) / sizeof(IC_SPEC_NAME[0]);
-	for (i = 0; i < icMax; i++)
-	{
-		GetPrivateProfileString(_T("ACMIS_IC"), IC_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-		m_ICSpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	}
-
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//RelativeIllumination
-	//[ACMIS_RI]
-	//
-	//for (i = 0; i < sizeof(IC_SPEC_NAME) / sizeof(IC_SPEC_NAME[0]); i++)
+	//int IlluminationMax = g_Ricount;
+	//for (i = 0; i < IlluminationMax; i++)
 	//{
-	//	GetPrivateProfileString(_T("ACMIS_IC"), IC_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
+	//	GetPrivateProfileString(_T("ACMIS_RI"), RI_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
 	//	m_RISpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
 	//}
+	////-------------------------------------------------------------------------------------------------------------------------------------
+	////-------------------------------------------------------------------------------------------------------------------------------------
+	////Color Shadings
+	//int mColorShadingMax = g_ColorShadingcount;
+	//for (i = 0; i < mColorShadingMax; i++)
+	//{
+	//	GetPrivateProfileString(_T("ACMIS_COLOR_SHADING"), COLOR_SHADING_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
+	//	m_ColorShadingSpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
+	//}
+	//-------------------------------------------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------------------------------------------------------------------------------------
+	
 
 	//-------------------------------------------------------------------------------------------------------------------------------------
 	//-------------------------------------------------------------------------------------------------------------------------------------
 	//STAIN
-	int blemishMax = g_Blemishcount;// sizeof(STAIN_BLEMISH_SPEC_NAME) / sizeof(STAIN_BLEMISH_SPEC_NAME[0]);
-	for (i = 0; i < blemishMax; i++)
-	{
-		GetPrivateProfileString(_T("ACMIS_BLACKSPOT"), STAIN_BLEMISH_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-		m_BlemishSpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	}
-	int lcbMax = g_StainLcbcount;// sizeof(STAIN_LCB_SPEC_NAME) / sizeof(STAIN_LCB_SPEC_NAME[0]);
+
+	/*int lcbMax = g_StainLcbcount;
 	for (i = 0; i < lcbMax; i++)
 	{
 		GetPrivateProfileString(_T("ACMIS_LCB"), STAIN_LCB_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
 		m_LcbSpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
 	}
-	int ymeanMax = g_StainYmeancount;// sizeof(STAIN_YMEAN_SPEC_NAME) / sizeof(STAIN_YMEAN_SPEC_NAME[0]);
+	int ymeanMax = g_StainYmeancount;
 	for (i = 0; i < ymeanMax; i++)
 	{
 		GetPrivateProfileString(_T("ACMIS_YMEAN"), STAIN_YMEAN_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
 		m_YmeanSpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
 	}
 
-	int fdfMax = g_StainFdfcount;// sizeof(STAIN_FDF_SPEC_NAME) / sizeof(STAIN_FDF_SPEC_NAME[0]);
+	int fdfMax = g_StainFdfcount;
 	for (i = 0; i < fdfMax; i++)
 	{
 		GetPrivateProfileString(_T("ACMIS_FDF"), STAIN_FDF_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
 		m_FDFSpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
 	}
 	
-
+	*/
 	for (i = 0; i < 4; i++)
 	{
 		_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("Offset%d"), i + 1);
@@ -2903,96 +3087,33 @@ void CModelData::AcmisDataLoad(TCHAR* szModelName)
 	}
 
 
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//IF FILTER
-	int irMax = g_Ircount;
-	for (i = 0; i < irMax; i++)
-	{
-		GetPrivateProfileString(_T("ACMIS_IRFILTER"), IRFILTER_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-		m_IrFilterSpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	}
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//COLOR REPRODUCTION
-	for (i = 0; i < 32; i++)
-	{
-		GetPrivateProfileString(_T("ACMIS_COLOR_REPRODUCTION"), COLOR_REPRODUCTION_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-		m_ColorReproductionSpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	}
+	////-------------------------------------------------------------------------------------------------------------------------------------
+	////-------------------------------------------------------------------------------------------------------------------------------------
+	////IF FILTER
+	//int irMax = g_Ircount;
+	//for (i = 0; i < irMax; i++)
+	//{
+	//	GetPrivateProfileString(_T("ACMIS_IRFILTER"), IRFILTER_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
+	//	m_IrFilterSpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
+	//}
+	////-------------------------------------------------------------------------------------------------------------------------------------
+	////-------------------------------------------------------------------------------------------------------------------------------------
+	////COLOR REPRODUCTION
+	//for (i = 0; i < 32; i++)
+	//{
+	//	GetPrivateProfileString(_T("ACMIS_COLOR_REPRODUCTION"), COLOR_REPRODUCTION_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
+	//	m_ColorReproductionSpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
+	//}
 
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	
-
-	
-	
-    //RelativeIllumination
-    //[ACMIS_RI_ROI]  ROI LOAD 1000개  THRESHOLD 400만 UI로 빼면된다.
-    //
-    int _x = 0;
-    int _y = 0;
-    //X(Left)	Y(Top)	Width(Right)	Heigh(Bottom)	Threshold_Ch0	Threshold_Ch1	Threshold_Ch2	Threshold_Ch3	Offset	Type
-    for (_y = 0; _y < 100; _y++)    //총 100개 항목
-    {
-        _stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("ROI%d"), _y + 1);
-        GetPrivateProfileString(_T("ACMIS_RI_ROI"), szIniIndex, _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-        for (_x = 0; _x < 10; _x++)
-        {
-            AfxExtractSubString(sToken, szIniBuff, _x, _T('/'));
-            m_RirOI[_y][_x] = _ttof((TCHAR*)(LPCTSTR)sToken);
-        }
-    }
-
-	//LensShading ROI 17 * 13 = 221
-	//m_LensShadingRoi
-	for (i = 0; i < 221; i++)
-	{
-		_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("ROI%d"), i + 1);
-		GetPrivateProfileString(_T("ACMIS_LENSSHADING_ROI"), szIniIndex, _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-
-		AfxExtractSubString(sToken, szIniBuff, 0, _T('/'));
-		m_LensShadingRoi[i].left = _ttoi((TCHAR*)(LPCTSTR)sToken);
-		AfxExtractSubString(sToken, szIniBuff, 1, _T('/'));
-		m_LensShadingRoi[i].top = _ttoi((TCHAR*)(LPCTSTR)sToken);
-		AfxExtractSubString(sToken, szIniBuff, 2, _T('/'));
-		m_LensShadingRoi[i].right = _ttoi((TCHAR*)(LPCTSTR)sToken);
-		AfxExtractSubString(sToken, szIniBuff, 3, _T('/'));
-		m_LensShadingRoi[i].bottom = _ttoi((TCHAR*)(LPCTSTR)sToken);
-	}
-	
-	//OC OFFSET
-	for (i = 0; i < g_Chartcount; i++)
-	{
-		GetPrivateProfileString(_T("ACMIS_OC_OFFSET_X"), CHART_PCB_TYPE[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-		m_dOcOffsetX[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-		GetPrivateProfileString(_T("ACMIS_OC_OFFSET_Y"), CHART_PCB_TYPE[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-		m_dOcOffsetY[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	}
-	//IC OFFSET
-	for (i = 0; i < g_Chartcount; i++)
-	{
-		GetPrivateProfileString(_T("ACMIS_IC_OFFSET_X"), CHART_PCB_TYPE[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-		m_d_IC_OffsetX[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-		GetPrivateProfileString(_T("ACMIS_IC_OFFSET_Y"), CHART_PCB_TYPE[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-		m_d_IC_OffsetY[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	}
-	
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	int CurrentMax = g_Currentcount;
-	for (i = 0; i < CurrentMax; i++)
-	{
-		GetPrivateProfileString(_T("ACMIS_CURRENT"), CURRENT_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-		m_CurrentSpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	}
+	////-------------------------------------------------------------------------------------------------------------------------------------
+	////-------------------------------------------------------------------------------------------------------------------------------------
+	//int CurrentMax = g_Currentcount;
+	//for (i = 0; i < CurrentMax; i++)
+	//{
+	//	GetPrivateProfileString(_T("ACMIS_CURRENT"), CURRENT_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
+	//	m_CurrentSpec[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
+	//}
     //-------------------------------------------------------------------------------------------------------------------------------------
-	int SFR7FMax = g_7fAvriationcount;
-	for (i = 0; i < SFR7FMax; i++)
-	{
-		GetPrivateProfileString(_T("ACMIS_SFR7F"), SFR_7VARIATION_SPEC_NAME[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-		m_7FVariation[i] = _ttof((TCHAR*)(LPCTSTR)szIniBuff);
-	}
-
     //-------------------------------------------------------------------------------------------------------------------------------------
 	return;
 }
@@ -3010,149 +3131,48 @@ void CModelData::AcmisDataSave(TCHAR* szModelName)
 	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\ACMIS_DATA.ini"), BASE_DATA_PATH);
 
 	//-------------------------------------------------------------------------------------------------------------------------------------
-	// DefectSpec, stSpecAllOnsemiRCCBSpec
-	int DefectMax = g_Defectcount;// sizeof(DEFECT_SPEC_NAME) / sizeof(DEFECT_SPEC_NAME[0]);// 19; 
-	for (i = 0; i < DefectMax; i++)
-	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_DefectSpec[i]);
-		WritePrivateProfileString(_T("ACMIS_DEFECT"), DEFECT_SPEC_NAME[i], szData, szPath);
-	}
-	_stprintf_s(szData, SIZE_OF_1K, _T("%d"), n_DefectCountLimit);
-	WritePrivateProfileString(_T("ACMIS_DEFECT_LIMIT"), _T("defectCount"), szData, szPath);
-	_stprintf_s(szData, SIZE_OF_1K, _T("%d"), n_ClusterCountLimit);
-	WritePrivateProfileString(_T("ACMIS_DEFECT_LIMIT"), _T("clusterCount"), szData, szPath);
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//fov, distortion, rotate
-	//m_FovSpec
-	int OCMax = 2;
-	for (i = 0; i < OCMax; i++)
-	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_OcSpec[i]);
-		WritePrivateProfileString(_T("ACMIS_OC"), OC_SPEC_NAME[i], szData, szPath);
-	}
-
-	_stprintf_s(szData, SIZE_OF_1K, _T("%.02lf"), m_dOCSpecLimit[0]);
-	WritePrivateProfileString(_T("ACMIS_OC"), OC_SPEC_NAME[2], szData, szPath);
-
-	_stprintf_s(szData, SIZE_OF_1K, _T("%.02lf"), m_dOCSpecLimit[1]);
-	WritePrivateProfileString(_T("ACMIS_OC"), OC_SPEC_NAME[3], szData, szPath);
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//rotate
-	_stprintf_s(szData, SIZE_OF_1K, _T("%.02lf"), m_dRotateSpecLimit[0]);
-	WritePrivateProfileString(_T("ACMIS_ROTATE"), ROTATE_SPEC_NAME[0], szData, szPath);
-
-	_stprintf_s(szData, SIZE_OF_1K, _T("%.02lf"), m_dRotateSpecLimit[1]);
-	WritePrivateProfileString(_T("ACMIS_ROTATE"), ROTATE_SPEC_NAME[1], szData, szPath);
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//tilt
-	_stprintf_s(szData, SIZE_OF_1K, _T("%.02lf"), m_dTiltxSpecLimit[0]);
-	WritePrivateProfileString(_T("ACMIS_TILTX"), TILTX_SPEC_NAME[0], szData, szPath);
-
-	_stprintf_s(szData, SIZE_OF_1K, _T("%.02lf"), m_dTiltxSpecLimit[1]);
-	WritePrivateProfileString(_T("ACMIS_TILTX"), TILTX_SPEC_NAME[1], szData, szPath);
-
-	_stprintf_s(szData, SIZE_OF_1K, _T("%.02lf"), m_dTiltySpecLimit[0]);
-	WritePrivateProfileString(_T("ACMIS_TILTY"), TILTY_SPEC_NAME[0], szData, szPath);
-
-	_stprintf_s(szData, SIZE_OF_1K, _T("%.02lf"), m_dTiltySpecLimit[1]);
-	WritePrivateProfileString(_T("ACMIS_TILTY"), TILTY_SPEC_NAME[1], szData, szPath);
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	// Color Sensitivity 
-	int ColorMax = g_ColorSenscount;
-	for (i = 0; i < ColorMax; i++)
-	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_ColorSensitivitySpec[0][i]);
-		WritePrivateProfileString(_T("ACMIS_COLOR_SENS_1"), COLOR_SENS_SPEC_NAME[i], szData, szPath);
-	}
-	for (i = 0; i < ColorMax; i++)
-	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_ColorSensitivitySpec[1][i]);
-		WritePrivateProfileString(_T("ACMIS_COLOR_SENS_2"), COLOR_SENS_SPEC_NAME[i], szData, szPath); 
-	}
-	for (i = 0; i < ColorMax; i++)
-	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_ColorSensitivitySpec[2][i]);
-		WritePrivateProfileString(_T("ACMIS_COLOR_SENS_3"), COLOR_SENS_SPEC_NAME[i], szData, szPath);
-	}
-    //-------------------------------------------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------------------------------------------
-    // SNR
-    int SnrMax = g_Snrcount;
-    for (i = 0; i < SnrMax; i++)
-    {
-        _stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_SnrSpec[i]);
-        WritePrivateProfileString(_T("ACMIS_SNR"), SNR_SPEC_NAME[i], szData, szPath);
-    }
-
-    
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//Uniform
-	int UniformMax = g_ColorUniformitycount;// sizeof(COLOR_UNIFORMITY_SPEC_NAME) / sizeof(COLOR_UNIFORMITY_SPEC_NAME[0]);
-	for (i = 0; i < UniformMax; i++)
-	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_UniformSpec[i]);
-		WritePrivateProfileString(_T("ACMIS_UNIFORMITY"), COLOR_UNIFORMITY_SPEC_NAME[i], szData, szPath);
-	}
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//fPN
-	int FpnMax = g_Fpncount;// sizeof(FPN_SPEC_NAME) / sizeof(FPN_SPEC_NAME[0]);
-	for (i = 0; i < FpnMax; i++)
-	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_FpnSpec[i]);
-		WritePrivateProfileString(_T("ACMIS_FPN"), FPN_SPEC_NAME[i], szData, szPath);
-	}
-	
 	//-------------------------------------------------------------------------------------------------------------------------------------
 	//-------------------------------------------------------------------------------------------------------------------------------------
 	//Relative Illumination 
-	int IlluminationMax = g_Ricount;// sizeof(RI_SPEC_NAME) / sizeof(RI_SPEC_NAME[0]);
-	for (i = 0; i < IlluminationMax; i++)
-	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_RISpec[i]);
-		WritePrivateProfileString(_T("ACMIS_RI"), RI_SPEC_NAME[i], szData, szPath);
-	}
+	//int IlluminationMax = g_Ricount;// sizeof(RI_SPEC_NAME) / sizeof(RI_SPEC_NAME[0]);
+	//for (i = 0; i < IlluminationMax; i++)
+	//{
+	//	_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_RISpec[i]);
+	//	WritePrivateProfileString(_T("ACMIS_RI"), RI_SPEC_NAME[i], szData, szPath);
+	//}
 	//-------------------------------------------------------------------------------------------------------------------------------------
 	//-------------------------------------------------------------------------------------------------------------------------------------
 	//Color Shading
-	int mColorShadingMax = g_ColorShadingcount;// sizeof(COLOR_SHADING_SPEC_NAME) / sizeof(COLOR_SHADING_SPEC_NAME[0]);
-	for (i = 0; i < mColorShadingMax; i++)
-	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_ColorShadingSpec[i]);
-		WritePrivateProfileString(_T("ACMIS_COLOR_SHADING"), COLOR_SHADING_SPEC_NAME[i], szData, szPath);
-	}
+	//int mColorShadingMax = g_ColorShadingcount;// sizeof(COLOR_SHADING_SPEC_NAME) / sizeof(COLOR_SHADING_SPEC_NAME[0]);
+	//for (i = 0; i < mColorShadingMax; i++)
+	//{
+	//	_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_ColorShadingSpec[i]);
+	//	WritePrivateProfileString(_T("ACMIS_COLOR_SHADING"), COLOR_SHADING_SPEC_NAME[i], szData, szPath);
+	//}
 
 
 	//
 	//-------------------------------------------------------------------------------------------------------------------------------------
 	//-------------------------------------------------------------------------------------------------------------------------------------
 	//stain
-	for (i = 0; i < g_Blemishcount; i++)
-	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_BlemishSpec[i]);
-		WritePrivateProfileString(_T("ACMIS_BLACKSPOT"), STAIN_BLEMISH_SPEC_NAME[i], szData, szPath);
-	}
     //
-	for (i = 0; i < g_StainLcbcount; i++)
-	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_LcbSpec[i]);
-		WritePrivateProfileString(_T("ACMIS_LCB"), STAIN_LCB_SPEC_NAME[i], szData, szPath);
-	}
-    //
-	for (i = 0; i < g_StainYmeancount; i++)
-	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_YmeanSpec[i]);
-		WritePrivateProfileString(_T("ACMIS_YMEAN"), STAIN_YMEAN_SPEC_NAME[i], szData, szPath);
-	}
+	//for (i = 0; i < g_StainLcbcount; i++)
+	//{
+	//	_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_LcbSpec[i]);
+	//	WritePrivateProfileString(_T("ACMIS_LCB"), STAIN_LCB_SPEC_NAME[i], szData, szPath);
+	//}
+ //   //
+	//for (i = 0; i < g_StainYmeancount; i++)
+	//{
+	//	_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_YmeanSpec[i]);
+	//	WritePrivateProfileString(_T("ACMIS_YMEAN"), STAIN_YMEAN_SPEC_NAME[i], szData, szPath);
+	//}
 
-	for (i = 0; i < g_StainFdfcount; i++)
-	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_FDFSpec[i]);
-		WritePrivateProfileString(_T("ACMIS_FDF"), STAIN_FDF_SPEC_NAME[i], szData, szPath);
-	}
+	//for (i = 0; i < g_StainFdfcount; i++)
+	//{
+	//	_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_FDFSpec[i]);
+	//	WritePrivateProfileString(_T("ACMIS_FDF"), STAIN_FDF_SPEC_NAME[i], szData, szPath);
+	//}
 
 	for (i = 0; i < 4; i++)
 	{
@@ -3170,101 +3190,29 @@ void CModelData::AcmisDataSave(TCHAR* szModelName)
 	//-------------------------------------------------------------------------------------------------------------------------------------
 	//-------------------------------------------------------------------------------------------------------------------------------------
 	//IR FILTER
-	for (i = 0; i < g_Ircount; i++)
+	/*for (i = 0; i < g_Ircount; i++)
 	{
 		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_IrFilterSpec[i]);
 		WritePrivateProfileString(_T("ACMIS_IRFILTER"), IRFILTER_SPEC_NAME[i], szData, szPath);
-	}
-
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	
-	//
-
-
-	//IC
-	int ICCount = g_Iccount;// sizeof(IC_SPEC_NAME) / sizeof(IC_SPEC_NAME[0]);
-	for (i = 0; i < ICCount; i++)
-	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_ICSpec[i]);
-		WritePrivateProfileString(_T("ACMIS_IC"), IC_SPEC_NAME[i], szData, szPath);
-	}
-
-    //RI THRESHOLD SPEC
-    int _y = 0;
-    int _x = 0;
-    for (_y = 0; _y < 100; _y++)    //총 100개 항목
-    {
-        nPosi = 0;
-        for (_x = 0; _x < 10; _x++)
-        {
-            _stprintf_s(&szIniBuff[nPosi], (SIZE_OF_1K - nPosi), _T("%.03lf / "), m_RirOI[_y][_x]);
-            nPosi = (int)(_tcslen(szIniBuff));
-        }
-        _stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("ROI%d"), _y + 1);
-        WritePrivateProfileString(_T("ACMIS_RI_ROI"), szIniIndex, szIniBuff, szPath);
-    }
-
-	//LENS SHADING ROI SPEC
-	for (i = 0; i < 221; i++)
-	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%d / %d / %d / %d"), 
-			m_LensShadingRoi[i].left, m_LensShadingRoi[i].top, m_LensShadingRoi[i].right, m_LensShadingRoi[i].bottom);
-
-		_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("ROI%d"), i + 1);
-		WritePrivateProfileString(_T("ACMIS_LENSSHADING_ROI"), szIniIndex, szData, szPath);
-	}
-
-    //-------------------------------------------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------------------------------------------
-	//OC OFFSET X,Y
-	for (i = 0; i < g_Chartcount; i++)
-	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_dOcOffsetX[i]);
-		WritePrivateProfileString(_T("ACMIS_OC_OFFSET_X"), CHART_PCB_TYPE[i], szData, szPath);
-
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_dOcOffsetY[i]);
-		WritePrivateProfileString(_T("ACMIS_OC_OFFSET_Y"), CHART_PCB_TYPE[i], szData, szPath);
-	}
-	
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//-------------------------------------------------------------------------------------------------------------------------------------
-	//IC OFFSET X,Y
-	for (i = 0; i < g_Chartcount; i++)
-	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.01lf"), m_d_IC_OffsetX[i]);
-		WritePrivateProfileString(_T("ACMIS_IC_OFFSET_X"), CHART_PCB_TYPE[i], szData, szPath);
-
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.01lf"), m_d_IC_OffsetY[i]);
-		WritePrivateProfileString(_T("ACMIS_IC_OFFSET_Y"), CHART_PCB_TYPE[i], szData, szPath);
-	}
-
+	}*/
 	//-------------------------------------------------------------------------------------------------------------------------------------
 	//-------------------------------------------------------------------------------------------------------------------------------------
 	//전류측정
-	int CurrentMax = g_Currentcount;
+	/*int CurrentMax = g_Currentcount;
 	for (i = 0; i < CurrentMax; i++)
 	{
 		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_CurrentSpec[i]);
 		WritePrivateProfileString(_T("ACMIS_CURRENT"), CURRENT_SPEC_NAME[i], szData, szPath);
-	}
+	}*/
 	//-------------------------------------------------------------------------------------------------------------------------------------
-	//[SFR Box] 0.7F Variation
-	int SFR7FMax = g_7fAvriationcount;
-	for (i = 0; i < SFR7FMax; i++)
-	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf"), m_7FVariation[i]);
-		WritePrivateProfileString(_T("ACMIS_SFR7F"), SFR_7VARIATION_SPEC_NAME[i], szData, szPath);
-	}
-	//---------
 	//-------------------------------------------------------------------------------------------------------------------------------------
 	//-------------------------------------------------------------------------------------------------------------------------------------
 	//COLOR REPRODUCTION
-	for (i = 0; i < 32; i++)
+	/*for (i = 0; i < 32; i++)
 	{
 		_stprintf_s(szData, SIZE_OF_1K, _T("%.06lf"), m_ColorReproductionSpec[i]);
 		WritePrivateProfileString(_T("ACMIS_COLOR_REPRODUCTION"), COLOR_REPRODUCTION_SPEC_NAME[i], szData, szPath);
-	}
+	}*/
 
 }
 
@@ -3386,10 +3334,10 @@ void CModelData::EpoxyDataLoad(TCHAR* szModelName)
 			AfxExtractSubString(sToken, szIniBuff, j, _T('/'));
 			switch (j)
 			{
-			case 0:		m_ResingRectStart[0].x = _ttof((TCHAR*)(LPCTSTR)sToken);	break;
-			case 1:		m_ResingRectStart[0].y = _ttof((TCHAR*)(LPCTSTR)sToken);	break;
-			case 2:		m_ResingRectSize[0].x = _ttof((TCHAR*)(LPCTSTR)sToken);		break;
-			case 3:		m_ResingRectSize[0].y = _ttof((TCHAR*)(LPCTSTR)sToken);		break;
+			case 0:		m_ResingRectStart[0].x = _ttoi((TCHAR*)(LPCTSTR)sToken);	break;
+			case 1:		m_ResingRectStart[0].y = _ttoi((TCHAR*)(LPCTSTR)sToken);	break;
+			case 2:		m_ResingRectSize[0].x = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
+			case 3:		m_ResingRectSize[0].y = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
 			}
 		}
 	}
@@ -3404,10 +3352,10 @@ void CModelData::EpoxyDataLoad(TCHAR* szModelName)
 			AfxExtractSubString(sToken, szIniBuff, j, _T('/'));
 			switch (j)
 			{
-			case 0:		m_ResingRectStart[1].x = _ttof((TCHAR*)(LPCTSTR)sToken);	break;
-			case 1:		m_ResingRectStart[1].y = _ttof((TCHAR*)(LPCTSTR)sToken);	break;
-			case 2:		m_ResingRectSize[1].x = _ttof((TCHAR*)(LPCTSTR)sToken);		break;
-			case 3:		m_ResingRectSize[1].y = _ttof((TCHAR*)(LPCTSTR)sToken);		break;
+			case 0:		m_ResingRectStart[1].x = _ttoi((TCHAR*)(LPCTSTR)sToken);	break;
+			case 1:		m_ResingRectStart[1].y = _ttoi((TCHAR*)(LPCTSTR)sToken);	break;
+			case 2:		m_ResingRectSize[1].x = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
+			case 3:		m_ResingRectSize[1].y = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
 			}
 		}
 	}
@@ -3422,10 +3370,10 @@ void CModelData::EpoxyDataLoad(TCHAR* szModelName)
 			AfxExtractSubString(sToken, szIniBuff, j, _T('/'));
 			switch (j)
 			{
-			case 0:		m_ResingRectStart[2].x = _ttof((TCHAR*)(LPCTSTR)sToken);	break;
-			case 1:		m_ResingRectStart[2].y = _ttof((TCHAR*)(LPCTSTR)sToken);	break;
-			case 2:		m_ResingRectSize[2].x = _ttof((TCHAR*)(LPCTSTR)sToken);		break;
-			case 3:		m_ResingRectSize[2].y = _ttof((TCHAR*)(LPCTSTR)sToken);		break;
+			case 0:		m_ResingRectStart[2].x = _ttoi((TCHAR*)(LPCTSTR)sToken);	break;
+			case 1:		m_ResingRectStart[2].y = _ttoi((TCHAR*)(LPCTSTR)sToken);	break;
+			case 2:		m_ResingRectSize[2].x = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
+			case 3:		m_ResingRectSize[2].y = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
 			}
 		}
 	}
@@ -3439,10 +3387,10 @@ void CModelData::EpoxyDataLoad(TCHAR* szModelName)
 			AfxExtractSubString(sToken, szIniBuff, j, _T('/'));
 			switch (j)
 			{
-			case 0:		m_ResingRectStart[3].x = _ttof((TCHAR*)(LPCTSTR)sToken);	break;
-			case 1:		m_ResingRectStart[3].y = _ttof((TCHAR*)(LPCTSTR)sToken);	break;
-			case 2:		m_ResingRectSize[3].x = _ttof((TCHAR*)(LPCTSTR)sToken);		break;
-			case 3:		m_ResingRectSize[3].y = _ttof((TCHAR*)(LPCTSTR)sToken);		break;
+			case 0:		m_ResingRectStart[3].x = _ttoi((TCHAR*)(LPCTSTR)sToken);	break;
+			case 1:		m_ResingRectStart[3].y = _ttoi((TCHAR*)(LPCTSTR)sToken);	break;
+			case 2:		m_ResingRectSize[3].x = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
+			case 3:		m_ResingRectSize[3].y = _ttoi((TCHAR*)(LPCTSTR)sToken);		break;
 			}
 		}
 	}
@@ -3855,12 +3803,26 @@ CTaskWork::CTaskWork()
 {
 	int i;
 
+	bRecv_Lgit_Pp_select = -1;
+	bRecv_S6F12_Process_State_Change = -1;
+	bRecv_S6F12_PP_Selected = -1;
+	bRecv_S7F25_Formatted_Process_Program = -1;
+	bRecv_S2F49_PP_UpLoad_Confirm = -1;
+	bRecv_S6F12_PP_UpLoad_Completed = -1;
+	bRecv_S2F49_LG_Lot_Start = -1;
+	bRecv_S6F12_Lot_Processing_Started = -1;
+	bRecv_S6F12_Lot_Apd = -1;
+	bRecv_S6F12_Lot_Processing_Completed = -1;
+	bRecv_S6F12_Lot_Processing_Completed_Ack = -1;
+	//
+	//
 	m_nAutoFlag = MODE_STOP;
 	m_nStartStep = 0;
 	m_nEndStep = 0;
 	m_nStartLensStep = 0;
 	m_nEndLensStep = 0;
 	m_bAreaSensorRun = false;
+	bIdleTimeExceed = false;
 	mRepetCount = 0;
 	m_nCurrentPcbStep = 0;
 	mVariationIndex = 0;
@@ -3946,6 +3908,10 @@ CTaskWork::CTaskWork()
 	_stprintf_s(m_szFuseId, SIZE_OF_100BYTE, _T("EMPTY"));
 	_stprintf_s(m_szManufacturerSerialNumber, SIZE_OF_100BYTE, _T("EMPTY"));
 	_stprintf_s(m_szRivianPartNumber, SIZE_OF_100BYTE, _T("EMPTY"));
+
+
+	_stprintf_s(m_szIdleStartTime, SIZE_OF_100BYTE, _T(""));
+	_stprintf_s(m_szIdleEndTime, SIZE_OF_100BYTE, _T(""));
 
 
 	_stprintf_s(m_szBinaryFile, SIZE_OF_100BYTE, _T("EMPTY"));
@@ -4413,9 +4379,11 @@ void CMandoInspLog::InitData()
 
 	m_TpTestResult[0] = false;
 	m_TpTestResult[1] = false;
-	for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
+
+
+	for (i = 0; i < MAX_LAST_INSP_COUNT; i++)
 	{
-		g_clTaskWork[UNIT_AA1].m_stSfrInsp._fAverSfr[i] = 0.0;
+		g_clTaskWork[0].m_stSfrInsp._fAverSfr[i] = 0.0;
 	}
 
 	
@@ -4784,15 +4752,15 @@ void CMandoInspLog::NGCheck(CString strNg)
 //-----------------------------------------------------------------------------
 CMandoSfrSpec::CMandoSfrSpec()
 {
-	int i, j, k;
+	int i, j;
 
-	for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
+	/*for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
 	{
 		for (j = 0; j < 2; j++)
 		{
 			m_dAASFR_Spec[i][j] = 0.227;
 		}
-	}
+	}*/
 
 	for (i = 0; i< MAX_SFR_INSP_COUNT; i++)
 	{
@@ -4855,7 +4823,7 @@ void CMandoSfrSpec::Load()
 	 
 	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\SfrSpec.ini"), BASE_DATA_PATH);
 
-	for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
+	/*for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
 	{
 		GetPrivateProfileString(_T("SFR_SPEC"), szIniIndex[i], _T(""), szIniBuff, sizeof(szIniBuff), szPath);
 		if (_tcslen(szIniBuff) > 0)
@@ -4871,7 +4839,7 @@ void CMandoSfrSpec::Load()
 				}
 			}
 		}
-	}
+	}*/
 	for (i = 0; i < MAX_SFR_INSP_SUMAVE_CNT; i++)
 	{
 		GetPrivateProfileString(_T("SFR_AVE_SPEC"), szIniAveIndex[i], _T("1.000"), szIniBuff, sizeof(szIniBuff), szPath);
@@ -4931,12 +4899,11 @@ void CMandoSfrSpec::Save()
 	int i;
 	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\SfrSpec.ini"), BASE_DATA_PATH);
 
-	for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
+	/*for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
 	{
-		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf / %.03lf"),
-			m_dAASFR_Spec[i][0], m_dAASFR_Spec[i][1]);
+		_stprintf_s(szData, SIZE_OF_1K, _T("%.03lf / %.03lf"), m_dAASFR_Spec[i][0], m_dAASFR_Spec[i][1]);
 		WritePrivateProfileString(_T("SFR_SPEC"), szIniIndex[i], szData, szPath);
-	}
+	}*/
 
 	for (i = 0; i < MAX_SFR_INSP_SUMAVE_CNT; i++)
 	{
@@ -4961,1556 +4928,3 @@ void CMandoSfrSpec::Save()
 		WritePrivateProfileString(_T("SFR_DIFF_SPEC_EOL"), szIniDiffIndex[i], szData, szPath);
 	}
 }
-
-
-//-----------------------------------------------------------------------------
-//
-//
-//
-//-----------------------------------------------------------------------------
-CMesCommunication::CMesCommunication()
-{
-	int i = 0;
-	int j = 0;
-	m_sMesI2C.Format(_T("0.0"));//(_T("PASS"));
-	m_sStain.Format(_T("PASS"));
-	m_sBlackSpot.Format(_T("PASS"));
-	m_sNoise.Format(_T("PASS"));
-	m_sDefect.Format(_T("PASS"));
-	m_nMesI2CResult = 0;
-	m_nsMesfuseIDResult = 1;
-
-	m_dMesUVBeforeOC[0] = m_dMesUVBeforeOC[1] = 0.0;	//OC 결과.[X/Y]  UV 전
-	m_dMesUVAfterOC[0] = m_dMesUVAfterOC[1] = 0.0;		//OC 결과.[X/Y]  UV 후
-	m_dMesUVAfterDeltaOC[0] = m_dMesUVAfterDeltaOC[1] = 0.0;
-	
-
-
-	m_dMesShading65FC[0] = m_dMesShading65FC[1] = m_dMesShading85FC[0] = m_dMesShading85FC[1] = 0.0;
-
-
-
-	m_nMesUVBeforeOCResult = m_nMesUVAfterOCResult[0] = m_nMesUVAfterOCResult[1] = 0;
-
-	m_nMesStainResult = 0;
-	m_nMesDarkResult = 0;
-
-
-	for (i = 0; i < 4; i++)
-	{
-		m_dI2cData[i] = 0x00;
-		m_dI2cDataResult[i] = 0;
-	}
-	for (i = 0; i < 2; i++)
-	{
-		m_dIspData[i] = 0x00;
-		m_dIspDataResult[i] = 0;
-	}
-
-	for (i = 0; i < 9; i++)
-	{
-		m_dChartBright[i] = 0;
-		m_dChartBrightResult[i] = 0;
-	}
-	for (i = 0; i < 5; i++)
-	{
-		m_dOcBright[i] = 0;
-		m_dOcBrightResult[i] = 0;
-	}
-	m_nMesShading65FCResult[0] = m_nMesShading65FCResult[1] = m_nMesShading85FCResult[0] = m_nMesShading85FCResult[1] = 0;
-
-	for (i = 0; i < 4; i++)
-	{
-		m_nMesRICornerResult[i] = 0;
-	}
-	
-	m_nMesRIDiffResult = 0;
-	m_nMesRIMinDiffResult = 0;
-	m_nMesRICenterRawResult = 0;
-
-	m_nMesDark = 0;
-	for (i = 0; i < MAX_LAST_INSP_COUNT; i++)
-	{
-		m_dMesAreaAvrMTF[i] = 0.0;
-		m_nMesMTFAreaAvrResult[i] = 0;
-		m_dMesAreaAvrUVBeforeMTF[i] = 0;
-	}
-	for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
-	{
-		m_dMesMTF67lp[i] = 0.0;			//MTF 검사 항목
-		m_dMesMTF67lpUVAfter[i] = 0.0;
-		m_dMesUvBeforeMTF[i] = 0.0;			//MTF 검사 항목
-		m_dMesUvAfterMTF[i] = 0.0;
-	}
-
-	m_dMes4F_Diff = 0.0;
-	m_dMes7F_Diff = 0.0;
-	m_dMes7FVariation = 0.0;
-	m_dMes4F_DiffResult = 0.0;
-	m_dMes7F_DiffResult = 0.0;
-	
-	m_dMes7FVariationResult = 0;
-	for (i = 0; i < MAX_SFR_INSP_SUMAVE_CNT; i++)
-	{
-		m_dMesMTF_AVER[i] = 0.0;
-		m_nMesMTFResult_AVER[i] = 0;
-		m_nMesMTFResult_UVBeforeAVER[i] = 0;
-	}
-	for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
-	{
-		m_nMesMTF67lpResult[i] = 0;
-		m_nMesMTF67lpResultUVAfter[i] = 0;
-		m_nMesUvBeforeMTFResult[i] = 0;
-		m_nMesUvAfterMTFResultUVAfter[i] = 0;
-	}
-
-	memset(mCrcData, 0x00, sizeof(mCrcData));
-	//memset(mReadEEpromData, 0x00, sizeof(mReadEEpromData));
-	//memset(mMesGetEEpromData, 0x00, sizeof(mMesGetEEpromData));
-	/*memset(compareData, 0x00, sizeof(compareData));
-	
-	for (i = 0; i < MES_VERIFY_SPEC_COUNT; i++)
-	{
-		_stprintf_s(mStrData[i], SIZE_OF_100BYTE, _T("0"));
-	}*/
-
-	//======================================================================================
-	//======================================================================================
-	//======================================================================================
-	//new Mes 190921
-
-	m_sMesLotID = _T("EMPTY");	// 바코드 아이디
-	m_nMesCnt = 0;			// 차수
-	m_nMesFinalResult = 0;	// 합부 선언부분
-	m_dMesCurrent = 0.0;
-	//
-	for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
-	{
-		m_dMesMTF[i] = 0.0;			//MTF 검사 항목
-	}
-	for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
-	{
-		m_nMesMTFResult[i] = 0;
-	}
-	for (i = 0; i < MAX_LAST_INSP_COUNT; i++)
-	{
-		m_dMesLightChartValue[i] = 0.0;
-		m_dMesLightChartResult[i] = 0;
-	}
-
-	m_dMesLightOcValue = 0.0;
-
-	m_dMesLightOcResult = 0;
-
-	m_dMesDistortion = 0.0;
-	m_dMesSnr = 0.0;
-	m_dMesDr = 0.0;
-	m_dMesUvAfterRotate = 0.0;
-	m_dMesUvBeforeRotate = 0.0;
-	for (i = 0; i < 4; i++)
-	{
-		m_dMesEEPROMResult[i] = 0;			//MTF 검사 항목
-	}
-
-	for (i = 0; i < 5; i++)
-	{
-		m_dMesOcLightTime[i] = 0;
-		m_dMesOcLightTimeResult[i] = 0;
-	}
-
-	m_nMesFirmwareVerifyResult = 0;
-	m_nMesCurrentResult = 0;
-	m_dMesRotateResult = 1;
-	m_dMesRotateUVAfterResult = 1;
-	m_dMesSnrResult = 1;
-	m_dMesDrResult = 1;
-	m_nMesDistortionResult = 1;
-	
-	for (i = 0; i < 2; i++)
-	{
-		m_dMesTiltResult[i] = 0;
-		m_dMesOC[i] = 0.0;
-		m_dMesDeltaOC[i] = 0.0;
-		m_dMesOCResult[i] = 0;
-		m_dMesDeltaOCResult[i] = 0;
-
-		m_dMesUVAfterOC[i] = 0.0;
-		m_dMesDeltaUVAfterOC[i] = 0.0;
-		m_dMesUVAfterOCResult[i] = 0;
-		m_dMesUVAfterDeltaOCResult[i] = 0;
-		//
-		 m_dMesICOC[2] = 0.0;
-		 m_dMesICDeltaOC[2] = 0.0;
-		 m_dMesICOCResult[2] = 0;
-		 m_dMesICDeltaOCResult[2] = 0;
-	}
-
-	for (i = 0; i < 2; i++)
-	{
-		m_dMesFov[i] = 0.0;
-		m_dMesFovResult[i] = 0;
-	}
-	for (i = 0; i < 12; i++)
-	{
-		m_nMesDefect[i] = 0;
-		m_nMesDefectResult[i] = 0;
-	}
-	/*for (i = 0; i < 3; i++)
-	{
-		for (j = 0; j < 7; j++)
-		{
-			m_nMesColorSensitivity[i][j] = 0.0;
-			m_nMesColorSensitivityResult[i][j] = 0;
-		}
-	}*/
-
-	for (i = 0; i < 8; i++)
-	{
-		m_nMesRI[0][i] = 0.0;
-		m_nMesRI[1][i] = 0.0;
-		m_nMesRIResult[0][i] = 0;
-		m_nMesRIResult[1][i] = 0;
-	}
-
-	/*for (i = 0; i < 5; i++)
-	{
-		m_nMesRIRoi[0][i][0] = 0.0;
-		m_nMesRIRoi[0][i][1] = 0.0;
-		m_nMesRIRoi[0][i][2] = 0.0;
-		m_nMesRIRoi[0][i][3] = 0.0;
-		m_nMesRIRoi[1][i][0] = 0.0;
-		m_nMesRIRoi[1][i][1] = 0.0;
-		m_nMesRIRoi[1][i][2] = 0.0;
-		m_nMesRIRoi[1][i][3] = 0.0;
-
-		m_nMesRIRoiResult[0][i][0] = 0;
-		m_nMesRIRoiResult[0][i][1] = 0;
-		m_nMesRIRoiResult[0][i][2] = 0;
-		m_nMesRIRoiResult[0][i][3] = 0;
-		m_nMesRIRoiResult[1][i][0] = 0;
-		m_nMesRIRoiResult[1][i][1] = 0;
-		m_nMesRIRoiResult[1][i][2] = 0;
-		m_nMesRIRoiResult[1][i][3] = 0;
-	}*/
-	/*for (i = 0; i < 4; i++)
-	{
-		m_nMesFpn5000[0][i] = 0.0;
-		m_nMesFpn5000[1][i] = 0.0;
-		m_nMesFpn5000[2][i] = 0.0;
-
-		m_nMesFpnDark[0][i] = 0.0;
-		m_nMesFpnDark[1][i] = 0.0;
-		m_nMesFpnDark[2][i] = 0.0;
-
-		m_nMesFpn5000Result[0][i] = 0;
-		m_nMesFpn5000Result[1][i] = 0;
-		m_nMesFpn5000Result[2][i] = 0;
-
-		m_nMesFpnDarkResult[0][i] = 0;
-		m_nMesFpnDarkResult[1][i] = 0;
-		m_nMesFpnDarkResult[2][i] = 0;
-	}*/
-
-	m_dMesRiDiff = 0.0;
-	m_dMesRiCenterRaw = 0.0;
-	for (i = 0; i < 4; i++)
-	{
-		m_nMesRICorner[i] = 0.0;
-		m_nMesRIRICornerResult[i] = 0;
-
-		m_nMesColorReproduction[i] = 0.0;
-		m_nMesColorReproductionResult[i] = 0;
-		
-	}
-	m_dMesRiMinDiff = 0.0;
-	/*for (i = 0; i < 12; i++)
-	{
-		m_nMesLensShading[0][i] = 0.0;
-		m_nMesLensShading[1][i] = 0.0;
-
-		m_nMesLensShadingResult[0][i] = 0;
-		m_nMesLensShadingResult[1][i] = 0;
-		
-	}*/
-	
-	// m_nMesRICorner[i], m_nMesRIRICornerResult[i])
-
-	/*for (i = 0; i < 8; i++)
-	{
-		m_nMesColorUniformity[i] = 0.0;
-		m_nMesColorUniformityResult[i] = 1;
-	}
-*/
-
-	for (i = 0; i < 9; i++)
-	{
-		m_nMesBlemishMaxDefect[i] = 0.0;
-		m_nMesBlemishMaxDefectResult[i] = 1;
-	}
-
-	for (i = 0; i < 4; i++)
-	{
-		m_dMesTemperature[i] = 0.0;
-		m_dMesTemperatureResult[i] = 1;
-	}
-	/*for (i = 0; i < 4; i++)
-	{
-		m_dMesVoltage[i] = 0.0;
-		m_dMesVoltageResult[i] = 1;
-	}*/
-	for (i = 0; i < 3; i++)
-	{
-		m_dMesSensorVoltage[i] = 0.0;
-		m_nMesSensorVoltageResult[i] = 1;
-	}
-
-	m_dMesVoltage = 0.0;
-	m_nMesVoltageResult = 1;
-
-
-	m_dMesSaturationBrightAvg = 0.0;
-	m_dMesSaturationBrightAvgResult = 1;
-
-
-	for (i = 0; i < 3; i++)
-	{
-		m_dMesIRFilterValue[i] = 0.0;
-		m_dMesIRFilterResult[i] = 1;
-	}
-	m_dMesIrROIBrightAvg = 0.0;
-	m_dMesIrROIBrightAvgResult = 1;
-
-	m_dMesIrRoiBrightVar = 0.0;
-	m_dMesIrRoiBrightVarResult = 1;
-
-
-	m_dMesDistortionResult = 1;
-	m_dMesNoiseResult = 1;
-
-
-	for (i = 0; i < 4; i++)
-	{
-		m_dGrrBeForeLaserPos[i] = 0.0;
-		m_dGrrLaserPos[i] = 0.0;
-	}
-	for (i = 0; i < 6; i++)
-	{
-		m_dGrrMotorPos[i] = 0.0;
-	}
-	for (i = 0; i < 3; i++)
-	{
-		m_dGrrAlignPos[i] = 0.0;
-	}
-
-}
-
-
-
-//-----------------------------------------------------------------------------
-//
-//
-//
-//-----------------------------------------------------------------------------
-CMesCommunication::~CMesCommunication()
-{
-	
-}
-
-//-----------------------------------------------------------------------------
-//
-//
-//
-//-----------------------------------------------------------------------------
-void CMesCommunication::Insp()
-{
-	
-}
-
-bool CMesCommunication::g_Grr____Align(int nUnit)
-{
-	TCHAR szPath[SIZE_OF_1K];
-	TCHAR szFilePath[SIZE_OF_1K];
-	SYSTEMTIME stSysTime;
-	CFileFind clFinder;
-	CString sFileMode = _T("");
-	CFile clFile;
-	FILE* fp;
-	int nStepNo;
-	int i = 0;
-	int j = 0;
-	int indexX = 0;
-	int indexY = 0;
-	bool createBool = true;
-	::GetLocalTime(&stSysTime);
-
-	if (_tcslen(g_clTaskWork[nUnit].m_szChipID) <= 0)
-		_tcscpy_s(g_clTaskWork[nUnit].m_szChipID, SIZE_OF_100BYTE, _T("(NULL)"));
-
-	if (clFinder.FindFile(BASE_LOG_PATH) == FALSE)
-		CreateDirectory(BASE_LOG_PATH, NULL);
-
-	if (clFinder.FindFile(BASE_LOG_PATH) == FALSE)
-		CreateDirectory(BASE_LOG_PATH, NULL);
-
-	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\Result"), BASE_LOG_PATH);
-	if (clFinder.FindFile(szPath) == FALSE)
-		CreateDirectory(szPath, NULL);
-
-	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\Result\\%04d%02d"), BASE_LOG_PATH, stSysTime.wYear, stSysTime.wMonth);
-	if (clFinder.FindFile(szPath) == FALSE)
-		CreateDirectory(szPath, NULL);
-
-	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\Result\\%04d%02d\\%02d"), BASE_LOG_PATH, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay);
-	if (clFinder.FindFile(szPath) == FALSE)
-		CreateDirectory(szPath, NULL);
-
-	nStepNo = g_clTaskWork[nUnit].m_nCountOfTotalStepAA;
-
-	TCHAR m_szModel[SIZE_OF_100BYTE];
-
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
-#else
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
-#endif
-
-	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\GrrAlignLog_%s_%04d%02d%02d.csv"), szPath, m_szModel, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay);
-
-	if (clFinder.FindFile(szFilePath) == TRUE)
-	{
-		if (clFile.Open(szFilePath, CFile::modeRead) == FALSE)
-		{
-			AddLog(_T("파일이 사용 중 입니다."), 1, nUnit);
-			return false;
-		}
-		else
-		{
-			clFile.Close();
-		}
-	}
-
-#ifdef _UNICODE
-	sFileMode = _T("w,ccs=UTF-8");
-#else
-	sFileMode = _T("w");
-#endif
-
-	// 파일이 없으면 헤더를 만든다.
-	if (clFinder.FindFile(szFilePath) == FALSE)
-	{
-		_tfopen_s(&fp, szFilePath, sFileMode);
-		if (fp != NULL)
-		{
-			_ftprintf_s(fp, _T("Time,"));
-			_ftprintf_s(fp, _T("Model,				SW Version,"));
-			_ftprintf_s(fp, _T("Chip ID,"));
-			_ftprintf_s(fp, _T("Align X ,Align Y ,Align Th ,"));
-
-
-			_ftprintf_s(fp, _T("\n"));
-			fclose(fp);
-		}
-	}
-
-
-#ifdef _UNICODE
-	sFileMode = _T("a,ccs=UTF-8");
-#else
-	sFileMode = _T("a");
-#endif
-
-	_tfopen_s(&fp, szFilePath, sFileMode);
-	if (fp != NULL)
-	{
-		_ftprintf_s(fp, _T("'%04d-%02d-%02d %02d:%02d:%02d,"), stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
-		_ftprintf_s(fp, _T("%s, %s,"), m_szModel, VER_STR);
-		_ftprintf_s(fp, _T("%s,"), g_clTaskWork[nUnit].m_szChipID);
-
-		for (i = 0; i < 3; i++)
-		{
-			_ftprintf_s(fp, _T("%lf,"), m_dGrrAlignPos[i]);
-		}
-
-		_ftprintf_s(fp, _T("\n"));
-		fclose(fp);
-	}
-	return true;
-}
-
-
-
-bool CMesCommunication::g_Grr____LaserMotorPos(int nUnit)
-{
-	TCHAR szPath[SIZE_OF_1K];
-	TCHAR szFilePath[SIZE_OF_1K];
-	SYSTEMTIME stSysTime;
-	CFileFind clFinder;
-	CString sFileMode = _T("");
-	CFile clFile;
-	FILE* fp;
-	int nStepNo;
-	int i = 0;
-	int j = 0;
-	int indexX = 0;
-	int indexY = 0;
-	bool createBool = true;
-	::GetLocalTime(&stSysTime);
-
-	if (_tcslen(g_clTaskWork[nUnit].m_szChipID) <= 0)
-		_tcscpy_s(g_clTaskWork[nUnit].m_szChipID, SIZE_OF_100BYTE, _T("(NULL)"));
-
-	if (clFinder.FindFile(BASE_LOG_PATH) == FALSE)
-		CreateDirectory(BASE_LOG_PATH, NULL);
-
-	if (clFinder.FindFile(BASE_LOG_PATH) == FALSE)
-		CreateDirectory(BASE_LOG_PATH, NULL);
-
-	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\Result"), BASE_LOG_PATH);
-	if (clFinder.FindFile(szPath) == FALSE)
-		CreateDirectory(szPath, NULL);
-
-	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\Result\\%04d%02d"), BASE_LOG_PATH, stSysTime.wYear, stSysTime.wMonth);
-	if (clFinder.FindFile(szPath) == FALSE)
-		CreateDirectory(szPath, NULL);
-
-	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\Result\\%04d%02d\\%02d"), BASE_LOG_PATH, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay);
-	if (clFinder.FindFile(szPath) == FALSE)
-		CreateDirectory(szPath, NULL);
-
-	nStepNo = g_clTaskWork[nUnit].m_nCountOfTotalStepAA;
-
-	TCHAR m_szModel[SIZE_OF_100BYTE];
-
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
-#else
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
-#endif
-
-	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\GrrLog_%s_%04d%02d%02d.csv"), szPath, m_szModel, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay);
-
-	if (clFinder.FindFile(szFilePath) == TRUE)
-	{
-		if (clFile.Open(szFilePath, CFile::modeRead) == FALSE)
-		{
-			AddLog(_T("파일이 사용 중 입니다."), 1, nUnit);
-			return false;
-	}
-		else
-		{
-			clFile.Close();
-		}
-}
-
-#ifdef _UNICODE
-	sFileMode = _T("w,ccs=UTF-8");
-#else
-	sFileMode = _T("w");
-#endif
-
-	// 파일이 없으면 헤더를 만든다.
-	if (clFinder.FindFile(szFilePath) == FALSE)
-	{
-		_tfopen_s(&fp, szFilePath, sFileMode);
-		if (fp != NULL)
-		{
-			_ftprintf_s(fp, _T("Time,"));
-			_ftprintf_s(fp, _T("Model,				SW Version,"));
-			_ftprintf_s(fp, _T("Chip ID,"));
-			_ftprintf_s(fp, _T("LASER Before POS1 ,LASER Before POS2 ,LASER Before POS3 ,"));
-			_ftprintf_s(fp, _T("LASER POS1 ,LASER POS2 ,LASER POS3 ,"));
-			_ftprintf_s(fp, _T("PCB X ,PCB Y ,PCB Z ,PCB Th ,PCB Tx ,PCB Ty ,"));
-			_ftprintf_s(fp, _T("Align X ,Align Y ,Align Th ,"));
-			_ftprintf_s(fp, _T("[SFR]0.0F AVERAGE,"));
-			_ftprintf_s(fp, _T("[SFR]0.4F LT AVERAGE,[SFR]0.4F RT AVERAGE,[SFR]0.4F LB AVERAGE,[SFR]0.4F RB AVERAGE,"));
-			_ftprintf_s(fp, _T("[SFR]0.7F LT AVERAGE,[SFR]0.7F RT AVERAGE,[SFR]0.7F LB AVERAGE,[SFR]0.7F RB AVERAGE,"));
-			_ftprintf_s(fp, _T("[OC] OC_X ,	[OC] OC_Y,"));
-			_ftprintf_s(fp, _T("[OC] OC_X DELTA ,	[OC] OC_Y DELTA,"));
-
-			_ftprintf_s(fp, _T("\n"));
-			fclose(fp);
-		}
-	}
-
-
-#ifdef _UNICODE
-	sFileMode = _T("a,ccs=UTF-8");
-#else
-	sFileMode = _T("a");
-#endif
-
-	_tfopen_s(&fp, szFilePath, sFileMode);
-	if (fp != NULL)
-	{
-		_ftprintf_s(fp, _T("'%04d-%02d-%02d %02d:%02d:%02d,"), stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
-		_ftprintf_s(fp, _T("%s, %s,"), m_szModel, VER_STR);
-		_ftprintf_s(fp, _T("%s,"), g_clTaskWork[nUnit].m_szChipID);
-
-		for (i = 0; i < 3; i++)
-		{
-			_ftprintf_s(fp, _T("%lf,"), m_dGrrBeForeLaserPos[i]);
-		}
-
-		for (i = 0; i < 3; i++)
-		{
-			_ftprintf_s(fp, _T("%lf,"), m_dGrrLaserPos[i]);
-		}
-		for (i = 0; i < 6; i++)
-		{
-			_ftprintf_s(fp, _T("%lf,"), m_dGrrMotorPos[i]);
-		}
-		for (i = 0; i < 3; i++)
-		{
-			_ftprintf_s(fp, _T("%lf,"), m_dGrrAlignPos[i]);
-		}
-		_ftprintf_s(fp, _T("%lf,"), (g_clMesCommunication[nUnit].m_dMesUvAfterMTF[0] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[1] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[2] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[3]) / 4);
-		_ftprintf_s(fp, _T("%lf,"), (g_clMesCommunication[nUnit].m_dMesUvAfterMTF[4] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[5]) / 2);
-		_ftprintf_s(fp, _T("%lf,"), (g_clMesCommunication[nUnit].m_dMesUvAfterMTF[6] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[7]) / 2);
-		_ftprintf_s(fp, _T("%lf,"), (g_clMesCommunication[nUnit].m_dMesUvAfterMTF[8] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[9]) / 2);
-		_ftprintf_s(fp, _T("%lf,"), (g_clMesCommunication[nUnit].m_dMesUvAfterMTF[10] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[11]) / 2);
-		_ftprintf_s(fp, _T("%lf,"), (g_clMesCommunication[nUnit].m_dMesUvAfterMTF[12] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[13]) / 2);
-		_ftprintf_s(fp, _T("%lf,"), (g_clMesCommunication[nUnit].m_dMesUvAfterMTF[14] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[15]) / 2);
-		_ftprintf_s(fp, _T("%lf,"), (g_clMesCommunication[nUnit].m_dMesUvAfterMTF[16] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[17]) / 2);
-		_ftprintf_s(fp, _T("%lf,"), (g_clMesCommunication[nUnit].m_dMesUvAfterMTF[18] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[19]) / 2);
-		_ftprintf_s(fp, _T("%0.3lf, %0.3lf,"), g_clMesCommunication[nUnit].m_dMesUVAfterOC[0], g_clMesCommunication[nUnit].m_dMesUVAfterOC[1]);
-		_ftprintf_s(fp, _T("%0.3lf, %0.3lf,"), g_clMesCommunication[nUnit].m_dMesUVAfterDeltaOC[0], g_clMesCommunication[nUnit].m_dMesUVAfterDeltaOC[1]);
-		//Laser 4개
-		//Pcb Motor 6개
-		//Align 3개
-		_ftprintf_s(fp, _T("\n"));
-		fclose(fp);
-	}
-	return true;
-}
-
-//------------------------------------------------------------------------------------------------------------------------------
-
-
-bool CMesCommunication::g_FovVertexLog(int nUnit)
-{
-	TCHAR szPath[SIZE_OF_1K];
-	TCHAR szFilePath[SIZE_OF_1K];
-	SYSTEMTIME stSysTime;
-	CFileFind clFinder;
-	CString sFileMode = _T("");
-	CFile clFile;
-	FILE* fp;
-	int nStepNo;
-	int i = 0;
-	int j = 0;
-	int indexX = 0;
-	int indexY = 0;
-	bool createBool = true;
-	::GetLocalTime(&stSysTime);
-
-	if (_tcslen(g_clTaskWork[nUnit].m_szChipID) <= 0)
-		_tcscpy_s(g_clTaskWork[nUnit].m_szChipID, SIZE_OF_100BYTE, _T("(NULL)"));
-
-	if (clFinder.FindFile(BASE_LOG_PATH) == FALSE)
-		CreateDirectory(BASE_LOG_PATH, NULL);
-
-	if (clFinder.FindFile(BASE_LOG_PATH) == FALSE)
-		CreateDirectory(BASE_LOG_PATH, NULL);
-
-	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\Result"), BASE_LOG_PATH);
-	if (clFinder.FindFile(szPath) == FALSE)
-		CreateDirectory(szPath, NULL);
-
-	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\Result\\%04d%02d"), BASE_LOG_PATH, stSysTime.wYear, stSysTime.wMonth);
-	if (clFinder.FindFile(szPath) == FALSE)
-		CreateDirectory(szPath, NULL);
-
-	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\Result\\%04d%02d\\%02d"), BASE_LOG_PATH, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay);
-	if (clFinder.FindFile(szPath) == FALSE)
-		CreateDirectory(szPath, NULL);
-
-	nStepNo = g_clTaskWork[nUnit].m_nCountOfTotalStepAA;
-
-	TCHAR m_szModel[SIZE_OF_100BYTE];
-
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
-#else
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
-#endif
-
-#ifdef KUMI_TEST_MODE
-	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\Test_EolLog_Vertex_%s_%04d%02d%02d.csv"), szPath, m_szModel, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay);
-#else
-	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\EolLog_Vertex_%s_%04d%02d%02d.csv"), szPath, m_szModel, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay);
-#endif
-	if (clFinder.FindFile(szFilePath) == TRUE)
-	{
-		if (clFile.Open(szFilePath, CFile::modeRead) == FALSE)
-		{
-			AddLog(_T("파일이 사용 중 입니다."), 1, nUnit);
-			return false;
-		}
-		else
-		{
-			clFile.Close();
-		}
-	}
-
-#ifdef _UNICODE
-	sFileMode = _T("w,ccs=UTF-8");
-#else
-	sFileMode = _T("w");
-#endif
-	
-	
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	int roiCount = 16;
-	TCHAR* pszCol[] = {
-		_T("VFOV_0") ,_T("VFOV_1") ,
-		_T("VFOV_2") ,_T("VFOV_3") ,
-		_T("VFOV_4") ,_T("VFOV_5") ,
-		_T("VFOV_6") ,_T("VFOV_7") ,
-
-		_T("HFOV_0") ,_T("HFOV_1") ,
-		_T("HFOV_2") ,_T("HFOV_3") ,
-		_T("HFOV_4") ,_T("HFOV_5") ,
-		_T("HFOV_6") ,_T("HFOV_7")
-		/*_T("TOP_CHART_LT_L") ,_T("TOP_CHART_LT_R") ,
-		_T("TOP_CHART_RT_L") ,_T("TOP_CHART_RT_R") ,
-		_T("TOP_CHART_BL_L") ,_T("TOP_CHART_BL_R") ,
-		_T("TOP_CHART_BR_L") ,_T("TOP_CHART_BR_R") ,
-		_T("LEFT_SIDE_CHART_4F_T") ,_T("LEFT_SIDE_CHART_4F_B") ,
-		_T("LEFT_SIDE_CHART_7F_T") ,_T("LEFT_SIDE_CHART_7F_B") ,
-		_T("RIGHT_SIDE_CHART_4F_T") ,_T("RIGHT_SIDE_CHART_4F_B"),
-		_T("RIGHT_SIDE_CHART_7F_T"),_T("RIGHT_SIDE_CHART_7F_B")*/
-	};
-#else
-	int roiCount = 14;
-	TCHAR* pszCol[] = {
-		_T("VFOV_0") ,_T("VFOV_1") ,
-		_T("VFOV_2") ,_T("VFOV_3") ,
-		_T("VFOV_4") ,_T("VFOV_5") ,
-		_T("VFOV_6") ,_T("VFOV_7") ,
-
-		_T("HFOV_0") ,_T("HFOV_1") ,
-		_T("HFOV_2") ,_T("HFOV_3") ,
-		_T("HFOV_4") ,_T("HFOV_5")
-		/*_T("LEFT_SIDE_CHART_4F_T_BL") ,_T("LEFT_SIDE_CHART_4F_T_TR") ,
-		_T("LEFT_SIDE_CHART_4F_B_TL") ,_T("LEFT_SIDE_CHART_4F_B_BR") ,
-		_T("LEFT_SIDE_CHART_7F_T") ,
-		_T("LEFT_SIDE_CHART_7F_M") ,
-		_T("LEFT_SIDE_CHART_7F_B") ,
-		_T("RIGHT_SIDE_CHART_4F_T_TL") ,_T("RIGHT_SIDE_CHART_4F_T_BR") ,
-		_T("RIGHT_SIDE_CHART_4F_B_BL") ,_T("RIGHT_SIDE_CHART_4F_B_TR") ,
-		_T("RIGHT_SIDE_CHART_7F_T") ,
-		_T("RIGHT_SIDE_CHART_7F_M") ,
-		_T("RIGHT_SIDE_CHART_7F_B") ,*/
-	};
-#endif
-	// 파일이 없으면 헤더를 만든다.
-	if (clFinder.FindFile(szFilePath) == FALSE)
-	{
-		_tfopen_s(&fp, szFilePath, sFileMode);
-		if (fp != NULL)
-		{
-			_ftprintf_s(fp, _T(",,,,,"));
-			for (i = 0; i < MAX_FOV_FIND_COUNT; i++)
-			{
-				if (i > 0)
-				{
-					_ftprintf_s(fp, _T(",,"));
-				}
-				_ftprintf_s(fp, _T("%s"), pszCol[i]);
-			}
-			fprintf_s(fp, "\n");
-			//
-			fprintf_s(fp, "Date,Time ");
-			fprintf_s(fp, ",SW Version,Model");
-			fprintf_s(fp, ",BarcodeID");
-			for (i = 0; i < MAX_FOV_FIND_COUNT; i++)
-			{
-				_ftprintf_s(fp, _T(",x,y"));
-			}
-
-
-			fprintf_s(fp, "\n");
-			fclose(fp);
-		}
-	}
-
-#ifdef _UNICODE
-	sFileMode = _T("a,ccs=UTF-8");
-#else
-	sFileMode = _T("a");
-#endif
-	_tfopen_s(&fp, szFilePath, sFileMode);
-	if (fp != NULL)
-	{
-		_ftprintf_s(fp, _T("'%04d-%02d-%02d,"), stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay);
-		_ftprintf_s(fp, _T("'%02d:%02d:%02d,"), stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
-		_ftprintf_s(fp, _T("VER.%s, %s,"), VER_STR, m_szModel);
-		_ftprintf_s(fp, _T("%s,"), g_clTaskWork[nUnit].m_szChipID);
-		for (i = 0; i < MAX_FOV_FIND_COUNT; i++)
-		{
-			fprintf_s(fp, "%d,%d,", g_clMandoInspLog[nUnit].m_ShmFovPoint[i].x, g_clMandoInspLog[nUnit].m_ShmFovPoint[i].y);
-		}
-		
-		//
-		_ftprintf_s(fp, _T("\n"));
-		fclose(fp);
-	}
-	return true;
-}
-
-
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------
-
-bool CMesCommunication::g_FinalEolLog(int nUnit)
-{
-	TCHAR szPath[SIZE_OF_1K];
-	TCHAR szFilePath[SIZE_OF_1K];
-	SYSTEMTIME stSysTime;
-	CFileFind clFinder;
-	CString sFileMode = _T("");
-	CFile clFile;
-	FILE* fp;
-	int nStepNo;
-	int i = 0;
-	int j = 0;
-	int indexX = 0;
-	int indexY = 0;
-	bool createBool = true;
-	::GetLocalTime(&stSysTime);
-
-	if (_tcslen(g_clTaskWork[nUnit].m_szChipID) <= 0)
-		_tcscpy_s(g_clTaskWork[nUnit].m_szChipID, SIZE_OF_100BYTE, _T("(NULL)"));
-
-	if (clFinder.FindFile(BASE_LOG_PATH) == FALSE)
-		CreateDirectory(BASE_LOG_PATH, NULL);
-
-	if (clFinder.FindFile(BASE_LOG_PATH) == FALSE)
-		CreateDirectory(BASE_LOG_PATH, NULL);
-
-	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\Result"), BASE_LOG_PATH);
-	if (clFinder.FindFile(szPath) == FALSE)
-		CreateDirectory(szPath, NULL);
-
-	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\Result\\%04d%02d"), BASE_LOG_PATH,  stSysTime.wYear, stSysTime.wMonth);
-	if (clFinder.FindFile(szPath) == FALSE)
-		CreateDirectory(szPath, NULL);
-
-	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\Result\\%04d%02d\\%02d"), BASE_LOG_PATH,  stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay);
-	if (clFinder.FindFile(szPath) == FALSE)
-		CreateDirectory(szPath, NULL);
-
-	nStepNo = g_clTaskWork[nUnit].m_nCountOfTotalStepAA;
-
-	TCHAR m_szModel[SIZE_OF_100BYTE];
-
-
-
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
-#else
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
-#endif
-#ifdef KUMI_TEST_MODE
-	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\Test_FinalEolLog_%s_%04d%02d%02d.csv"), szPath, m_szModel, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay);
-#else
-	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\FinalEolLog_%s_%04d%02d%02d.csv"), szPath, m_szModel, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay);
-#endif
-
-	if (clFinder.FindFile(szFilePath) == TRUE) 
-	{
-		if (clFile.Open(szFilePath, CFile::modeRead) == FALSE)
-		{
-			AddLog(_T("파일이 사용 중 입니다."), 1, nUnit);
-			return false;
-		}
-		else
-		{
-			clFile.Close();
-		}
-	}
-
-#ifdef _UNICODE
-	sFileMode = _T("w,ccs=UTF-8");
-#else
-	sFileMode = _T("w");
-#endif
-
-	// 파일이 없으면 헤더를 만든다.
-	if (clFinder.FindFile(szFilePath) == FALSE)
-	{
-		_tfopen_s(&fp, szFilePath, sFileMode);
-		if (fp != NULL)
-		{
-			_ftprintf_s(fp, _T("Time,"));
-			_ftprintf_s(fp, _T("Model,				SW Version,"));
-			_ftprintf_s(fp, _T("Chip ID,Sensor Serial ID,"));
-			//전류, 볼테이지
-			_ftprintf_s(fp, _T("CURRENT ,VOLTAGE,"));
-			
-
-			//MTF 개별
-			_ftprintf_s(fp, _T("[SFR]0.0F T_V,		[SFR]0.0F B_V,		[SFR]0.0F L_H,		[SFR]0.0F R_H,"));
-			_ftprintf_s(fp, _T("[SFR]0.4F TL H ,	[SFR]0.4F TL V,		[SFR]0.4F TR H ,	[SFR]0.4F TR V,		[SFR]0.4F BL H ,	[SFR]0.4F BL V,		[SFR]0.4F BR H ,	[SFR]0.4F BR V,"));
-			_ftprintf_s(fp, _T("[SFR]0.7F TL H ,	[SFR]0.7F TL V,		[SFR]0.7F TR H ,	[SFR]0.7F TR V,		[SFR]0.7F BL H ,	[SFR]0.7F BL V,		[SFR]0.7F BR H ,	[SFR]0.7F BR V,"));
-			//MTF 평균
-			_ftprintf_s(fp, _T("[SFR]0.0F AVERAGE,"));
-			_ftprintf_s(fp, _T("[SFR]0.4F LT AVERAGE,[SFR]0.4F RT AVERAGE,[SFR]0.4F LB AVERAGE,[SFR]0.4F RB AVERAGE,"));
-			_ftprintf_s(fp, _T("[SFR]0.7F LT AVERAGE,[SFR]0.7F RT AVERAGE,[SFR]0.7F LB AVERAGE,[SFR]0.7F RB AVERAGE,"));
-			_ftprintf_s(fp, _T("[SFR]0.4F DIFF,[SFR]0.7F DIFF,"));
-			
-			//OC
-			_ftprintf_s(fp, _T("[OC] OC_X ,	[OC] OC_Y,"));
-			_ftprintf_s(fp, _T("[OC] OC_X DELTA ,	[OC] OC_Y DELTA,"));
-
-			_ftprintf_s(fp, _T("[FOV] Horizontal,	[FOV] Vertical,"));
-			//ROTATION
-			_ftprintf_s(fp, _T("ROTATE ,"));
-
-			//STAIN 12개
-			_ftprintf_s(fp, _T("[Blemish] LCB ,[Blemish] FPF ,[Blemish] Ymean ,"));
-			_ftprintf_s(fp, _T("[Blemish] LCB Max Value(Center) ,[Blemish] LCB Max Value(Edge) ,[Blemish] LCB Max Value(Corner) ,"));
-			_ftprintf_s(fp, _T("[Blemish] FDF Max Value(Center) ,[Blemish] FDF Max Value(Edge) ,[Blemish] FDF Max Value(Corner) ,"));
-			_ftprintf_s(fp, _T("[Blemish] Ymean Max Value(Center) ,[Blemish] Ymean Max Value(Edge) ,[Blemish] Ymean Max Value(Corner) ,"));
-
-			//Relative Illumination (Shading)
-			_ftprintf_s(fp, _T("[RI] Diff ,[RI] Center Intensity,"));
-			_ftprintf_s(fp, _T("[RI] RIconer0 ,[RI] RIconer1 ,[RI] RIconer2 ,[RI] RIconer3 ,[RI] RIconer Min, "));
-
-			//ColorReproduction
-			_ftprintf_s(fp, _T("[CR] ROI1 ,[CR] ROI2 ,[CR] ROI3 ,[CR] ROI4 ,"));
-			_ftprintf_s(fp, _T("[SATURATION] CHART 0F ,"));
-			_ftprintf_s(fp, _T("[SATURATION] CHART 4F LT ,[SATURATION] CHART 4F RT ,[SATURATION] CHART 4F BL ,[SATURATION] CHART 4F BR ,"));
-			_ftprintf_s(fp, _T("[SATURATION] CHART 7F LT ,[SATURATION] CHART 7F RT ,[SATURATION] CHART 7F BL ,[SATURATION] CHART 7F BR ,"));
-			_ftprintf_s(fp, _T("[SATURATION] OC ,"));
-			//
-			_ftprintf_s(fp, _T("[Nor Flash Memory] ISP Version ,[Nor Flash Memory] ISP Model ,"));
-			_ftprintf_s(fp, _T("[Error Flag Check] Image Sensor ,[Error Flag Check] PMIC ,"));
-			_ftprintf_s(fp, _T("[Error Flag Check] Serializer1 ,[Error Flag Check] Serializer2 ,"));
-			//--------------------------
-			_ftprintf_s(fp, _T("[Saturation] TOP_Chart_Bright_LT,	[Saturation] TOP_Chart_Bright_LB,"));
-			_ftprintf_s(fp, _T("[Saturation] TOP_Chart_Bright_RB,	[Saturation] TOP_Chart_Bright_RT,"));
-			_ftprintf_s(fp, _T("[Saturation] Side_Chart_Bright_LT,	[Saturation] Side_Chart_Bright_LB,"));
-
-			_ftprintf_s(fp, _T("[Saturation] Side_Chart_Bright_RT, [Saturation] Side_Chart_Bright_RB,"));
-			_ftprintf_s(fp, _T("[Saturation] TOP_Chart_Bright_Avg,"));
-			 
-			_ftprintf_s(fp, _T("[RI] OC_CENTER,"));
-	
-			_ftprintf_s(fp, _T("[Sensor Voltage] AVDD,[Sensor Voltage] OVDD,[Sensor Voltage] DVDD,"));
-
-			_ftprintf_s(fp, _T("[F/W] ORIGINAL FILE, [F/W] JUDGE,"));
-			_ftprintf_s(fp, _T("NG LIST,JUDGE,"));
-			_ftprintf_s(fp, _T("\n"));
-			fclose(fp);
-		}
-	}
-
-
-#ifdef _UNICODE
-	sFileMode = _T("a,ccs=UTF-8");
-#else
-	sFileMode = _T("a");
-#endif
-
-	_tfopen_s(&fp, szFilePath, sFileMode);
-	if (fp != NULL)
-	{
-		_ftprintf_s(fp, _T("'%04d-%02d-%02d %02d:%02d:%02d,"), stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
-		_ftprintf_s(fp, _T("%s, %s,"),m_szModel, VER_STR);
-		_ftprintf_s(fp, _T("%s,%s,"), g_clTaskWork[nUnit].m_szChipID , g_clMesCommunication[nUnit].m_sMesI2cSensorID);
-		
-		//CURRENT , VOL
-		_ftprintf_s(fp, _T("%.6lf,%.6lf,"), g_clMesCommunication[nUnit].m_dMesCurrent, g_clMesCommunication[nUnit].m_dMesVoltage);
-		//sfr 개별
-		for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
-		{
-			_ftprintf_s(fp, _T("%lf,"), g_clMesCommunication[nUnit].m_dMesUvAfterMTF[i]);
-		}
-		//sfr 필드 평균
-		_ftprintf_s(fp, _T("%lf,"), (g_clMesCommunication[nUnit].m_dMesUvAfterMTF[0] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[1] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[2] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[3]) / 4);
-		_ftprintf_s(fp, _T("%lf,"), (g_clMesCommunication[nUnit].m_dMesUvAfterMTF[4] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[5]) / 2);
-		_ftprintf_s(fp, _T("%lf,"), (g_clMesCommunication[nUnit].m_dMesUvAfterMTF[6] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[7]) / 2);
-		_ftprintf_s(fp, _T("%lf,"), (g_clMesCommunication[nUnit].m_dMesUvAfterMTF[8] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[9]) / 2);
-		_ftprintf_s(fp, _T("%lf,"), (g_clMesCommunication[nUnit].m_dMesUvAfterMTF[10] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[11]) / 2);
-		_ftprintf_s(fp, _T("%lf,"), (g_clMesCommunication[nUnit].m_dMesUvAfterMTF[12] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[13]) / 2);
-		_ftprintf_s(fp, _T("%lf,"), (g_clMesCommunication[nUnit].m_dMesUvAfterMTF[14] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[15]) / 2);
-		_ftprintf_s(fp, _T("%lf,"), (g_clMesCommunication[nUnit].m_dMesUvAfterMTF[16] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[17]) / 2);
-		_ftprintf_s(fp, _T("%lf,"), (g_clMesCommunication[nUnit].m_dMesUvAfterMTF[18] + g_clMesCommunication[nUnit].m_dMesUvAfterMTF[19]) / 2);
-
-		_ftprintf_s(fp, _T("%lf,%lf,"), g_clMesCommunication[nUnit].m_dMes4F_Diff, g_clMesCommunication[nUnit].m_dMes7F_Diff);
-		//OC
-		_ftprintf_s(fp, _T("%0.3lf, %0.3lf,"), g_clMesCommunication[nUnit].m_dMesUVAfterOC[0], g_clMesCommunication[nUnit].m_dMesUVAfterOC[1]);
-		_ftprintf_s(fp, _T("%0.3lf, %0.3lf,"), g_clMesCommunication[nUnit].m_dMesUVAfterDeltaOC[0], g_clMesCommunication[nUnit].m_dMesUVAfterDeltaOC[1]);
-		//FOV
-		_ftprintf_s(fp, _T("%0.3lf, %0.3lf,"), g_clMesCommunication[nUnit].m_dMesFov[0], g_clMesCommunication[nUnit].m_dMesFov[1]);
-		//ROTATE , TILT
-		_ftprintf_s(fp, _T("%.3lf,"), g_clMesCommunication[nUnit].m_dMesUvAfterRotate);
-
-		//STAIN 0 = LCB , 1 = FDF , 2 = RU_Ymean
-		_ftprintf_s(fp, _T("%.1lf,%.1lf,%.1lf,"), g_clMesCommunication[nUnit].m_nMesBlemish[0], g_clMesCommunication[nUnit].m_nMesBlemish[1], g_clMesCommunication[nUnit].m_nMesBlemish[2]);
-		for (i = 0; i < 9; i++)
-		{
-			_ftprintf_s(fp, _T("%.1lf,"), g_clMesCommunication[nUnit].m_nMesBlemishMaxDefect[i]);	//lcb , fdf , ymean
-		}
-
-		
-		//RI
-		_ftprintf_s(fp, _T("%.3lf,%.3lf,"), g_clMesCommunication[nUnit].m_dMesRiDiff, g_clMesCommunication[nUnit].m_dMesRiCenterRaw);
-
-		for (i = 0; i < 4; i++)
-		{
-			_ftprintf_s(fp, _T("%lf,"), g_clMesCommunication[nUnit].m_nMesRICorner[i]);
-		}
-
-		_ftprintf_s(fp, _T("%lf,"), g_clMesCommunication[nUnit].m_dMesRiMinDiff);
-		
-		for (i = 0; i < 4; i++)
-		{
-			_ftprintf_s(fp, _T("%lf,"), g_clMesCommunication[nUnit].m_nMesColorReproduction[i]);
-		}
-
-		for (i = 0; i < 9; i++)
-		{
-			_ftprintf_s(fp, _T("%lf,"), g_clMesCommunication[nUnit].m_dMesSaturationChart[i]);
-		}
-		_ftprintf_s(fp, _T("%lf,"), g_clMesCommunication[nUnit].m_dMesSaturationOc);
-
-		for (i = 0; i < 2; i++)
-		{
-			_ftprintf_s(fp, _T("%02X,"), g_clMesCommunication[nUnit].m_dIspData[i]);
-		}
-		//I2c
-		for (i = 0; i < 4; i++)
-		{
-			_ftprintf_s(fp, _T("%02X,"), g_clMesCommunication[nUnit].m_dI2cData[i]);
-		}
-		
-
-		//차트 , oc Bright
-		for (i = 0; i < 9; i++)
-		{
-			_ftprintf_s(fp, _T("%d,"), g_clMesCommunication[nUnit].m_dChartBright[i]);
-		}
-		for (i = 0; i < 1; i++)
-		{
-			_ftprintf_s(fp, _T("%d,"), g_clMesCommunication[nUnit].m_dOcBright[i]);
-		}
-		for (i = 0; i < 3; i++)
-		{
-			_ftprintf_s(fp, _T("%lf,"), g_clMesCommunication[nUnit].m_dMesSensorVoltage[i]);
-		}
-		//펌웨어 비교 원본 파일명
-		_ftprintf_s(fp, _T("%s,"), g_clTaskWork[nUnit].m_szBinaryFile);
-		if (g_clMesCommunication[nUnit].m_nMesFirmwareVerifyResult == 1)
-		{
-			fprintf_s(fp, "PASS,");
-		}
-		else
-		{
-			TCHAR* pszVerify[] = {
-				_T("File Save"),_T(" "),
-				_T("Original READ"),_T("SetWPDisable"),_T("GetCatMultiRegister"),_T("SetWPEnable"),_T("Verify")};
-
-			fprintf_s(fp, "FAIL(%s),", pszVerify[g_clMesCommunication[nUnit].m_nMesFirmwareVerifyResult]);
-		}
-		//
-		//
-		if (g_clMesCommunication[nUnit].m_nMesFinalResult == 1)		fprintf_s(fp, "%s ,OK,", g_clMandoInspLog[nUnit].m_sNGList);
-		else														fprintf_s(fp, "%s ,NG,", g_clMandoInspLog[nUnit].m_sNGList);
-		//
-		_ftprintf_s(fp, _T("\n"));
-		fclose(fp);
-	}
-	return true;
-}
-bool CMesCommunication::MesEolSave(int nUnit)
-{
-	SYSTEMTIME stSysTime;
-	CString strLine = _T("");
-	CStdioFile StdFile;
-	CFileException e;
-	
-	TCHAR loadPath[SIZE_OF_1K];
-	TCHAR szLog[SIZE_OF_1K];
-	double mMesTempValue = 0.0;
-	GetLocalTime(&stSysTime);
-	//if (m_sMesLotID.GetLength() < 12)
-	//{
-	//	_stprintf_s(szLog, SIZE_OF_1K, _T("[MES] LOT ERROR:%s"), m_sMesLotID);
-	//	AddLog(szLog, 1, nUnit);
-	//	return false;
-	//}
-
-	TCHAR szPath[SIZE_OF_1K];
-	TCHAR szRootPath[SIZE_OF_1K];
-	TCHAR szTempPath[SIZE_OF_1K];
-	SYSTEMTIME time;
-	::GetLocalTime(&time);
-
-
-	int i = 0;
-	int j = 0;
-	CFileFind clFinder;
-#ifdef NORINDA_MODE
-	_stprintf_s(szRootPath, SIZE_OF_1K, _T("c:\\BMS_MES"));// _T("\\\\192.168.0.79\\BMS_MES"));	
-	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\TEMPMES"), szRootPath);
-#else
-	_stprintf_s(szRootPath, SIZE_OF_1K, _T("\\\\192.168.5.1\\BMS_MES"));	//EOL//_T("C:\\BMS_MES"));	//EOL
-	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\TEMPMES"), szRootPath);
-#endif
-
-	if (clFinder.FindFile(szPath) == FALSE)
-	{
-		CreateDirectory(szPath, NULL);
-	}
-
-	//_stprintf_s(szMainPath, SIZE_OF_1K, _T("\\\\192.168.5.1\\BMS_MES"));
-	//------------------------------------------------------------------------------------------------------------------------------------------
-	//
-	//
-	//이전 모델 data Load
-	//
-	//------------------------------------------------------------------------------------------------------------------------------------------
-	_stprintf_s(szTempPath, SIZE_OF_1K, _T("%s\\%s_%d_%04d%02d%02d%02d%02d%02d.txt"), szPath,  g_clSysData.m_szFactoryCd, m_nMesCnt, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
-	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\%s_%d_%04d%02d%02d%02d%02d%02d.txt"), szRootPath, g_clSysData.m_szFactoryCd, m_nMesCnt, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
-
-	//------------------------------------------------------------------------------------------------------------------------------------------
-	//
-	if (StdFile.Open(szTempPath, CStdioFile::modeCreate | CFile::modeReadWrite))
-	{
-		strLine.Format("%s,", m_sMesLotID);				// 바코드명
-		StdFile.WriteString(strLine);
-		strLine.Format("%d,", m_nMesCnt);					// 차수
-		StdFile.WriteString(strLine);
-		strLine.Format("%d,", m_nMesFinalResult);			// 최종합부
-		StdFile.WriteString(strLine);
-
-		strLine.Format("%d:%d,", m_dwMesCycleTime, 1);
-		StdFile.WriteString(strLine);
-		strLine.Format("%.2lf:%d,", m_dMesCurrent, m_nMesCurrentResult);
-		StdFile.WriteString(strLine);
-
-		//SFR 20개 + 9개 + 1개
-		for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
-		{
-			strLine.Format(_T("%.03lf:%d,"), m_dMesUvAfterMTF[i], m_nMesUvAfterMTFResultUVAfter[i]);
-			StdFile.WriteString(strLine);
-		}
-		strLine.Format(_T("%.03lf:%d,"), m_dMesAreaAvrMTF[0], m_nMesMTFAreaAvrResult[0]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%.03lf:%d,"), m_dMesAreaAvrMTF[1], m_nMesMTFAreaAvrResult[1]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%.03lf:%d,"), m_dMesAreaAvrMTF[2], m_nMesMTFAreaAvrResult[2]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%.03lf:%d,"), m_dMesAreaAvrMTF[3], m_nMesMTFAreaAvrResult[3]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%.03lf:%d,"), m_dMesAreaAvrMTF[4], m_nMesMTFAreaAvrResult[4]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%.03lf:%d,"), m_dMesAreaAvrMTF[5], m_nMesMTFAreaAvrResult[5]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%.03lf:%d,"), m_dMesAreaAvrMTF[6], m_nMesMTFAreaAvrResult[6]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%.03lf:%d,"), m_dMesAreaAvrMTF[7], m_nMesMTFAreaAvrResult[7]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%.03lf:%d,"), m_dMesAreaAvrMTF[8], m_nMesMTFAreaAvrResult[8]);
-		StdFile.WriteString(strLine);
-
-		strLine.Format(_T("%.03lf:%d,"), m_dMes7FVariation, m_dMes7FVariationResult);
-		StdFile.WriteString(strLine);
-
-		
-		//[OC] OC_X
-		//[OC] OC_Y
-		//[OC] Delta_X
-		//[OC] Delta_Y
-		
-		strLine.Format(_T("%.02lf:%d,"), m_dMesUVAfterOC[0], m_dMesUVAfterOCResult[0]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%.02lf:%d,"), m_dMesUVAfterOC[1], m_dMesUVAfterOCResult[1]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%.02lf:%d,"), m_dMesUVAfterDeltaOC[0], m_dMesUVAfterOCResult[0]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%.02lf:%d,"), m_dMesUVAfterDeltaOC[1], m_dMesUVAfterOCResult[1]);
-		StdFile.WriteString(strLine);
-		
-		
-		//[Rotate] Rotate(°)
-		//[Tilt] Tilt_X(°)
-		//[Tilt] Tilt_Y(°)
-		
-		strLine.Format(_T("%.02lf:%d,"), m_dMesUvAfterRotate, m_dMesRotateUVAfterResult);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%.02lf:%d,"), m_dMesTilt[0], m_dMesTiltResult[0]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%.02lf:%d,"), m_dMesTilt[1], m_dMesTiltResult[1]);
-		StdFile.WriteString(strLine);
-		
-		//[Defect] Hot
-		//[Defect] Dead
-		//[Defect] Row
-		//[Defect] Column
-		strLine.Format(_T("%d:%d,"), m_nMesDefect[8], m_nMesDefectResult[8]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%d:%d,"), m_nMesDefect[9], m_nMesDefectResult[9]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%d:%d,"), m_nMesDefect[10], m_nMesDefectResult[10]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%d:%d,"), m_nMesDefect[11], m_nMesDefectResult[11]);
-		StdFile.WriteString(strLine);
-
-		//[Blemish] FDF
-		//[Blemish] LCB
-		//[Blemish] Ymean
-		//[Blemish] FDF Max Value (Center)
-		//[Blemish] FDF Max Value (Edge)
-		//[Blemish] FDF Max Value (Corner)
-		//[Blemish] LCB Max Value (Center)
-		//[Blemish] LCB Max Value (Edge)
-		//[Blemish] LCB Max Value (Corner)
-		//[Blemish] Ymean Max Value (Center)
-		//[Blemish] Ymean Max Value (Edge)
-		//[Blemish] Ymean Max Value (Corner)
-		for (i = 0; i < 3; i++)
-		{
-			strLine.Format(_T("%.01lf:%d,"), m_nMesBlemish[i], m_nMesBlemishResult[i]);
-			StdFile.WriteString(strLine);
-		}
-		for (i = 0; i < 9; i++)
-		{
-			strLine.Format(_T("%.01lf:%d,"), m_nMesBlemishMaxDefect[i], m_nMesBlemishMaxDefectResult[i]);
-			StdFile.WriteString(strLine);
-		}
-		
-		//[CU] Delta_Sum_Min
-		//[CU] Delta_Sum_Max :판정 o
-		//[CU] Delta_RG_Min
-		//[CU] Delta_RG_Max :판정 o
-		//[CU] Delta_BG_Min
-		//[CU] Delta_BG_Max :판정 o
-		//[CU] Delta_GrGb_Min
-		//[CU] Delta_GrGb_Max :판정 o
-		for (i = 0; i < 8; i++)
-		{
-			strLine.Format(_T("%.03lf:%d,"), m_nMesColorUniformity[i], m_nMesColorUniformityResult[i]);
-			StdFile.WriteString(strLine);
-		}
-		
-		//[RI] ROI0_R
-		//[RI] ROI0_Gr
-		//[RI] ROI0_Gb
-		//[RI] ROI0_B
-		//[RI] ROI1_R
-		//[RI] ROI1_Gr
-		//[RI] ROI1_Gb
-		//[RI] ROI1_B
-		//[RI] ROI2_R
-		//[RI] ROI2_Gr
-		//[RI] ROI2_Gb
-		//[RI] ROI2_B
-		//[RI] ROI3_R
-		//[RI] ROI3_Gr
-		//[RI] ROI3_Gb
-		//[RI] ROI3_B
-		//[RI] ROI4_R
-		//[RI] ROI4_Gr
-		//[RI] ROI4_Gb
-		//[RI] ROI4_B
-
-		//[RI] RI_Min_R(%)
-		//[RI] RI_Min_Gr(%)
-		//[RI] RI_Min_Gb(%)
-		//[RI] RI_Min_B(%)
-
-		//[RI] RG_Min(%)
-		//[RI] RG_Max(%)
-		//[RI] BG_Min(%)
-		//[RI] BG_Max(%)
-		for (i = 0; i < 5; i++)
-		{
-			strLine.Format(_T("%.03lf:%d,"), m_nMesRIRoi[0][i][0], m_nMesRIRoiResult[0][i][0]);
-			StdFile.WriteString(strLine);
-			strLine.Format(_T("%.03lf:%d,"), m_nMesRIRoi[0][i][1], m_nMesRIRoiResult[0][i][1]);
-			StdFile.WriteString(strLine);
-			strLine.Format(_T("%.03lf:%d,"), m_nMesRIRoi[0][i][2], m_nMesRIRoiResult[0][i][2]);
-			StdFile.WriteString(strLine);
-			strLine.Format(_T("%.03lf:%d,"), m_nMesRIRoi[0][i][3], m_nMesRIRoiResult[0][i][3]);
-			StdFile.WriteString(strLine);
-		}
-		for (i = 0; i < 8; i++)
-		{
-			strLine.Format(_T("%.03lf:%d,"), m_nMesRI[0][i], m_nMesRIResult[0][i]);
-			StdFile.WriteString(strLine);
-		}
-
-		//[Dark Pixel Uniformity] ROI0_R
-		//[Dark Pixel Uniformity] ROI0_Gr
-		//[Dark Pixel Uniformity] ROI0_Gb
-		//[Dark Pixel Uniformity] ROI0_B
-		//[Dark Pixel Uniformity] ROI1_R
-		//[Dark Pixel Uniformity] ROI1_Gr
-		//[Dark Pixel Uniformity] ROI1_Gb
-		//[Dark Pixel Uniformity] ROI1_B
-		//[Dark Pixel Uniformity] ROI2_R
-		//[Dark Pixel Uniformity] ROI2_Gr
-		//[Dark Pixel Uniformity] ROI2_Gb
-		//[Dark Pixel Uniformity] ROI2_B
-		//[Dark Pixel Uniformity] ROI3_R
-		//[Dark Pixel Uniformity] ROI3_Gr
-		//[Dark Pixel Uniformity] ROI3_Gb
-		//[Dark Pixel Uniformity] ROI3_B
-		//[Dark Pixel Uniformity] ROI4_R
-		//[Dark Pixel Uniformity] ROI4_Gr
-		//[Dark Pixel Uniformity] ROI4_Gb
-		//[Dark Pixel Uniformity] ROI4_B
-		//[Dark Pixel Uniformity] RI_Min_R(%)
-		//[Dark Pixel Uniformity] RI_Min_Gr(%)
-		//[Dark Pixel Uniformity] RI_Min_Gb(%)
-		//[Dark Pixel Uniformity] RI_Min_B(%)
-		for (i = 0; i < 5; i++)
-		{
-			strLine.Format(_T("%.03lf:%d,"), m_nMesRIRoi[1][i][0], m_nMesRIRoiResult[1][i][0]);
-			StdFile.WriteString(strLine);
-			strLine.Format(_T("%.03lf:%d,"), m_nMesRIRoi[1][i][1], m_nMesRIRoiResult[1][i][1]);
-			StdFile.WriteString(strLine);
-			strLine.Format(_T("%.03lf:%d,"), m_nMesRIRoi[1][i][2], m_nMesRIRoiResult[1][i][2]);
-			StdFile.WriteString(strLine);
-			strLine.Format(_T("%.03lf:%d,"), m_nMesRIRoi[1][i][3], m_nMesRIRoiResult[1][i][3]);
-			StdFile.WriteString(strLine);
-		}
-		for (i = 0; i < 4; i++)		//dark는 4개만
-		{
-			strLine.Format(_T("%.03lf:%d,"), m_nMesRI[1][i], m_nMesRIResult[1][i]);
-			StdFile.WriteString(strLine);
-		}
-		//[SNR] SNR_R_5000K
-		//[SNR] SNR_Gr_5000K
-		//[SNR] SNR_Gb_5000K
-		//[SNR] SNR_B_5000K
-
-		//[FPN] C_FPN_R_5000K
-		//[FPN] C_FPN_Gr_5000K
-		//[FPN] C_FPN_Gb_5000K
-		//[FPN] C_FPN_B_5000K
-
-		//[FPN] R_FPN_R_5000K
-		//[FPN] R_FPN_Gr_5000K
-		//[FPN] R_FPN_Gb_5000K
-		//[FPN] R_FPN_B_5000K
-		for (i = 0; i < 4; i++)
-		{
-			strLine.Format(_T("%.03lf:%d,"), m_nMesFpn5000[0][i], m_nMesFpn5000Result[0][i]);
-			StdFile.WriteString(strLine);
-		}
-		for (i = 0; i < 4; i++)
-		{
-			strLine.Format(_T("%.03lf:%d,"), m_nMesFpn5000[2][i], m_nMesFpn5000Result[2][i]);	//Col먼저라서 2 index
-			StdFile.WriteString(strLine);
-		}
-		for (i = 0; i < 4; i++)
-		{
-			strLine.Format(_T("%.03lf:%d,"), m_nMesFpn5000[1][i], m_nMesFpn5000Result[1][i]);
-			StdFile.WriteString(strLine);
-		}
-		//
-		//[SNR] SNR_R_Dark
-		//[SNR] SNR_Gr_Dark
-		//[SNR] SNR_Gb_Dark
-		//[SNR] SNR_B_Dark
-
-		//[FPN] C_FPN_R_Dark
-		//[FPN] C_FPN_Gr_Dark
-		//[FPN] C_FPN_Gb_Dark
-		//[FPN] C_FPN_B_Dark
-
-		//[FPN] R_FPN_R_Dark
-		//[FPN] R_FPN_Gr_Dark
-		//[FPN] R_FPN_Gb_Dark
-		//[FPN] R_FPN_B_Dark
-		for (i = 0; i < 4; i++)
-		{
-			strLine.Format(_T("%.03lf:%d,"), m_nMesFpnDark[0][i], m_nMesFpnDarkResult[0][i]);
-			StdFile.WriteString(strLine);
-		}
-		for (i = 0; i < 4; i++)
-		{
-			strLine.Format(_T("%.03lf:%d,"), m_nMesFpnDark[2][i], m_nMesFpnDarkResult[2][i]);	//Col먼저라서 2 index
-			StdFile.WriteString(strLine);
-		}
-		for (i = 0; i < 4; i++)
-		{
-			strLine.Format(_T("%.03lf:%d,"), m_nMesFpnDark[1][i], m_nMesFpnDarkResult[1][i]);
-			StdFile.WriteString(strLine);
-		}
-
-		//[IR] Average Brightness
-		//[IR] Standard Deviation
-		strLine.Format(_T("%.03lf:%d,"), m_dMesIRFilterValue[1], m_dMesIRFilterResult[1]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%.03lf:%d,"), m_dMesIRFilterValue[2], m_dMesIRFilterResult[2]);
-		StdFile.WriteString(strLine);
-		//[WB] R_3000K
-		//[WB] Gr_3000K
-		//[WB] Gb_3000K
-		//[WB] B_3000K
-		//[WB] R_5000K
-		//[WB] Gr_5000K
-		//[WB] Gb_5000K
-		//[WB] B_5000K
-		//[WB] R_Dark
-		//[WB] Gr_Dark
-		//[WB] Gb_Dark
-		//[WB] B_Dark
-		
-		for (i = 0; i < 3; i++)
-		{
-			strLine.Format(_T("%.03lf:%d,"), m_nMesColorSensitivity[i][0], m_nMesColorSensitivityResult[i][0]);
-			StdFile.WriteString(strLine);
-			strLine.Format(_T("%.03lf:%d,"), m_nMesColorSensitivity[i][1], m_nMesColorSensitivityResult[i][1]);
-			StdFile.WriteString(strLine);
-			strLine.Format(_T("%.03lf:%d,"), m_nMesColorSensitivity[i][2], m_nMesColorSensitivityResult[i][2]);
-			StdFile.WriteString(strLine);
-			strLine.Format(_T("%.03lf:%d,"), m_nMesColorSensitivity[i][3], m_nMesColorSensitivityResult[i][3]);
-			StdFile.WriteString(strLine);
-			strLine.Format(_T("%.03lf:%d,"), m_nMesColorSensitivity[i][4], m_nMesColorSensitivityResult[i][4]);
-			StdFile.WriteString(strLine);
-			strLine.Format(_T("%.03lf:%d,"), m_nMesColorSensitivity[i][5], m_nMesColorSensitivityResult[i][5]);
-			StdFile.WriteString(strLine);
-			strLine.Format(_T("%.03lf:%d,"), m_nMesColorSensitivity[i][6], m_nMesColorSensitivityResult[i][6]);
-			StdFile.WriteString(strLine);
-		}
-		//[Lens Shading] CH0_Min_3000K
-		//[Lens Shading] CH0_Avg_3000K
-		//[Lens Shading] CH0_Max_3000K
-		//[Lens Shading] CH1_Min_3000K
-		//[Lens Shading] CH1_Avg_3000K
-		//[Lens Shading] CH1_Max_3000K
-		//[Lens Shading] CH2_Min_3000K
-		//[Lens Shading] CH2_Avg_3000K
-		//[Lens Shading] CH2_Max_3000K
-		//[Lens Shading] CH3_Min_3000K
-		//[Lens Shading] CH3_Avg_3000K
-		//[Lens Shading] CH3_Max_3000K
-		//
-		//[Lens Shading] CH0_Min_5000K
-		//[Lens Shading] CH0_Avg_5000K
-		//[Lens Shading] CH0_Max_5000K
-		//[Lens Shading] CH1_Min_5000K
-		//[Lens Shading] CH1_Avg_5000K
-		//[Lens Shading] CH1_Max_5000K
-		//[Lens Shading] CH2_Min_5000K
-		//[Lens Shading] CH2_Avg_5000K
-		//[Lens Shading] CH2_Max_5000K
-		//[Lens Shading] CH3_Min_5000K
-		//[Lens Shading] CH3_Avg_5000K
-		//[Lens Shading] CH3_Max_5000K
-		for (i = 0; i < 12; i++)
-		{
-			strLine.Format(_T("%.03lf:%d,"), m_nMesLensShading[0][i], m_nMesLensShadingResult[0][i]);
-			StdFile.WriteString(strLine);
-		}
-		for (i = 0; i < 12; i++)
-		{
-			strLine.Format(_T("%.03lf:%d,"), m_nMesLensShading[1][i], m_nMesLensShadingResult[1][i]);
-			StdFile.WriteString(strLine);
-		}
-
-		//[Mean Values] Color temperature 1
-		//[Mean Values] Color temperature 2
-		//[Color Shading] Horizontal grid number
-		//[Color Shading] Vertical grid number
-		//[Color Shading] High color temperature
-		//[Color Shading] Low color temperature
-
-
-		//[CRC] Mean Values
-		//[CRC] Color Shading
-
-
-
-		//[Received MES_EEPROM] 0 to 99
-		//[Received MES_EEPROM] 100 to 199
-		//[Received MES_EEPROM] 200 to 299
-		//[Received MES_EEPROM] 300 to 345
-		//g_clMesCommunication[nUnit].mMesGetEEpromData[index]
-
-		//[EEPROM] 346 to 445
-		//[EEPROM] 446 to 545
-		//[EEPROM] 546 to 645
-		//[EEPROM] 646 to 745
-		//[EEPROM] 746 to 845
-		//[EEPROM] 846 to 945
-		//[EEPROM] 946 to 1045
-		//[EEPROM] 1046 to 1145
-		//[EEPROM] 1146 to 1245
-		//[EEPROM] 1246 to 1345
-		//[EEPROM] 1346 to 1445
-		//[EEPROM] 1446 to 1545
-		//[EEPROM] 1546 to 1645
-		//[EEPROM] 1646 to 1745
-		//[EEPROM] 1746 to 1845
-		//[EEPROM] 1846 to 1945
-		//[EEPROM] 1946 to 2045
-		//[EEPROM] 2046 to 2145
-		//[EEPROM] 2146 to 2245
-		//[EEPROM] 2246 to 2345
-		//[EEPROM] 2346 to 2445
-		//[EEPROM] 2446 to 2457
-		
-		int mEolStartAddr = 346;
-		int mindex = 0;
-
-
-
-		
-#ifdef OC___LIGHT___OLD
-		strLine.Format(_T("%d:%d\r\n"), m_dMesOcLightTime[0], 1);
-		StdFile.WriteString(strLine);
-#else
-		//oc light channel
-		for (i = 0; i < 4; i++)
-		{
-			m_dMesOcLightTimeResult[i] = 1;
-			if (m_dMesOcLightTime[i] > 20000)
-			{
-				m_dMesOcLightTimeResult[i] = 0;
-			}
-		}
-
-		strLine.Format(_T("%d:%d,"), m_dMesOcLightTime[0], m_dMesOcLightTimeResult[0]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%d:%d,"), m_dMesOcLightTime[1], m_dMesOcLightTimeResult[1]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%d:%d,"), m_dMesOcLightTime[2], m_dMesOcLightTimeResult[2]);
-		StdFile.WriteString(strLine);
-		strLine.Format(_T("%d:%d\r\n"), m_dMesOcLightTime[3], m_dMesOcLightTimeResult[3]);
-		StdFile.WriteString(strLine);
-#endif
-		
-		//
-		StdFile.Close();
-	}
-	else
-	{
-
-		_stprintf_s(szLog, SIZE_OF_1K, _T("[MES] 파일 생성 실패"));
-		AddLog(szLog, 1, nUnit);
-		return false;
-	}
-	//CopyFile(szTempPath, szPath, TRUE);
-	MoveFile(szTempPath, szPath);
-	return true;
-}
-
-bool CMesCommunication::MesAASave(int nUnit)
-{
-	
-	return true;
-
-}
-
-

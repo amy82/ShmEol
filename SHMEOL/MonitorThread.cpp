@@ -219,6 +219,8 @@ void CMonitorThread::CheckCurtainState()
 			TCHAR szLog[SIZE_OF_1K];
 			g_pCarAABonderDlg->PauseAutoProcess(UNIT_AA1);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[ERROR] 자동 운전 중 CURTAIN 감지. 일시 정지"));
+
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1080);
 			AddLog(szLog, 1, UNIT_AA1, true);
 			return;
 		}

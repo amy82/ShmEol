@@ -11,12 +11,15 @@
 
 IMPLEMENT_DYNAMIC(CMessageModalDlg, CDialogEx)
 
-CMessageModalDlg::CMessageModalDlg(CString sTitle, CString sMsg, COLORREF bgColor, CWnd* pParent /*=NULL*/)
+CMessageModalDlg::CMessageModalDlg(CString sTitle, CString sMsg, COLORREF bgColor, CString sYesBtn, CString sNoBtn, CWnd* pParent /*=NULL*/)
 	: CDialogEx(CMessageModalDlg::IDD, pParent)
 {
 	m_sTitle = sTitle;
 	m_sMsg = sMsg;
 	m_bgColor = bgColor;
+	m_sLeftBtnName = sYesBtn;
+	m_sRightBtnName = sNoBtn;
+	m_brushEdit.CreateSolidBrush(MESSAGE_BG_COLOR);
 }
 
 CMessageModalDlg::~CMessageModalDlg()
@@ -30,6 +33,9 @@ void CMessageModalDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATIC_MESSAGE_MODAL_MSG, m_clColorStaticMsg);	
 	DDX_Control(pDX, IDC_BUTTON_MESSAGE_MODAL_YES, m_clColorButtonYes);
 	DDX_Control(pDX, IDC_BUTTON_MESSAGE_MODAL_NO, m_clColorButtonNo);
+
+
+	DDX_Control(pDX, IDC_EDIT_MESSAGE_MODAL_MSG, m_edtModalMsg);
 }
 
 
@@ -38,6 +44,7 @@ BEGIN_MESSAGE_MAP(CMessageModalDlg, CDialogEx)
 	ON_WM_LBUTTONDOWN()	
 	ON_BN_CLICKED(IDC_BUTTON_MESSAGE_MODAL_YES, &CMessageModalDlg::OnBnClickedButtonMessageModalYes)
 	ON_BN_CLICKED(IDC_BUTTON_MESSAGE_MODAL_NO, &CMessageModalDlg::OnBnClickedButtonMessageModalNo)
+	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 
@@ -101,7 +108,7 @@ void CMessageModalDlg::InitCtrl()
 	m_clColorStaticMsg.SetFont(&m_clFontMid);
     m_clColorStaticMsg.SetBorder(TRUE);
     m_clColorStaticMsg.SetFontSize(27);
-    m_clColorStaticMsg.SetWindowText(m_sMsg);
+   // m_clColorStaticMsg.SetWindowText(m_sMsg);
     m_clColorStaticMsg.SetBkColor(MESSAGE_BG_COLOR);
     
 
@@ -109,6 +116,30 @@ void CMessageModalDlg::InitCtrl()
     m_clColorButtonNo.state = 100;
 	//m_clColorButtonYes.ChangeColor(m_bgColor);
 	//m_clColorButtonNo.ChangeColor(m_bgColor);
+
+	CFont m_font;
+	// 폰트 설정 (Arial, 크기 20)
+	m_font.CreatePointFont(135, _T("맑은 고딕"));  // 크기 20포인트는 200 단위 사용
+	m_edtModalMsg.SetFont(&m_font);
+	m_edtModalMsg.ModifyStyle(0, ES_MULTILINE | ES_AUTOVSCROLL | ES_WANTRETURN);
+	//m_edtModalMsg.col
+
+
+	m_clColorButtonYes.SetWindowTextA(m_sLeftBtnName);
+	m_clColorButtonNo.SetWindowTextA(m_sRightBtnName);
+	m_clColorButtonYes.Invalidate();
+	m_clColorButtonNo.Invalidate();
+
+
+	m_sMsg.Replace(_T("\n"), _T("\r\n"));
+	m_edtModalMsg.SetWindowText(m_sMsg);
+	m_edtModalMsg.Invalidate();
+
+
+
+
+
+
 }
 
 //-----------------------------------------------------------------------------
@@ -164,3 +195,23 @@ BOOL CMessageModalDlg::PreTranslateMessage(MSG* pMsg)
 }
 
 
+
+
+HBRUSH CMessageModalDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	// TODO:  Change any attributes of the DC here
+	if (pWnd->GetDlgCtrlID() == IDC_EDIT_MESSAGE_MODAL_MSG
+		)
+	{
+		pDC->SetTextColor(RGB_COLOR_BLACK);
+		pDC->SetBkColor(MESSAGE_BG_COLOR);// RGB(100, 100, 100));
+		pDC->SetBkMode(TRANSPARENT);
+
+		return (HBRUSH)m_brushEdit;
+		//return (HBRUSH)::GetStockObject(NULL_BRUSH);
+	}
+	// TODO:  Return a different brush if the default is not desired
+	return hbr;
+}

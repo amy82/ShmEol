@@ -15,6 +15,7 @@
 #include "LightDlg.h"
 #include "AlarmDlg.h"
 #include "ConfigDlg.h"
+#include "MainDlg.h"
 #include "VisionStatic.h"
 #include "resource.h"
 #include "afxwin.h"
@@ -39,6 +40,11 @@
 #include "VisionGrabThread.h"
 #include "ModelSelectDlg.h"
 #include "InterLockDlg.h"
+#include "UbiGem.h"
+#include "IdlePopupDlg.h"
+#include "MessageInput.h"
+#include "MessageLot.h"
+
 
 // CAutoInspDlg 대화 상자
 class CAutoInspDlg : public CDialogEx
@@ -74,6 +80,7 @@ public:
 
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 public:
+	CMainDlg m_clMainDlg;
     CManualDlg m_clManualDlg;
     CTeachingDlg m_clTeachingDlg;
     CCcdDlg m_clCcdDlg;
@@ -82,6 +89,9 @@ public:
     CAlarmDlg m_clAlarmDlg;
     CConfigDlg m_clConfigDlg;
     CProductNGDlg m_clProductNGDlg[MAX_UNIT_COUNT];
+	CUbiGem m_clUbiGemDlg;
+
+
    // CUpdateHistoryDlg m_clUpdateHistoryDlg;
 	//CModelSelectDlg m_clModelSelectDlg;
 
@@ -96,12 +106,17 @@ public:
 	CVisionGrabThread m_clVisionGrabThread[MAX_UNIT_COUNT];
 
 	CLogThread m_clLogThread;
+
+	CIdlePopupDlg m_clIdlePopupDlg;
+	//CMessageInput m_clMessageInput;
+	CMessageLot m_clMessageLot;
 	//CLensAxisThread m_clLensAxisThread[MAX_UNIT_COUNT];
 private:
 	bool m_bMesConnect;
 
 	CMesConnSocket m_clMesConnSocket;
 public:
+	
     CLabel m_clColorStaticBcr[2];
     CLabel m_clColorStaticOutput[2];
     CLabel m_clColorStaticPin[2];
@@ -208,7 +223,7 @@ private:
 
 	void InformationState();
 	bool SkipLog(CString strLog);
-
+	
 public:
 	bool m_bMasterModeState[2];
 	int m_bCamState[2];
@@ -386,4 +401,5 @@ public:
 	afx_msg void OnStnClickedStaticMainPinVal1();
 	afx_msg void OnStnClickedStaticMainCurrMode3();
 	afx_msg void OnBnClickedButtonMainDoor1();
+//	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 };

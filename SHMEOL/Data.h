@@ -42,6 +42,28 @@ public:
 	CArray<CModelInfo, CModelInfo&> m_clModelList;
 	int m_nCurrentNo;
 	int m_nTotalCount;
+
+	TCHAR m_szCurrentModel[SIZE_OF_100BYTE];					// MODEL NAME
+
+
+
+public:
+	int iniRecipeListLoad();
+	void xmlRecipeCreate(CString copyPPid, CString createPPid);
+	void xmlRecipeDelete(CString PPid);
+	void RecipeModelLoad();
+	void RecipeModelSave();
+	std::vector<std::string> m_vRecipeVec;
+
+
+
+public:
+	bool RecipeModelDel(CString PPid);
+
+	void RecipeListLoad();
+	void RecipeListSave();
+	
+	CArray<CModelInfo, CModelInfo&> m_clRecipeList;
 };
 
 
@@ -57,8 +79,8 @@ public:
 	void CopyBackup();
 
 public:
-	int m_nModelIndex;		//1 = MODERATE , 2 = NARROW
-	TCHAR m_szModelTypeName[SIZE_OF_100BYTE];		// 모델 명
+	//int m_nModelIndex;		//1 = MODERATE , 2 = NARROW
+	//TCHAR m_szModelTypeName[SIZE_OF_100BYTE];		// 모델 명
 };
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -76,6 +98,9 @@ public:
 
 	void commonDataLoad();
 	void commonDataSave();
+
+	
+
 	void sDCopyBackup();
 
 	void SfrOffsetLoad();
@@ -428,38 +453,38 @@ public:
     double m_OcSpec[2];//
 
     //Color Sensitivity ColorMean WhiteBalance
-    double m_ColorSensitivitySpec[3][g_ColorSenscount];//	 0 = 3000k , 1 = 5000k ,2 = Dark
+    //double m_ColorSensitivitySpec[3][g_ColorSenscount];//	 0 = 3000k , 1 = 5000k ,2 = Dark
 
     //SNR
     double m_SnrSpec[2];//
 
 	//Uniform 
-	double m_UniformSpec[g_ColorUniformitycount];// [14];//
+	//double m_UniformSpec[g_ColorUniformitycount];// [14];//
 
 	//Fpn snr row column noise 
-	double m_FpnSpec[g_Fpncount];
+	//double m_FpnSpec[g_Fpncount];
 	//Relative Illumination  
 	double m_RIlluminationSpec[5];//
 
 	//Blemish Stain  
-	double m_BlemishSpec[g_Blemishcount];
-	double m_LcbSpec[g_StainLcbcount];
-	double m_YmeanSpec[g_StainYmeancount];
-	double m_FDFSpec[g_StainFdfcount];
+	//double m_BlemishSpec[g_Blemishcount];
+	//double m_LcbSpec[g_StainLcbcount];
+	//double m_YmeanSpec[g_StainYmeancount];
+	//double m_FDFSpec[g_StainFdfcount];
 
 	int m_LcbOffsetSpec[4];
 	int m_YmeanOffsetSpec[4];
 	int m_FDFOffsetSpec[4];
 
 	//Defect
-	double m_DefectSpec[g_Defectcount];
-	double m_ICSpec[g_Iccount];
+	//double m_DefectSpec[g_Defectcount];
+	//double m_ICSpec[g_Iccount];
 	//Chart  
 	double m_ChartSpec[8];
 	//Saturation  
 	double m_SaturationSpec[6];
 	//IR FILTER
-	double m_IrFilterSpec[g_Ircount];
+	//double m_IrFilterSpec[g_Ircount];
 
 	//Color Reproduction  
 	double m_ColorReproductionSpec[32];
@@ -471,9 +496,9 @@ public:
 	double INSP_Voltage_Spec;
 	double m_VoltageSpec[8];
     //RI  
-    double m_RISpec[g_Ricount];//m_RISpec[6] = CornerVariationMin , m_RISpec[7] = CornerVariationMax
+   // double m_RISpec[g_Ricount];//m_RISpec[6] = CornerVariationMin , m_RISpec[7] = CornerVariationMax
 	//COLOR SHADING  
-    double m_ColorShadingSpec[g_ColorShadingcount];
+    //double m_ColorShadingSpec[g_ColorShadingcount];
 
 	//Lens shading Roi 총 221개 (가로 17개 , 세로 13개)
 	CRect m_LensShadingRoi[221];
@@ -650,6 +675,7 @@ public:
 	int m_nAlignPass;
 	int m_nRawSavePass;
 	int m_nJxlSavePass;
+	int m_nIdleReasonPass;
 
 
 	int m_LxData[2];		//0 = 5000k , 1 = 6500K
@@ -735,7 +761,7 @@ typedef struct STRUC_SFR_INSP
 	float	_64_fSfrN4[MAX_SFR_INSP_COUNT];
 	float	_64_fSfrN8[MAX_SFR_INSP_COUNT];
 
-    double	_fAverSfr[MAX_SFR_INSP_COUNT];
+    double	_fAverSfr[MAX_LAST_INSP_COUNT];
 
 	double dSfrDataX[MAX_SFR_INSP_COUNT][MAX_SFR_DATA_COUNT];
 	double dSfrDataY[MAX_SFR_INSP_COUNT][MAX_SFR_DATA_COUNT];
@@ -796,7 +822,21 @@ public:
 	void InitSfrInsp();
     void InitSfrSpec();
 	void SetUnit(int nUnit);
+public:
+	int bRecv_Lgit_Pp_select;
 
+	int bRecv_S6F12_Process_State_Change;
+	int bRecv_S6F12_PP_Selected;
+	int bRecv_S6F12_PP_UpLoad_Completed;
+	int bRecv_S6F12_Lot_Processing_Started;
+	int bRecv_S6F12_Lot_Apd;
+	int bRecv_S6F12_Lot_Processing_Completed;
+	int bRecv_S6F12_Lot_Processing_Completed_Ack;
+
+	int bRecv_S7F25_Formatted_Process_Program;
+
+	int bRecv_S2F49_PP_UpLoad_Confirm;		//Confirm or Fail
+	int bRecv_S2F49_LG_Lot_Start;	//Start or Id Fail
 public:
 	int m_nUnit;							// UNIT NO
 
@@ -1015,7 +1055,9 @@ public:
 	//7 = Dark Pixel Uniformity (dark)	[Color Sensitivity - Mean]
 	//8 = White Balance (dark)			[FPN]
 	//9 = Row/Col. Noise (dark)			[IR Filter]
-
+	bool bIdleTimeExceed;
+	TCHAR m_szIdleStartTime[SIZE_OF_100BYTE];
+	TCHAR m_szIdleEndTime[SIZE_OF_100BYTE];
 
 	//[0]BCR , [1]전류 , [2]I2C , [3]OC , [4]MTF , [5]DISTORTION , [6]STAIN , [7]RI , [8]DEFECT
     std::vector<int> m_vDirection;
@@ -1030,6 +1072,9 @@ public:
 	std::vector<char> BinOrgBuffer;
 	bool m_bFirmwareStop;
 	int BinOrgBufferSize;
+
+
+
 };
 
 
@@ -1351,7 +1396,7 @@ public:
 	//기존 60LP, C/P 추가한 부분이 많고, C/P은 재사용할수 도 있으니
 	//배열 3개는 그래도 가고, [0]배열, [2]배열은 사용 하지 않는다.
 	// AA장비 변수
-	double	m_dAASFR_Spec[MAX_SFR_INSP_COUNT][2];//[3];	
+	//double	m_dAASFR_Spec[MAX_SFR_INSP_COUNT][2];//[3];	
 	//210825
 	// [INDEX][0][0]  : AA
 	// [INDEX][0][1]  : EOL
@@ -1374,360 +1419,3 @@ private:
 };
 
 
-class CMesCommunication
-{
-public:
-	CMesCommunication();
-	~CMesCommunication();
-
-	void Insp();
-	void Save(int index);
-public:
-
-	bool g_FinalEolLog(int index);
-	bool g_Final_OqaLog(int index);
-
-	bool g_FovVertexLog(int index);
-
-	bool g_Grr____LaserMotorPos(int index);
-	bool g_Grr____Align(int index);
-	bool MesAASave(int index);
-	bool MesEolSave(int index);
-
-public:
-	CString m_sMesLotID;				// 바코드명
-	int		m_nMesCnt;					// 차수
-	int		m_nMesFinalResult;			// 합부
-
-	DWORD m_dwCycleTactStartTime;
-	DWORD m_dwCycleTactEndTime;
-	DWORD m_dwMesCycleTime;
-
-
-
-	//FirmwareVerify
-	int		m_nMesFirmwareVerifyResult;
-
-
-	int		m_nMesCycleTimeResult;
-
-	double	m_dMesCurrent;				// 전류측정
-	int		m_nMesCurrentResult;
-	double	m_dMesVoltage;				// SUPPLY VOLTAGE		[4]
-	int		m_nMesVoltageResult;		//[4]	
-
-	double	m_dMesSensorVoltage[3];				// SENSOR VOLTAGE		[4]
-	int		m_nMesSensorVoltageResult[3];		//[4]	
-
-	
-	double	m_dMesUVAfterOC[2];			//OC 결과.[X/Y]  UV 후
-	double	m_dMesUVAfterDeltaOC[2];	//OC 결과.[X/Y]  UV 후 OC_Y - Image Height / 2
-	int		m_nMesUVAfterOCResult[2];
-	
-
-	int		m_nMesDefect[12];
-	int		m_nMesDefectResult[12];
-
-
-	double  m_dMesOC[2];
-	double  m_dMesDeltaOC[2];
-
-	double  m_dMesDeltaUVAfterOC[2];
-	double	m_nMesBlemish[3];			//0 = LCB , 1 = FDF , 2 = RU_Ymean
-	double	m_nMesBlemishMaxDefect[9];
-	int	m_nMesBlemishMaxDefectResult[9];
-
-	double	m_nMesColorUniformity[8];
-	int		m_nMesColorUniformityResult[8];
-
-	double	m_nMesRIRoi[2][5][4];//0 = white , 1 = dark
-	int		m_nMesRIRoiResult[2][5][4];
-
-	double	m_nMesSHMRI[20];		//lim240430
-
-	double  m_nMesRICorner[4];
-	double  m_dMesRiDiff;
-	double  m_dMesRiMinDiff;
-	double m_dMesRiCenterRaw;
-
-	int		m_nMesRICornerResult[4];
-	int		m_nMesRIDiffResult;
-	int		m_nMesRIMinDiffResult;
-	int		m_nMesRICenterRawResult;
-
-
-
-	int		m_nMesRIResult[2][8];
-
-	double	m_nMesFpn5000[3][4];		//0 = snr, 1 = c , 2 = r
-	int		m_nMesFpn5000Result[3][4];
-
-	double	m_nMesFpnDark[3][4];		//0 = snr, 1 = c , 2 = r
-	int		m_nMesFpnDarkResult[3][4];
-
-	double	m_nMesLensShading[2][12];		//0 = 3000k , 1 = 5000k
-	int		m_nMesLensShadingResult[2][12];
-
-
-	int		m_nMesStain;
-	int		m_nMesUVBeforeOCResult;
-	int		m_nMesDistortionResult;
-	int		m_nMesStainResult;
-    int		m_nMesDarkResult;
-
-	byte	m_dI2cData[4];
-	int		m_dI2cDataResult[4];
-
-	byte	m_dIspData[2];
-	int		m_dIspDataResult[2];
-	
-	int m_dChartBright[9];
-	int	m_dChartBrightResult[9];
-	int m_dOcBright[5];
-	int	m_dOcBrightResult[5];
-
-	byte mCrcData[5];
-	//TCHAR	mStrData[MES_VERIFY_SPEC_COUNT][SIZE_OF_100BYTE];
-	//byte mReadEEpromData[2500];
-	//byte mMesGetEEpromData[2500];		//cal에서 보내주는 eeprom data 물류 pc에서 바코드 받을 때 받는다.
-	//byte compareData[300];
-
-	double m_dGrrBeForeLaserPos[4];
-
-	double m_dGrrLaserPos[4];
-	double m_dGrrMotorPos[6];
-	double m_dGrrAlignPos[3];
-
-
-	double   m_dMesUvBeforeMTF[MAX_SFR_INSP_COUNT];
-	double   m_dMesUvAfterMTF[MAX_SFR_INSP_COUNT];
-
-	double m_dMesSaturationChart[MAX_LAST_INSP_COUNT];
-	double m_dMesSaturationOc;
-
-	double	m_dMes4F_Diff;
-	double	m_dMes7F_Diff;
-	int		m_dMes4F_DiffResult;
-	int		m_dMes7F_DiffResult;
-	double	m_nMesRI[2][8];		//0 = white , 1 = dark
-	double	m_dMes7FVariation;
-	int		m_dMes7FVariationResult;
-	int		m_nMesUvBeforeMTFResult[MAX_SFR_INSP_COUNT];
-	int		m_nMesUvAfterMTFResultUVAfter[MAX_SFR_INSP_COUNT];
-	double	m_dMesMTF[MAX_SFR_INSP_COUNT];				//MTF 검사 항목
-	double	m_dMesAreaAvrMTF[MAX_LAST_INSP_COUNT];
-	double  m_dMesAreaAvrUVBeforeMTF[MAX_LAST_INSP_COUNT];
-	double  m_dMesMTF_AVER[MAX_SFR_INSP_SUMAVE_CNT];
-	
-	int		m_nMesMTFResult[MAX_SFR_INSP_COUNT];
-	int		m_nMesMTFAreaAvrResult[MAX_LAST_INSP_COUNT];
-	int		m_nMesMTFResult_AVER[MAX_SFR_INSP_SUMAVE_CNT];
-	int		m_nMesMTFResult_UVBeforeAVER[MAX_SFR_INSP_SUMAVE_CNT];
-
-	
-
-
-	double  m_dMesICOC[2];
-	double  m_dMesICDeltaOC[2];
-	
-	
-	int m_dMesOcLightTime[5];		//ch1 ~ ch4   임의로 늘려놓음   4개만 사용
-	int m_dMesOcLightTimeResult[5];	//
-	
-
-	double  m_nMesColorSensitivity[3][7];	//[4];
-	
-	
-	
-	double	m_dMesDistortion;
-
-	double	m_nMesColorReproduction[4];
-	
-	double	m_dMesSnr;
-	double	m_dMesDr;
-	double	m_dMesFov[2];	//0 = HFov , 1 = VFov
-
-
-	double	m_dMesUvAfterRotate;
-	double  m_dMesTilt[2];
-	double	m_dMesUvBeforeRotate;
-
-
-	double	m_dMesSaturationBrightAvg;
-	int	m_dMesSaturationBrightAvgResult;
-
-	double	m_dMesTemperature[4];
-	int	m_dMesTemperatureResult[4];//온도 0,1,2  습도3
-
-	double		m_dMesLightChartValue[MAX_LAST_INSP_COUNT];
-	double		m_dMesLightOcValue;
-
-
-	//IR Filter  m_stIRFilterResult
-	double m_dMesIRFilterValue[3];
-	int	m_dMesIRFilterResult[3];
-
-
-	double	m_dMesIrROIBrightAvg;
-	int	m_dMesIrROIBrightAvgResult;
-
-	double	m_dMesIrRoiBrightVar;
-	int	m_dMesIrRoiBrightVarResult;
-	//---------------------------------------------------------------
-	//---------------------------------------------------------------
-	//result
-	
-	int		m_dMesOCResult[2];
-	int		m_dMesDeltaOCResult[2];
-	int		m_dMesUVAfterOCResult[2];
-	int		m_dMesUVAfterDeltaOCResult[2];
-
-
-	int		m_dMesICOCResult[2];
-	int		m_dMesICDeltaOCResult[2];
-	int		m_nMesColorSensitivityResult[3][7];//[4];
-	
-	int		m_nMesRIRICornerResult[4];
-	
-
-	int		m_nMesColorReproductionResult[4];
-	int		m_nMesBlemishResult[3];
-	int		m_dMesDistortionResult;
-	int		m_dMesSnrResult;
-	int		m_dMesDrResult;
-	int		m_dMesFovResult[2];
-	int		m_dMesRotateResult;
-	int		m_dMesRotateUVAfterResult;
-	int		m_dMesTiltResult[2];
-	int		m_dMesEEPROMResult[4];
-	int		m_dMesNoiseResult;
-
-
-	int		m_dMesLightChartResult[MAX_LAST_INSP_COUNT];
-	int		m_dMesLightOcResult;
-	CString m_sendData;
-	CString m_getData;
-
-	//----------------------------------------------------------------------------------------------------------------------
-	public:
-		/*
-		[EEPROM] Signature Code
-		[EEPROM] ParameterVersion
-		[EEPROM] Calibration Model
-		[EEPROM] Focal Length (fx)
-		[EEPROM] Focal Length (fy)
-		[EEPROM] Principal Point (cx)
-		[EEPROM] Principal Point (cy)
-		[EEPROM] RadialDistortion (k1)
-		[EEPROM] Radial Distortion (k2)
-		[EEPROM] Radial Distortion (k3)
-		[EEPROM] TangentialDistortion (P1)
-		[EEPROM] Tangential Distortion (P2)
-		[EEPROM] Checksum
-		[EEPROM] Production date
-		[EEPROM] RMS
-		[EEPROM] FOV
-		[EEPROM] Calibration Temperature
-		Checksum 만 result 0,1로 판단되고 나머지는 전부 1
-		*/
-		//TCHAR m_szSignaturecode[SIZE_OF_100BYTE];
-		//TCHAR m_szParameterVersion[SIZE_OF_100BYTE];
-		//TCHAR m_szCalibrationModel[SIZE_OF_100BYTE];
-		//TCHAR m_szFocalLengthFx[SIZE_OF_100BYTE];
-		//TCHAR m_szFocalLengthFy[SIZE_OF_100BYTE];
-		//TCHAR m_szPrincipalPointCx[SIZE_OF_100BYTE];
-		//TCHAR m_szPrincipalPointCy[SIZE_OF_100BYTE];
-		//TCHAR m_szRadialDistortionK1[SIZE_OF_100BYTE];
-		//TCHAR m_szRadialDistortionK2[SIZE_OF_100BYTE];
-		//TCHAR m_szRadialDistortionK3[SIZE_OF_100BYTE];
-		//TCHAR m_szTangentialDistortionP1[SIZE_OF_100BYTE];
-		//TCHAR m_szTangentialDistortionP2[SIZE_OF_100BYTE];
-		//TCHAR m_szCheckSum[SIZE_OF_100BYTE];
-		//TCHAR m_szProductiondate[SIZE_OF_100BYTE];
-		//TCHAR m_szRMS[SIZE_OF_100BYTE];
-		//TCHAR m_szFOV[SIZE_OF_100BYTE];
-		//TCHAR m_szCalibrationTemperature[SIZE_OF_100BYTE];
-
-		//TCHAR m_szPartNumberVersion[SIZE_OF_100BYTE];
-		//TCHAR m_szImagerESVersionInfo[SIZE_OF_100BYTE];
-		////power pcb
-		//TCHAR m_szPowerPcbPartNumberVersion[SIZE_OF_100BYTE];	//16byte
-		//TCHAR m_szPowerPcbMotionalPartNumber[SIZE_OF_100BYTE];	//13byte
-		//TCHAR m_szPowerProductiondata[SIZE_OF_100BYTE];			//1byte
-
-		/*
-		[Calibration] FocalLength (fx)
-		[Calibration] FocalLength (fy)
-		[Calibration] PrincipalPoint (cx)
-		[Calibration] PrincipalPoint (cy)
-		[Calibration] RadialDistortion (k1)
-		[Calibration] RadialDistortion (k2)
-		[Calibration] RadialDistortion (k3)
-		[Calibration] TangentialDistortion (P1)
-		[Calibration] TangentialDistortion (P2)
-		*/
-		double m_dMesFocalLengthFx;
-		double m_dMesFocalLengthFy;
-
-		double m_dMesPrincipalPointCx;
-		double m_dMesPrincipalPointCy;
-
-		double m_dMesRadialDistortionK1;
-		double m_dMesRadialDistortionK2;
-		double m_dMesRadialDistortionK3;
-
-		double m_dMesTangentialDistortionP1;
-		double m_dMesTangentialDistortionP2;
-
-
-		double   m_UvBeforeSFR_0F_Diff;
-		double   m_UvBeforeSFR_5F_Diff;
-		double   m_UvBeforeSFR_85F_Diff;
-		double   m_UvBeforeSFR_5F_Diff_A;
-		double   m_UvBeforeSFR_85F_Diff_A;
-
-		double   m_UvAfterSFR_0F_Diff;
-		double   m_UvAfterSFR_5F_Diff;
-		double   m_UvAfterSFR_85F_Diff;
-		double   m_UvAfterSFR_5F_Diff_A;
-		double   m_UvAfterSFR_85F_Diff_A;
-
-		double   m_UvBeforeSFR_0F_DiffResult;
-		double   m_UvBeforeSFR_5F_DiffResult;
-		double   m_UvBeforeSFR_85F_DiffResult;
-		double   m_UvBeforeSFR_5F_Diff_AResult;
-		double   m_UvBeforeSFR_85F_Diff_AResult;
-
-		double   m_UvAfterSFR_0F_DiffResult;
-		double   m_UvAfterSFR_5F_DiffResult;
-		double   m_UvAfterSFR_85F_DiffResult;
-		double   m_UvAfterSFR_5F_Diff_AResult;
-		double   m_UvAfterSFR_85F_Diff_AResult;
-		int		m_nMesShading65FCResult[2];
-		int		m_nMesShading85FCResult[2];
-
-
-		double	m_dMesMTF67lp[MAX_SFR_INSP_COUNT];			//MTF 검사 항목
-		double  m_dMesMTF67lpUVAfter[MAX_SFR_INSP_COUNT];
-		int		m_nMesMTF67lpResult[MAX_SFR_INSP_COUNT];
-		int		m_nMesMTF67lpResultUVAfter[MAX_SFR_INSP_COUNT];
-		int		m_nMesDark;
-		CString m_sMesfuseID;				// FUSE 아이디
-		int		m_nsMesfuseIDResult;
-
-		//CString m_sMesI2cSensorID;				// i2c 센서 아이디
-		TCHAR m_sMesI2cSensorID[SIZE_OF_100BYTE];
-		int		m_nMesI2CResult;
-
-		double	m_dMesShading65FC[2];
-		double	m_dMesShading85FC[2];
-		CString m_sMesI2C;					// I2C
-		CString m_sBlackSpot;				// 이물
-		CString m_sStain;					// 이물
-		CString m_sDefect;					// defect
-		CString m_sNoise;					// Noise
-
-		double	m_dMesUVBeforeOC[2];		//OC 결과.[X/Y]  UV 전
-		//----------------------------------------------------------------------------------------------------------------------
-		
-};

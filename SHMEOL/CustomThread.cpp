@@ -130,7 +130,7 @@ int CCustomThread::CCD_Run(int nStep)
 					Sleep(300);
 
 					g_clTaskWork[m_nUnit].m_nCcdCount++;
-					int _delay = g_clModelData[m_nUnit].m_dCcdDelay * 1000;
+					int _delay = (int)g_clModelData[m_nUnit].m_dCcdDelay * 1000;
 					Sleep(_delay);
 					_stprintf_s(szLog, SIZE_OF_1K, _T("[CCD] Retry %d/%d"), g_clTaskWork[m_nUnit].m_nCcdCount, g_clModelData[m_nUnit].m_nCcdRetryCount);
 					AddLog(szLog, 0, m_nUnit);

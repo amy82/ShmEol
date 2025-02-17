@@ -22,7 +22,6 @@ void CActiveAlignThread::SetUnit(int nUnit)
 	m_nUnit = nUnit;
 
 	m_clPcbProcess.SetUnit(nUnit);
-	m_clLensProcess.SetUnit(nUnit);
 }
 
 //-----------------------------------------------------------------------------
@@ -92,6 +91,35 @@ void CActiveAlignThread::ThreadCallBack()
 			{
 				g_pCarAABonderDlg->ShowAutoReadyState(m_nUnit);
 				m_dwTickCount[1] = GetTickCount();
+			}
+		}
+		if (g_clTaskWork[m_nUnit].m_nCurrentPcbStep >= 20000)
+		{
+			if (g_clMesCommunication[m_nUnit].m_bLgit_Pause_req == true && g_clMotorSet.GetPcbZMotorPosCheck(m_nUnit, WAIT_POS))		//Z축 대기 위치일때 세우자
+			{
+				g_clMesCommunication[m_nUnit].m_bLgit_Pause_req = false;	//thread
+				g_clDioControl.SetBuzzer(true, BUZZER_ALARM);
+				//S6F11 Process State Change Report (EXECUTING)
+				g_clMesCommunication[m_nUnit].m_dProcessState[0] = g_clMesCommunication[m_nUnit].m_dProcessState[1];
+				g_clMesCommunication[m_nUnit].m_dProcessState[1] = ePAUSE;
+
+				g_clMesCommunication[m_nUnit].m_uAlarmList.clear();
+
+				g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(PROCESS_STATE_CHANGED_REPORT_10401, "");		//Heavy Alarm일때만 상태 pause 전송한다.
+
+				//그리고 s6f25 받으면 Resume 팝업 추가
+				TCHAR szLog[SIZE_OF_1K];
+
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PAUSE COMMAND RECEIVE [STEP : %d]"), g_clTaskWork[m_nUnit].m_nCurrentPcbStep);
+				//여기에 자동운전 진행 선택가능한 버튼 필요
+				AddLog(szLog, 0, m_nUnit);
+
+				CString strValue;
+				strValue.Format(_T("[Code]:%s\n[Text]:%s"), g_clReportData.rLgit_Pause.PauseCode, g_clReportData.rLgit_Pause.PauteText);
+				g_ShowMsgPopup(_T("LGIT_PAUSE"), strValue, RGB_COLOR_RED);
+
+
+				g_clTaskWork[m_nUnit].m_nCurrentPcbStep = abs(g_clTaskWork[m_nUnit].m_nCurrentPcbStep) * -1;
 			}
 		}
 		//

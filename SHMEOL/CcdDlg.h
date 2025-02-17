@@ -82,10 +82,10 @@ private:
     CCcdRISpecDlg m_clRiSpecDlg;
 	CCcdColorShadingSpecDlg m_clColorShadingSpecDlg;
 	CCcdColorUniformitySpecDlg m_clColorUniformitySpecDlg;
-    CCcdRIThresholdSpecDlg m_clRiThresholdSpecDlg;
+    //CCcdRIThresholdSpecDlg m_clRiThresholdSpecDlg;
     CCcdSnrColorSensSpecDlg m_clSnrColorSensSpecDlg;
 	CCcdSaturationSpecDlg m_clSaturationSpecDlg;
-	CCcdFpnSpecDlg m_clFpnSpecDlg;
+	//CCcdFpnSpecDlg m_clFpnSpecDlg;
 
 	CCcdColorReproductionSpecDlg m_clColorReproductionSpecDlg;
 	CCcdTemperatureSpecDlg m_clTemperatureSpecDlg;
