@@ -21,8 +21,6 @@ public:
 
 public:
 	CPcbProcess m_clPcbProcess;
-
-
 	DWORD m_dwTickCount[2];
 	int m_nUnit;
 	int m_nStep;

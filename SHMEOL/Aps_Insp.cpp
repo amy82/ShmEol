@@ -4100,7 +4100,9 @@ bool CAps_Insp::func_Insp_FirmwareVerify(bool bAutoMode)
 	{
 		if (bAutoMode == true)
 		{
-			if (g_clTaskWork[m_nUnit].m_bFirmwareStop == true)
+			
+			//if (g_clTaskWork[m_nUnit].m_bFirmwareStop == true)
+			if(g_pCarAABonderDlg->m_clActiveAlignThread[0].GetForceStop() == true)
 			{
 				g_clMesCommunication[m_nUnit].m_dEqpDefectCode.Format(_T("37"));
 				g_clMesCommunication[m_nUnit].m_nMesFinalResult = 0;
@@ -4244,7 +4246,8 @@ bool CAps_Insp::func_Insp_FirmwareVerify(bool bAutoMode)
 		int errcount = 0;
 		for (size_t i = 0; i < g_clTaskWork[m_nUnit].BinOrgBuffer.size(); ++i) 
 		{
-			if (g_clTaskWork[m_nUnit].m_bFirmwareStop == true)
+			//if (g_clTaskWork[m_nUnit].m_bFirmwareStop == true)
+			if (g_pCarAABonderDlg->m_clActiveAlignThread[0].GetForceStop() == true)
 			{
 				g_clMesCommunication[m_nUnit].m_nMesFinalResult = 0;
 				g_clMesCommunication[m_nUnit].m_nMesFirmwareVerifyResult = 4;

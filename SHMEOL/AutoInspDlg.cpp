@@ -400,7 +400,6 @@ BOOL CAutoInspDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// 큰 아이콘을 설정합니다.
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
-	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 	
 #ifdef _DEBUG
 	// 메모리 누수 보고서 생성
@@ -438,7 +437,6 @@ void CAutoInspDlg::OnSysCommand(UINT nID, LPARAM lParam)
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnTimer(UINT_PTR nIDEvent)
 {
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	switch (nIDEvent)
 	{
 	case WM_UI_CM_TIMER:
@@ -2978,7 +2976,6 @@ bool CAutoInspDlg::SendDataToInsp(CString sData)
 
 BOOL CAutoInspDlg::OnEraseBkgnd(CDC* pDC)
 {
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	//CRect rect;
 	//GetClientRect(rect);
 	////rect.bottom = rect.bottom - 200;
@@ -2996,7 +2993,6 @@ HBRUSH CAutoInspDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
 
-	// TODO:  여기서 DC의 특성을 변경합니다.
 	/*if (pWnd->GetDlgCtrlID() == IDD_TESLAINSPINSP_DIALOG) {
 
 		pDC->SetTextColor(RGB(0, 255, 255));
@@ -3006,7 +3002,6 @@ HBRUSH CAutoInspDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		return (HBRUSH)::GetStockObject(NULL_BRUSH);
 
 	}*/
-	// TODO:  기본값이 적당하지 않으면 다른 브러시를 반환합니다.
 	return hbr;
 }
 
@@ -3967,7 +3962,8 @@ void CAutoInspDlg::PauseAutoProcess(int nUnit)
 bool CAutoInspDlg::StopAutoProcess(int nUnit)
 {
     
-
+	g_clTaskWork[nUnit].m_bFirmwareStop = true;		//Firmware 검사 길어져서 추가
+	// TODO: m_bFirmwareStop false 돼있어서 true로 변경 250217
     g_clMotorSet.StopAxisAll(nUnit);
 
     if (m_clActiveAlignThread[nUnit].GetThreadRunning() == true)
@@ -3980,7 +3976,7 @@ bool CAutoInspDlg::StopAutoProcess(int nUnit)
 		m_clCustomThread[nUnit].EndThread(); 
 	}
 	
-	g_clTaskWork[nUnit].m_bFirmwareStop = false;		//Firmware 검사 길어져서 추가
+	
 
 
 	g_clLaonGrabberWrapper[nUnit].CloseDevice();
@@ -5661,7 +5657,6 @@ bool CAutoInspDlg::InsertAlignData(int nUnit)
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainLink1()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 #ifdef ON_LINE_GRABBER
     if (g_clLaonGrabberWrapper[UNIT_AA1].OpenDevice() == false)
     {
@@ -5677,7 +5672,6 @@ void CAutoInspDlg::OnBnClickedButtonMainLink1()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainCcd1()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if (g_clTaskWork[UNIT_AA1].m_nAutoFlag == MODE_AUTO)
 	{
 		AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA2);
@@ -5702,7 +5696,6 @@ void CAutoInspDlg::OnBnClickedButtonMainCcd1()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainStartingPoint1()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if (g_clTaskWork[UNIT_AA1].m_nAutoFlag == MODE_AUTO)
 	{
 		AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA1);
@@ -5733,8 +5726,6 @@ void CAutoInspDlg::OnBnClickedButtonMainStartingPoint1()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainAutoReady1()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	
 	
 	if (g_clTaskWork[UNIT_AA1].m_nAutoFlag == MODE_AUTO)
 	{
@@ -5767,7 +5758,6 @@ void CAutoInspDlg::OnBnClickedButtonMainAutoReady1()
 void CAutoInspDlg::OnBnClickedButtonMainAutoRun1()
 {
 	TCHAR szLog[SIZE_OF_1K];
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	
 	//if (g_clModelData[UNIT_AA1].m_nMesPass == 1)
 	//{
@@ -5811,7 +5801,6 @@ void CAutoInspDlg::OnBnClickedButtonMainAutoRun1()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainComplOk1()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
     if (g_clTaskWork[UNIT_AA1].m_nAutoFlag == MODE_AUTO)
     {
         AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA1);
@@ -5857,7 +5846,6 @@ void CAutoInspDlg::OnBnClickedButtonMainComplOk1()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainComplEmission1()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
     //m_clProductNGDlg.SetUnit(UNIT_AA1);
     //m_clProductNGDlg[UNIT_AA1].ShowWindow(SW_SHOW);
 }
@@ -5872,7 +5860,6 @@ void CAutoInspDlg::OnBnClickedButtonMainAutoStop1()
 	//g_clPriInsp[UNIT_AA1].func_EEprom_CheckSum_Check(true);
 	//return;
 
-     //TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.  (m_nUnit + g_clSysData.m_nUnitNo + g_clSysData.m_nSysNo + 1));
     CString sMsg = _T("");
 
 #ifdef ON_LINE_SOCKET
@@ -5898,7 +5885,6 @@ void CAutoInspDlg::OnBnClickedButtonMainAutoStop1()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainAutoPause1()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
     CString sMsg = _T("");
 
 #ifdef ON_LINE_SOCKET
@@ -5928,7 +5914,6 @@ void CAutoInspDlg::OnBnClickedButtonMainAutoPause1()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainComplNg1()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
     if (g_clTaskWork[UNIT_AA1].m_nAutoFlag == MODE_AUTO)
     {
         AddLog(_T("[INFO] 자동 운전 중 사용 불가"), 1, UNIT_AA1);
@@ -5963,7 +5948,6 @@ void CAutoInspDlg::OnBnClickedButtonMainComplNg1()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainLink2()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 #ifdef ON_LINE_GRABBER
     if (g_clLaonGrabberWrapper[UNIT_AA1].OpenDevice() == false)
     {
@@ -5979,7 +5963,6 @@ void CAutoInspDlg::OnBnClickedButtonMainLink2()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainCcd2()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if (g_clTaskWork[UNIT_AA2].m_nAutoFlag == MODE_AUTO)
 	{
 		AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA2);
@@ -6000,7 +5983,6 @@ void CAutoInspDlg::OnBnClickedButtonMainCcd2()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainStartingPoint2()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if (g_clTaskWork[UNIT_AA2].m_nAutoFlag == MODE_AUTO)
 	{
 		AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA2);
@@ -6024,7 +6006,6 @@ void CAutoInspDlg::OnBnClickedButtonMainStartingPoint2()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainAutoReady2()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if (g_clTaskWork[UNIT_AA2].m_nAutoFlag == MODE_AUTO)
 	{
 		AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA2);
@@ -6040,7 +6021,6 @@ void CAutoInspDlg::OnBnClickedButtonMainAutoReady2()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainAutoRun2()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if (g_clModelData[UNIT_AA2].m_nMesPass == 1)
 	{
 		TCHAR szLog[SIZE_OF_1K];
@@ -6063,7 +6043,6 @@ void CAutoInspDlg::OnBnClickedButtonMainAutoRun2()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainComplOk2()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if (g_clTaskWork[UNIT_AA2].m_nAutoFlag == MODE_AUTO)
 	{
 		AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA2);
@@ -6103,7 +6082,6 @@ void CAutoInspDlg::OnBnClickedButtonMainComplOk2()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainComplEmission2()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
     //m_clProductNGDlg.SetUnit(UNIT_AA2);
     //m_clProductNGDlg[UNIT_AA2].ShowWindow(SW_SHOW);
 }
@@ -6116,7 +6094,6 @@ void CAutoInspDlg::OnBnClickedButtonMainComplEmission2()
 void CAutoInspDlg::OnBnClickedButtonMainAutoStop2()
 {
 	CString sMsg = _T("");
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 #ifdef ON_LINE_SOCKET
 	sMsg.Format(_T("#AA%d@ALARM&CLR$"), (UNIT_AA2 + g_clSysData.m_nUnitNo + g_clSysData.m_nSysNo + 1));
 	this->SendDataToAAMain(UNIT_AA2, sMsg);
@@ -6139,7 +6116,6 @@ void CAutoInspDlg::OnBnClickedButtonMainAutoStop2()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainAutoPause2()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
     CString sMsg = _T("");
 
 #ifdef ON_LINE_SOCKET
@@ -6166,7 +6142,6 @@ void CAutoInspDlg::OnBnClickedButtonMainAutoPause2()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainComplNg2()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if (g_clTaskWork[UNIT_AA2].m_nAutoFlag == MODE_AUTO)
 	{
 		AddLog(_T("[INFO] 자동 운전 중 사용 불가"), 1, UNIT_AA2);
@@ -6195,7 +6170,6 @@ void CAutoInspDlg::OnBnClickedButtonMainComplNg2()
 void CAutoInspDlg::OnBnClickedButtonMainUnitChange()
 {
 	//return;//cal  측정 안함
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	return;
 
 
@@ -6221,7 +6195,6 @@ void CAutoInspDlg::OnBnClickedButtonMainUnitChange()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainMain()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	//m_nCurrentUnit = SHOW_ALL;
 
 	//return;
@@ -6241,7 +6214,6 @@ void CAutoInspDlg::OnBnClickedButtonMainMain()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainManual()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_nCurrentDlg = DLG_MANUAL;
 	this->ShowDialog(m_nCurrentDlg);
 }
@@ -6253,7 +6225,6 @@ void CAutoInspDlg::OnBnClickedButtonMainManual()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainTeaching()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
 	m_nCurrentDlg = DLG_TEACH;
 	this->ShowDialog(m_nCurrentDlg);
@@ -6266,7 +6237,6 @@ void CAutoInspDlg::OnBnClickedButtonMainTeaching()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainCcd()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_nCurrentDlg = DLG_CCD;
 	this->ShowDialog(m_nCurrentDlg);
 }
@@ -6278,7 +6248,6 @@ void CAutoInspDlg::OnBnClickedButtonMainCcd()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainDio()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_nCurrentDlg = DLG_DIO;
 	this->ShowDialog(m_nCurrentDlg);
 }
@@ -6290,7 +6259,6 @@ void CAutoInspDlg::OnBnClickedButtonMainDio()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainLight()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_nCurrentDlg = DLG_LIGHT;
 	this->ShowDialog(m_nCurrentDlg);
 }
@@ -6302,7 +6270,6 @@ void CAutoInspDlg::OnBnClickedButtonMainLight()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainAlarm()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_nCurrentDlg = DLG_ALARM;
 	this->ShowDialog(m_nCurrentDlg);
 }
@@ -6314,7 +6281,6 @@ void CAutoInspDlg::OnBnClickedButtonMainAlarm()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainConfig()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_nCurrentDlg = DLG_CONFIG;
 	this->ShowDialog(m_nCurrentDlg);
 }
@@ -6335,7 +6301,6 @@ void CAutoInspDlg::OnBnClickedButtonMainMinimize()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainExit()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if (g_clTaskWork[UNIT_AA1].m_nAutoFlag == MODE_AUTO)
 	{
 		g_ShowMsgPopup(_T("ERROR"), _T("자동 운전 중 사용불가합니다."), RGB_COLOR_RED);
@@ -6377,7 +6342,6 @@ void CAutoInspDlg::OnBnClickedButtonMainExit()
 void CAutoInspDlg::OnBnClickedButtonMainLan()
 {
 	CString sMsg = _T("");
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.		
 #ifdef ON_LINE_SOCKET
     if (this->ConnectAAMain() == false)
     {
@@ -6397,7 +6361,6 @@ void CAutoInspDlg::OnBnClickedButtonMainLan()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnStnClickedStaticMainOutput1()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
     CString sMsg = _T("");
 
     sMsg.Format(_T("[PRODUCT COUNT] 제품 생산 수량 초기화진행하시겠습니까?"));
@@ -6421,7 +6384,6 @@ void CAutoInspDlg::OnStnClickedStaticMainOutput1()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnStnClickedStaticMainOutput2()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
     CString sMsg = _T("");
 
     sMsg.Format(_T("[PRODUCT COUNT] 2PARA 제품 생산 수량 초기화를 진행하시겠습니까?"));
@@ -6445,7 +6407,6 @@ void CAutoInspDlg::OnStnClickedStaticMainOutput2()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnStnClickedStaticMainPin1()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
     CString sMsg = _T("");
 
     sMsg.Format(_T("[PRODUCT COUNT] 포고핀 사용량 초기화Z진행하시겠습니까?"));
@@ -6468,7 +6429,6 @@ void CAutoInspDlg::OnStnClickedStaticMainPin1()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnStnClickedStaticMainPin2()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
     CString sMsg = _T("");
 
     sMsg.Format(_T("[PRODUCT COUNT] 2PARA 포고핀 사용량 초기화를 진행하시겠습니까?"));
@@ -6605,7 +6565,6 @@ void CAutoInspDlg::OnStnClickedStaticMainVersion2()
 {
 	//g_clMesCommunication[UNIT_AA2].newSave(UNIT_AA2);//mes 저장 
     //g_FinalInspLog(UNIT_AA2);
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
     //m_clUpdateHistoryDlg.ShowWindow(SW_SHOW);
 }
 //-----------------------------------------------------------------------------
@@ -6615,7 +6574,6 @@ void CAutoInspDlg::OnStnClickedStaticMainVersion2()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnStnClickedStaticMainBcrVal1()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
     // 완제품 모드일때만
     CKeyBoardDlg* pDlg = new CKeyBoardDlg(20, false);
 	CString sData;
@@ -6647,7 +6605,6 @@ void CAutoInspDlg::OnStnClickedStaticMainBcrVal1()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnStnClickedStaticMainBcrVal2()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
     // 완제품 모드일때만
     CKeyBoardDlg* pDlg = new CKeyBoardDlg(20, false);
     if (pDlg != NULL)
@@ -7312,7 +7269,6 @@ bool CAutoInspDlg::InspQuaternHole(bool autoMode, int index, int dispMode, int i
 
 void CAutoInspDlg::OnBnClickedButtonMasterChageMode1()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if (g_clTaskWork[UNIT_AA1].m_nAutoFlag == MODE_AUTO)
 	{
 		AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA1);
@@ -7324,7 +7280,6 @@ void CAutoInspDlg::OnBnClickedButtonMasterChageMode1()
 
 void CAutoInspDlg::OnBnClickedButtonMasterChageMode2()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if (g_clTaskWork[UNIT_AA1].m_nAutoFlag == MODE_AUTO)
 	{
 		AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA2);
@@ -7337,7 +7292,6 @@ void CAutoInspDlg::OnBnClickedButtonMasterChageMode2()
 
 void CAutoInspDlg::OnBnClickedButtonMainCamChange1()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if (g_clTaskWork[UNIT_AA1].m_nAutoFlag == MODE_AUTO)
 	{
 		AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA2);
@@ -7350,7 +7304,6 @@ void CAutoInspDlg::OnBnClickedButtonMainCamChange1()
 
 void CAutoInspDlg::OnBnClickedButtonMainCamChange2()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if (g_clTaskWork[UNIT_AA1].m_nAutoFlag == MODE_AUTO)
 	{
 		AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA2);
@@ -7504,7 +7457,6 @@ void CAutoInspDlg::versionList()
 }
 void CAutoInspDlg::OnBnClickedButtonMainCcdChange1()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if (g_clTaskWork[UNIT_AA1].m_nAutoFlag == MODE_AUTO)
 	{
 		AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA2);
@@ -7517,7 +7469,6 @@ void CAutoInspDlg::OnBnClickedButtonMainCcdChange1()
 
 void CAutoInspDlg::OnBnClickedButtonMainCcdChange2()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if (g_clTaskWork[UNIT_AA2].m_nAutoFlag == MODE_AUTO)
 	{
 		AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA2);
@@ -7530,7 +7481,6 @@ void CAutoInspDlg::OnBnClickedButtonMainCcdChange2()
 
 void CAutoInspDlg::OnBnClickedButtonMainMes1()
 {
-	// TODO: Add your control notification handler code here
 	if (g_clTaskWork[UNIT_AA1].m_nAutoFlag == MODE_AUTO)
 	{
 		AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA2);
@@ -7556,7 +7506,6 @@ void CAutoInspDlg::OnBnClickedButtonMainMes2()
 		AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA2);
 		return;
 	}
-	// TODO: Add your control notification handler code here
 }
 
 
@@ -7674,7 +7623,6 @@ void CAutoInspDlg::OnBnClickedButtonModelSelct()
 
 BOOL CAutoInspDlg::PreTranslateMessage(MSG* pMsg)
 {
-	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
 	if (pMsg->message == WM_LBUTTONDOWN)
 	{
 		//뜨면 바로 띄우나
@@ -7703,7 +7651,6 @@ BOOL CAutoInspDlg::PreTranslateMessage(MSG* pMsg)
 
 void CAutoInspDlg::OnStnClickedStaticMainCurrMode1()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	CAMChangeHandler(0, VIDEO_CCD);
 	/*if (m_bCamState[0] == VIDEO_CAM)
 	{
@@ -7720,7 +7667,6 @@ void CAutoInspDlg::OnStnClickedStaticMainCurrMode1()
 
 void CAutoInspDlg::OnStnClickedStaticMainOutputVal1()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	CString sMsg = _T("");
 
 	sMsg.Format(_T("[PRODUCT] 제품 생산 수량 초기화하시겠습니까?"));
@@ -7740,7 +7686,6 @@ void CAutoInspDlg::OnStnClickedStaticMainOutputVal1()
 
 void CAutoInspDlg::OnStnClickedStaticMainPinVal1()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	CString sMsg = _T("");
 
 	sMsg.Format(_T("[PRODUCT COUNT] 포고핀 사용량 초기화진행하시겠습니까?"));
@@ -7760,7 +7705,6 @@ void CAutoInspDlg::OnStnClickedStaticMainPinVal1()
 bool CAutoInspDlg::CDP800_Connect()
 {
 #if 0
-	// TODO: Add your control notification handler code here
 	ViStatus status;
 	ViSession defaultRM;
 	ViString expr = "?*";
@@ -8019,7 +7963,6 @@ bool CAutoInspDlg::CurrentInsp()
 
 void CAutoInspDlg::OnStnClickedStaticMainCurrMode3()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
 	CAMChangeHandler(0, VIDEO_CAM);
 
@@ -8038,6 +7981,5 @@ void CAutoInspDlg::OnStnClickedStaticMainCurrMode3()
 
 void CAutoInspDlg::OnBnClickedButtonMainDoor1()
 {
-	// TODO: Add your control notification handler code here
 }
 

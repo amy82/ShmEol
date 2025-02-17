@@ -18,14 +18,17 @@ protected:
 	virtual void ThreadDestructor(){ return; };
 	virtual void ThreadCallBack(){ return; };
 
+	
+
 public:
 	virtual BOOL InitInstance();
 	virtual int ExitInstance();
 
 	bool StartThread();
 	void EndThread();
-	void PumpPendingMessage();
-	bool GetThreadRunning(){ return m_bWorking; };
+
+	bool GetForceStop();
+	bool GetThreadRunning();
 	void SetThreadPause(bool bPause){ if(m_bWorking == true) m_bPause = bPause; };
 	bool GetThreadPause(){ return m_bPause; };
 private:
@@ -36,6 +39,7 @@ private:
 	bool m_bPause;
 	HANDLE m_hThread;
 	DWORD m_nThreadID;
+	bool ThreadForceStop;
 
 protected:
 	DECLARE_MESSAGE_MAP()

@@ -13,6 +13,7 @@ CBaseThread::CBaseThread()
 {
 	m_bWorking = false;
 	m_bPause = false;
+	ThreadForceStop = false;		//init
 	m_hThread = NULL;
 	m_nThreadID = 0;
 }
@@ -23,13 +24,11 @@ CBaseThread::~CBaseThread()
 
 BOOL CBaseThread::InitInstance()
 {
-	// TODO:  여기에서 각 스레드에 대한 초기화를 수행합니다.
 	return TRUE;
 }
 
 int CBaseThread::ExitInstance()
 {
-	// TODO:  여기에서 각 스레드에 대한 정리를 수행합니다.
 	return CWinThread::ExitInstance();
 }
 
@@ -39,6 +38,22 @@ END_MESSAGE_MAP()
 
 // CBaseThread 메시지 처리기입니다.
 
+bool CBaseThread::GetThreadRunning()
+{
+	if (m_hThread != NULL || m_bWorking)
+	{
+		if (::WaitForSingleObject(m_hThread, 100) == WAIT_TIMEOUT)
+		{
+			return true;	//thread Run....
+		}
+		return true;		//thread Run....
+	}
+	return false;			//thread Stop....
+}
+bool CBaseThread::GetForceStop()
+{
+	return ThreadForceStop;
+}
 //-----------------------------------------------------------------------------
 //
 //	 스레드 시작
@@ -53,7 +68,7 @@ bool CBaseThread::StartThread()
 	}
 
 	m_bWorking = true;
-	
+	ThreadForceStop = false;		//StartThread
 	if (::AfxBeginThread(ThreadFunc, (LPVOID)this) == NULL)
 	{
 		m_bWorking = false;
@@ -80,6 +95,10 @@ UINT CBaseThread::ThreadFunc(void* pParam)
 
 	while (pThread->m_bWorking == true)
 	{
+		if (pThread->ThreadForceStop == true)
+		{
+			break;
+		}
 		if (PeekMessage(&stMessage, NULL, 0, 0, PM_NOREMOVE) != 0)
 		{
 			if (GetMessage(&stMessage, NULL, 0, 0) == -1)
@@ -108,8 +127,9 @@ UINT CBaseThread::ThreadFunc(void* pParam)
 	pThread->m_hThread = NULL;
 	pThread->m_bWorking = false;
 
+	//TRACE(_T("\n ThreadFunc Exit Type: %s\n"), typeid(*pThread).name());
 	::AfxEndThread(0, TRUE);
-
+	//AfxEndThread 밑으로 실행 안됨
 	return TRUE;
 }
 
@@ -120,37 +140,11 @@ UINT CBaseThread::ThreadFunc(void* pParam)
 //-----------------------------------------------------------------------------
 void CBaseThread::EndThread()
 {
-	if (m_bWorking == false)
-	{
-		return;
-	}
-
-	m_bWorking = false;
+	ThreadForceStop = true;		//EndThread
 	m_bPause = false;
-
-	if (::WaitForSingleObject(m_hThread, 300) == WAIT_TIMEOUT)
-	{
-		return;
-	}
+	//////////m_bWorking = false;		////쓰레드 while 빠져나가면 종료되게 주석처리
 }
 
-//-----------------------------------------------------------------------------
-//
-//
-//
-//-----------------------------------------------------------------------------
-void CBaseThread::PumpPendingMessage()
-{
-	if (m_bWorking == false)
-	{
-		return;
-	}
-
-	if (::PostThreadMessage(m_nThreadID, WM_PAINT, NULL, NULL) == FALSE)
-	{
-		TRACE("PostThreadMessage() Fail\n");
-	}
-}
 
 //-----------------------------------------------------------------------------
 //
