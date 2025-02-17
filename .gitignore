@@ -1,3 +1,13 @@
+.vs/
+ipch/
+*.ipch
+.x64/
+**/x64/
+**/Library/lib64/
+SHMEOL.VC.db
+SHMEOL.VC.VC.opendb
+
+
 # Prerequisites
 *.d
 

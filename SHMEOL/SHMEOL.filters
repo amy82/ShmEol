@@ -1,0 +1,252 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="UxModule">
+      <UniqueIdentifier>{2e2d17d2-790d-47e8-9390-6484930c7ae0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UxModule\button">
+      <UniqueIdentifier>{e5f3558d-a0ef-42d8-9b19-a18e3a32870f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UxModule\static">
+      <UniqueIdentifier>{e5a9973c-a8f9-4be0-803c-7f59090cc3e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UxModule\graph">
+      <UniqueIdentifier>{dbc0bb0c-13d7-43fd-80c4-d75028bbc14a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UxModule\graph\Graph2D">
+      <UniqueIdentifier>{5b212895-31f7-49f4-8807-71b3f997f648}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data">
+      <UniqueIdentifier>{22104946-d576-4449-a4f0-c6eff7b09afc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Log">
+      <UniqueIdentifier>{434ff42a-ee83-4b2c-a5b3-dec54cfb3067}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Path">
+      <UniqueIdentifier>{d7031aa1-a9ac-48de-a833-4a87860972f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Motor">
+      <UniqueIdentifier>{5c56873f-852e-4d1c-ba65-9b966ef63d11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DIO">
+      <UniqueIdentifier>{1f2573ad-4c39-4ca6-a621-c23bcc540ae8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="UserCommon.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="uxmodule\uxbutton\UXButton.h">
+      <Filter>UxModule\button</Filter>
+    </ClInclude>
+    <ClInclude Include="AlarmDlg.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="uxmodule\uxstatic\UXStatic.h">
+      <Filter>UxModule\static</Filter>
+    </ClInclude>
+    <ClInclude Include="CcdDlg.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="IoDlg.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ManualDlg.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="SetDlg.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="TeachingDlg.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="uxmodule\uxgraph\UXGraph.h">
+      <Filter>UxModule\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="uxmodule\uxgraph\Graph2D\dib256.h">
+      <Filter>UxModule\graph\Graph2D</Filter>
+    </ClInclude>
+    <ClInclude Include="uxmodule\uxgraph\Graph2D\dibpal.h">
+      <Filter>UxModule\graph\Graph2D</Filter>
+    </ClInclude>
+    <ClInclude Include="uxmodule\uxgraph\Graph2D\Graph2D_Data.h">
+      <Filter>UxModule\graph\Graph2D</Filter>
+    </ClInclude>
+    <ClInclude Include="uxmodule\uxgraph\Graph2D\Graph2D_Resource.h">
+      <Filter>UxModule\graph\Graph2D</Filter>
+    </ClInclude>
+    <ClInclude Include="uxmodule\uxgraph\Graph2D\Graph2D_Struct.h">
+      <Filter>UxModule\graph\Graph2D</Filter>
+    </ClInclude>
+    <ClInclude Include="uxmodule\uxgraph\Graph2D\Graph2DExtendWnd.h">
+      <Filter>UxModule\graph\Graph2D</Filter>
+    </ClInclude>
+    <ClInclude Include="uxmodule\uxgraph\Graph2D\Graph2DWnd.h">
+      <Filter>UxModule\graph\Graph2D</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\ModuleData.h">
+      <Filter>Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\Task.h">
+      <Filter>Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\Work.h">
+      <Filter>Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Log\Log.h">
+      <Filter>Log</Filter>
+    </ClInclude>
+    <ClInclude Include="UserPath.h">
+      <Filter>Path</Filter>
+    </ClInclude>
+    <ClInclude Include="AxlMotorSet.h">
+      <Filter>Motor</Filter>
+    </ClInclude>
+    <ClInclude Include="AXTDefine.h">
+      <Filter>Motor</Filter>
+    </ClInclude>
+    <ClInclude Include="UserDefine.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="uxmodule\uxbutton\ButtonCT.h">
+      <Filter>UxModule\button</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\Model.h">
+      <Filter>Data</Filter>
+    </ClInclude>
+    <ClInclude Include="DioControl.h">
+      <Filter>DIO</Filter>
+    </ClInclude>
+    <ClInclude Include="DioDefine.h">
+      <Filter>DIO</Filter>
+    </ClInclude>
+    <ClInclude Include="AutoInsp.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="AutoInspDlg.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="UserCommon.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="uxmodule\uxbutton\UXButton.cpp">
+      <Filter>UxModule\button</Filter>
+    </ClCompile>
+    <ClCompile Include="AlarmDlg.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="uxmodule\uxstatic\UXStatic.cpp">
+      <Filter>UxModule\static</Filter>
+    </ClCompile>
+    <ClCompile Include="CcdDlg.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="IoDlg.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ManualDlg.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="SetDlg.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="TeachingDlg.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="uxmodule\uxgraph\UXGraph.cpp">
+      <Filter>UxModule\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="uxmodule\uxgraph\Graph2D\dib256.cpp">
+      <Filter>UxModule\graph\Graph2D</Filter>
+    </ClCompile>
+    <ClCompile Include="uxmodule\uxgraph\Graph2D\dibpal.cpp">
+      <Filter>UxModule\graph\Graph2D</Filter>
+    </ClCompile>
+    <ClCompile Include="uxmodule\uxgraph\Graph2D\Graph2D_Data.cpp">
+      <Filter>UxModule\graph\Graph2D</Filter>
+    </ClCompile>
+    <ClCompile Include="uxmodule\uxgraph\Graph2D\Graph2D_Resource.cpp">
+      <Filter>UxModule\graph\Graph2D</Filter>
+    </ClCompile>
+    <ClCompile Include="uxmodule\uxgraph\Graph2D\Graph2DExtendWnd.cpp">
+      <Filter>UxModule\graph\Graph2D</Filter>
+    </ClCompile>
+    <ClCompile Include="uxmodule\uxgraph\Graph2D\Graph2DWnd.cpp">
+      <Filter>UxModule\graph\Graph2D</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\ModuleData.cpp">
+      <Filter>Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Task.cpp">
+      <Filter>Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Work.cpp">
+      <Filter>Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Log\Log.cpp">
+      <Filter>Log</Filter>
+    </ClCompile>
+    <ClCompile Include="AxlMotorSet.cpp">
+      <Filter>Motor</Filter>
+    </ClCompile>
+    <ClCompile Include="uxmodule\uxbutton\ButtonCT.cpp">
+      <Filter>UxModule\button</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\Model.cpp">
+      <Filter>Data</Filter>
+    </ClCompile>
+    <ClCompile Include="DioControl.cpp">
+      <Filter>DIO</Filter>
+    </ClCompile>
+    <ClCompile Include="AutoInsp.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="AutoInspDlg.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="SHMEOL.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\SHMEOL.rc2">
+      <Filter>리소스 파일</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\SHMEOL.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

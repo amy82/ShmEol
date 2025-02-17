@@ -1,0 +1,2540 @@
+// VisitionStatic.cpp : 구현 파일입니다.
+//
+
+#include "stdafx.h"
+#include "VisionStatic.h"
+
+
+// CVisionStatic
+
+IMPLEMENT_DYNAMIC(CVisionStatic, CStatic)
+
+CVisionStatic::CVisionStatic()
+{	
+}
+
+CVisionStatic::~CVisionStatic()
+{
+}
+
+
+BEGIN_MESSAGE_MAP(CVisionStatic, CStatic)
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
+	ON_WM_HSCROLL()
+	ON_WM_VSCROLL()	
+	ON_WM_RBUTTONUP()
+END_MESSAGE_MAP()
+
+
+
+// CVisitionStatic 메시지 처리기입니다.
+
+
+//-----------------------------------------------------------------------------
+//
+//	초기화
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::SetInit(int nCamNo, double dZoomFac, CPoint clPtSize)
+{
+	m_nCamNo = nCamNo;
+	m_dZoomFac = dZoomFac;
+	m_clCamSize = clPtSize;
+
+	//TRACE("CamNo:%d, ZoomFac:%lf, Size:%ld,%ld", nCamNo, dZoomFac, clPtSize.x, clPtSize.y);
+
+	m_clDisplaySize.x = (LONG)(m_clCamSize.x * m_dZoomFac);
+	m_clDisplaySize.y = (LONG)(m_clCamSize.y * m_dZoomFac);
+	m_clScrollPos = 0;
+	m_clClickPoint = 0;
+
+	m_nDragType = 0;
+	m_bDrag = false;
+	m_bRButtonUp = false;
+
+	m_nMeasureStep = MEASURE_START;
+	m_bClick = false;
+	m_bDrawLine = false;
+	m_nDragDistType = 0;
+	m_nBoxDrawType = 0;
+
+	m_nCursorType = 0;
+	m_clClickPoint = 0;
+
+	m_clMeasure[0].x = (m_clCamSize.x / 2) - 30;
+	m_clMeasure[0].y = (m_clCamSize.y / 2) - 30;
+	m_clMeasure[1].x = (m_clCamSize.x / 2) + 30;
+	m_clMeasure[1].y = (m_clCamSize.y / 2) + 30;
+
+	m_bLock = false;
+
+    m_nSfrSizeX = 80;
+    m_nSfrSizeY = 80;
+
+    m_FovSetMode = false;
+    m_SnrSetMode = false;
+	::ShowScrollBar(this->GetSafeHwnd(), SB_HORZ, FALSE);
+	::ShowScrollBar(this->GetSafeHwnd(), SB_VERT, FALSE);
+
+#ifdef ON_LINE_MIL
+	/*if (g_clVision.m_MilDisplay[m_nCamNo])
+	{
+		MdispZoom(g_clVision.m_MilDisplay[m_nCamNo], m_dZoomFac, m_dZoomFac);
+		this->ImageScroll();
+	}*/
+
+	m_nSfrSizeX = g_clModelData[m_nCamNo].m_clSfrInfo.m_nSizeX;
+	m_nSfrSizeY = g_clModelData[m_nCamNo].m_clSfrInfo.m_nSizeY;
+
+	this->ClearMeasure();
+#endif
+	this->LoadStandardCursor();
+
+    this->SetSfrRoi();
+    this->SetFovRoi();
+    this->SetSnrRoi();
+}
+
+//-----------------------------------------------------------------------------
+//
+//	Display Zoom
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::DisplayZoom()
+{
+#ifndef ON_LINE_MIL
+	return;
+#endif
+	double dMaxZoomFac = 0.0;
+	
+	if(g_clModelData[m_nCamNo].m_nDomeChartUse == 1)	
+		dMaxZoomFac = ((double)CCD1_DISP_SIZE_X / (double)g_clModelData[m_nCamNo].m_nWidth);
+	else
+		dMaxZoomFac = ((double)CCD2_DISP_SIZE_X / (double)g_clModelData[m_nCamNo].m_nWidth);
+	
+	if (g_clVision.m_MilDisplay[m_nCamNo])
+	{
+		if (m_dZoomFac <= dMaxZoomFac)
+		{
+			m_clScrollPos.x = m_clScrollPos.y = 0;
+		}
+
+		this->InitScroll();
+		MdispZoom(g_clVision.m_MilDisplay[m_nCamNo], m_dZoomFac, m_dZoomFac);
+
+		this->ImageScroll();
+		Invalidate();
+	}
+}
+
+//-----------------------------------------------------------------------------
+//
+//	커서 로드
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::LoadStandardCursor()
+{
+	m_hCursorStd = NULL;
+	m_hCursorWidth = NULL;
+	m_hCursorHeight = NULL;
+	m_hCursorMove = NULL;
+	m_hCursorNWSE = NULL;
+	m_hCursorNESW = NULL;
+
+	m_hCursorStd = AfxGetApp()->LoadStandardCursor(IDC_ARROW);
+	m_hCursorWidth = AfxGetApp()->LoadStandardCursor(IDC_SIZEWE);
+	m_hCursorHeight = AfxGetApp()->LoadStandardCursor(IDC_SIZENS);
+	m_hCursorMove = AfxGetApp()->LoadStandardCursor(IDC_SIZEALL);
+	m_hCursorNWSE = AfxGetApp()->LoadStandardCursor(IDC_SIZENWSE);
+	m_hCursorNESW = AfxGetApp()->LoadStandardCursor(IDC_SIZENESW);
+}
+
+//-----------------------------------------------------------------------------
+//
+//	커서 변경
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::ChangeCursor(int nType)
+{
+	switch (nType)
+	{
+	case STANDARD:		::SetCursor(m_hCursorStd);		break;
+	case CENTER:		::SetCursor(m_hCursorMove);		break;
+	case LEFT:			::SetCursor(m_hCursorWidth);	break;
+	case LEFTTOP:		::SetCursor(m_hCursorNWSE);		break;
+	case LEFTBOTTOM:	::SetCursor(m_hCursorNESW);		break;
+	case RIGHT:			::SetCursor(m_hCursorWidth);	break;
+	case RIGHTTOP:		::SetCursor(m_hCursorNESW);		break;
+	case RIGHTBOTTOM:	::SetCursor(m_hCursorNWSE);		break;
+	case TOP:			::SetCursor(m_hCursorHeight);	break;
+	case BOTTOM:		::SetCursor(m_hCursorHeight);	break;
+	}
+}
+
+//-----------------------------------------------------------------------------
+//
+//
+//
+//-----------------------------------------------------------------------------
+int CVisionStatic::ChangeCursorMeasureMode(CPoint clPoint)
+{
+#ifndef ON_LINE_MIL
+	return 0;
+#endif
+
+	double dZoomX, dZoomY;
+	CPoint clDrawOffset;
+	CPoint cpDraw;
+	CPoint p;
+	int nRetVal;
+	int nGap;
+
+	nRetVal = -1;
+	nGap = 20;
+	dZoomX = dZoomY = 0.0;
+
+	if (m_dZoomFac >= 1)
+		dZoomX = dZoomY = (double)(1.0 * m_dZoomFac);
+	else
+		dZoomX = dZoomY = (double)(1.0 / m_dZoomFac);
+
+	clDrawOffset.x = (int)(m_clScrollPos.x / m_dZoomFac);
+	clDrawOffset.y = (int)(m_clScrollPos.y / m_dZoomFac);
+
+	if (m_dZoomFac >= 1)
+	{
+		p.x = (int)(clPoint.x / dZoomX + 0.5) + clDrawOffset.x;
+		p.y = (int)(clPoint.y / dZoomY + 0.5) + clDrawOffset.y;
+	}
+	else
+	{
+		p.x = (int)(clPoint.x * dZoomX + 0.5) + clDrawOffset.x;
+		p.y = (int)(clPoint.y * dZoomY + 0.5) + clDrawOffset.y;
+	}
+	
+
+	TRACE("m_clMeasure[0].x(%d) - nGap(%d) < p.x(%d)", m_clMeasure[0].x, nGap, p.x);
+
+	if (m_clMeasure[0].x - nGap < p.x && m_clMeasure[0].x + nGap > p.x)
+	{
+		::SetCursor(m_hCursorWidth);
+		nRetVal = 1;
+	}
+	else if (m_clMeasure[0].y - nGap < p.y && m_clMeasure[0].y + nGap > p.y)
+	{
+		::SetCursor(m_hCursorHeight);
+		nRetVal = 2;
+	}
+	else if (m_clMeasure[1].x - nGap < p.x && m_clMeasure[1].x + nGap > p.x)
+	{
+		::SetCursor(m_hCursorWidth);
+		nRetVal = 3;
+	}
+	else if (m_clMeasure[1].y - nGap < p.y && m_clMeasure[1].y + nGap > p.y)
+	{
+		::SetCursor(m_hCursorHeight);
+		nRetVal = 4;
+	}
+
+	return nRetVal;
+}
+
+//-----------------------------------------------------------------------------
+//
+//
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::SetDrawMoveSfr(int nRefIndex, CPoint clPoint)
+{
+	int		i = 0;
+	int		nMoveValue = 0;
+	double dDispFacX = 0.0;
+	double dDispFacY = 0.0;
+	
+	//if(g_clModelData[m_nCamNo].m_nDomeChartUse != 1)
+	//	return;
+
+	if(g_clModelData[m_nCamNo].m_nDomeChartUse == 1)
+	{
+		dDispFacX = ((double)g_clModelData[m_nCamNo].m_nWidth / (double)CCD1_DISP_SIZE_X);
+		dDispFacY = ((double)g_clModelData[m_nCamNo].m_nHeight / (double)CCD1_DISP_SIZE_Y);
+	}		
+	else
+	{
+		dDispFacX = ((double)g_clModelData[m_nCamNo].m_nWidth / (double)CCD2_DISP_SIZE_X);
+		dDispFacY = ((double)g_clModelData[m_nCamNo].m_nHeight / (double)CCD2_DISP_SIZE_Y);
+	}	
+
+	switch (m_nCursorType)
+	{
+	case CENTER:
+		m_clPtOffset[nRefIndex].x = (int)(clPoint.x * dDispFacX) - (m_nSfrSizeX / 2);
+		m_clPtOffset[nRefIndex].y = (int)(clPoint.y * dDispFacY) - (m_nSfrSizeY / 2);
+		break;
+	case LEFT:// LEFT 라인을 움직이면 좌표는 이동량만큼 '-' , 사이즈는 이동량만큼 '+'
+		nMoveValue = m_clPtOffset[nRefIndex].x - (int)(clPoint.x * dDispFacX);		
+		m_nSfrSizeX += nMoveValue;
+		m_clPtOffset[nRefIndex].x -= nMoveValue;
+		
+		if(g_clModelData[m_nCamNo].m_nDomeChartUse == 1)
+			m_nSfrSizeY += nMoveValue;
+		break;
+	case RIGHT:// RIGHT 라인을 움직이면 좌표는 안움직이고 , 사이즈는 이동량만큼 '-'
+		nMoveValue = (m_clPtOffset[nRefIndex].x + m_nSfrSizeX) - (int)(clPoint.x * dDispFacX);		
+		m_nSfrSizeX -= nMoveValue;
+
+		if(g_clModelData[m_nCamNo].m_nDomeChartUse == 1)
+			m_nSfrSizeY -= nMoveValue;
+		break;
+	case TOP:// TOP 라인을 움직이면 좌표는 이동량만큼 '-' , 사이즈는 이동량만큼 '+'
+		nMoveValue = m_clPtOffset[nRefIndex].y - (int)(clPoint.y * dDispFacY);
+		m_nSfrSizeY += nMoveValue;
+		m_clPtOffset[nRefIndex].y -= nMoveValue;
+
+		if(g_clModelData[m_nCamNo].m_nDomeChartUse == 1)
+			m_nSfrSizeX += nMoveValue;
+		break;
+	case BOTTOM:// BOTTOM 라인을 움직이면 좌표 는 안움직이고 , 사이즈는 이동량만큼 '-'
+		nMoveValue = (m_clPtOffset[nRefIndex].y + m_nSfrSizeY) - (int)(clPoint.y * dDispFacY);
+		m_nSfrSizeY -= nMoveValue;
+
+		if(g_clModelData[m_nCamNo].m_nDomeChartUse == 1)
+			m_nSfrSizeX -= nMoveValue;
+		break;
+	default:
+		return;
+	}
+}
+
+//-----------------------------------------------------------------------------
+//
+//
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::SetDrawMoveCircle(int nRefIndex, CPoint clPoint)
+{
+	int		nMoveValue = 0;
+	int		nSx = 0, nSy = 0;
+	double	dDispFacX = 0, dDispFacY = 0;
+	CRect	clRectROI;
+
+    dDispFacX = (double)g_clModelData[m_nCamNo].m_nWidth / (double)CCD2_DISP_SIZE_X;
+    dDispFacY = (double)g_clModelData[m_nCamNo].m_nHeight / (double)CCD2_DISP_SIZE_Y;
+	
+	//clRectROI = m_clRectCircle[nRefIng_pAABonderDlg->m_pCcdDlg->m_pCcdSfrDlg->GetRectCircle(nRefIndex);
+
+	switch (m_nCursorType)
+	{
+	case CENTER:
+		nSx = m_clRectCircle[nRefIndex].right - m_clRectCircle[nRefIndex].left;
+		nSy = m_clRectCircle[nRefIndex].bottom - m_clRectCircle[nRefIndex].top;
+
+		m_clRectCircle[nRefIndex].left = (long)(clPoint.x * dDispFacX) - nSx / 2;
+		m_clRectCircle[nRefIndex].top = (long)(clPoint.y * dDispFacY) - nSy / 2;
+		m_clRectCircle[nRefIndex].right = (long)(clPoint.x * dDispFacX) + nSx / 2;
+		m_clRectCircle[nRefIndex].bottom = (long)(clPoint.y * dDispFacY) + nSy / 2;		
+		break;
+	case LEFT:
+		nMoveValue = m_clRectCircle[nRefIndex].left - (int)(clPoint.x * dDispFacX);
+		m_clRectCircle[nRefIndex].left -= nMoveValue;		
+		break;
+	case RIGHT:
+		nMoveValue = m_clRectCircle[nRefIndex].right - (int)(clPoint.x * dDispFacX);
+		m_clRectCircle[nRefIndex].right -= nMoveValue;		
+		break;
+	case TOP:
+		nMoveValue = m_clRectCircle[nRefIndex].top - (int)(clPoint.y * dDispFacY);
+		m_clRectCircle[nRefIndex].top -= nMoveValue;		
+		break;
+	case BOTTOM:
+		nMoveValue = m_clRectCircle[nRefIndex].bottom - (int)(clPoint.y * dDispFacY);
+		m_clRectCircle[nRefIndex].bottom -= nMoveValue;		
+		break;
+
+	default:
+		return;
+	}
+}
+
+//-----------------------------------------------------------------------------
+//
+//
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::DestroyCursor()
+{
+	if (m_hCursorStd != NULL)
+		::DestroyCursor(m_hCursorStd);
+
+	if (m_hCursorWidth != NULL)
+		::DestroyCursor(m_hCursorWidth);
+
+	if (m_hCursorHeight != NULL)
+		::DestroyCursor(m_hCursorHeight);
+
+	if (m_hCursorMove != NULL)
+		::DestroyCursor(m_hCursorMove);
+
+	if (m_hCursorNWSE != NULL)
+		::DestroyCursor(m_hCursorNWSE);
+
+	if (m_hCursorNESW != NULL)
+		::DestroyCursor(m_hCursorNESW);
+}
+
+//-----------------------------------------------------------------------------
+//
+//
+//
+//-----------------------------------------------------------------------------
+int CVisionStatic::GetLineType()
+{
+#ifndef ON_LINE_MIL
+	return 0;
+#endif
+
+	int nType;
+
+	nType = 0;
+
+	if ((m_clClickPoint.x > (m_clDrawBox.centerX - MOUSE_DRAG_SIZE_X)) && (m_clClickPoint.x < (m_clDrawBox.centerX + MOUSE_DRAG_SIZE_X)) &&
+		(m_clClickPoint.y >(m_clDrawBox.centerY - MOUSE_DRAG_SIZE_X)) && (m_clClickPoint.y < (m_clDrawBox.centerY + MOUSE_DRAG_SIZE_X)))
+	{
+		nType = CENTER;
+	}
+	else if ((m_clClickPoint.x >(m_clDrawBox.left - MOUSE_DRAG_SIZE_X)) && (m_clClickPoint.x < (m_clDrawBox.left + MOUSE_DRAG_SIZE_X)) &&
+		(m_clClickPoint.y >(m_clDrawBox.top + MOUSE_DRAG_SIZE_Y)) && (m_clClickPoint.y < (m_clDrawBox.bottom - MOUSE_DRAG_SIZE_Y)))
+	{
+		nType = LEFT;
+	}
+	else if ((m_clClickPoint.x >(m_clDrawBox.left - MOUSE_DRAG_SIZE_X)) && (m_clClickPoint.x < (m_clDrawBox.left + MOUSE_DRAG_SIZE_X)) &&
+		(m_clClickPoint.y >(m_clDrawBox.top - MOUSE_DRAG_SIZE_Y)) && (m_clClickPoint.y < (m_clDrawBox.top + MOUSE_DRAG_SIZE_Y)))
+	{
+		nType = LEFTTOP;
+	}
+	else if ((m_clClickPoint.x >(m_clDrawBox.left - MOUSE_DRAG_SIZE_X)) && (m_clClickPoint.x < (m_clDrawBox.left + MOUSE_DRAG_SIZE_X)) &&
+		(m_clClickPoint.y >(m_clDrawBox.bottom - MOUSE_DRAG_SIZE_Y)) && (m_clClickPoint.y < (m_clDrawBox.bottom + MOUSE_DRAG_SIZE_Y)))
+	{
+		nType = LEFTBOTTOM;
+	}
+	else if ((m_clClickPoint.x >(m_clDrawBox.right - MOUSE_DRAG_SIZE_X)) && (m_clClickPoint.x <(m_clDrawBox.right + MOUSE_DRAG_SIZE_X)) &&
+		(m_clClickPoint.y >(m_clDrawBox.top + MOUSE_DRAG_SIZE_Y)) && (m_clClickPoint.y < (m_clDrawBox.bottom - MOUSE_DRAG_SIZE_Y)))
+	{
+		nType = RIGHT;
+	}
+	else if ((m_clClickPoint.x >(m_clDrawBox.right - MOUSE_DRAG_SIZE_X)) && (m_clClickPoint.x < (m_clDrawBox.right + MOUSE_DRAG_SIZE_X)) &&
+		(m_clClickPoint.y >(m_clDrawBox.top - MOUSE_DRAG_SIZE_Y)) && (m_clClickPoint.y < (m_clDrawBox.top + MOUSE_DRAG_SIZE_Y)))
+	{
+		nType = RIGHTTOP;
+	}
+	else if ((m_clClickPoint.x >(m_clDrawBox.right - MOUSE_DRAG_SIZE_X)) && (m_clClickPoint.x < (m_clDrawBox.right + MOUSE_DRAG_SIZE_X)) &&
+		(m_clClickPoint.y >(m_clDrawBox.bottom - MOUSE_DRAG_SIZE_Y)) && (m_clClickPoint.y < (m_clDrawBox.bottom + MOUSE_DRAG_SIZE_Y)))
+	{
+		nType = RIGHTBOTTOM;
+	}
+	else if ((m_clClickPoint.x > m_clDrawBox.left) && (m_clClickPoint.x < m_clDrawBox.right) &&
+		(m_clClickPoint.y >(m_clDrawBox.top - MOUSE_DRAG_SIZE_Y)) && (m_clClickPoint.y < (m_clDrawBox.top + MOUSE_DRAG_SIZE_Y)))
+	{
+		nType = TOP;
+	}
+	else if ((m_clClickPoint.x > m_clDrawBox.left) && (m_clClickPoint.x < m_clDrawBox.right) &&
+		(m_clClickPoint.y >(m_clDrawBox.bottom - MOUSE_DRAG_SIZE_Y)) && (m_clClickPoint.y < (m_clDrawBox.bottom + MOUSE_DRAG_SIZE_Y)))
+	{
+		nType = BOTTOM;
+	}
+	else
+	{
+		nType = STANDARD;
+	}
+
+	return nType;
+}
+
+//-----------------------------------------------------------------------------
+//
+//
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::InitScroll()
+{
+#ifndef ON_LINE_MIL
+	return;
+#endif
+
+	double dZoomDispSize;
+	SCROLLINFO si;
+	double dMaxZoomFac;
+	
+	if(g_clModelData[m_nCamNo].m_nDomeChartUse == 1)
+		dMaxZoomFac = ((double)CCD1_DISP_SIZE_X / (double)g_clModelData[m_nCamNo].m_nWidth);
+	else
+		dMaxZoomFac = ((double)CCD2_DISP_SIZE_X / (double)g_clModelData[m_nCamNo].m_nWidth);
+
+	//### H-Scroll Settine(X축)
+	dZoomDispSize = (double)(m_clCamSize.x * m_dZoomFac);
+
+	if (m_dZoomFac == dMaxZoomFac)
+	{
+		::ShowScrollBar(this->GetSafeHwnd(), SB_HORZ, FALSE);
+	}
+	else
+	{
+		si.cbSize = sizeof(SCROLLINFO);
+		si.fMask = SIF_ALL;
+		si.nPage = (UINT)(dZoomDispSize / 10);
+		si.nMax = (UINT)(dZoomDispSize - m_clDisplaySize.x + si.nPage + 17);		//전체 Size - Display되는 Size + 한페이지크기 + Scroll 크기
+		si.nMin = 0;
+		si.nPos = (UINT)(m_clScrollPos.x / m_dZoomFac);
+		si.nTrackPos = 0;
+		::ShowScrollBar(this->GetSafeHwnd(), SB_HORZ, TRUE);
+		this->SetScrollInfo(SB_HORZ, &si);
+	}
+
+	//### V-Scroll Settine(Y축)	
+	dZoomDispSize = (double)(m_clCamSize.y * m_dZoomFac);
+
+	if (m_dZoomFac == dMaxZoomFac)
+	{
+		::ShowScrollBar(this->GetSafeHwnd(), SB_VERT, FALSE);
+	}
+	else
+	{
+		si.cbSize = sizeof(SCROLLINFO);
+		si.fMask = SIF_ALL;
+		si.nPage = (UINT)(dZoomDispSize / 10);
+		si.nMax = (UINT)(dZoomDispSize - m_clDisplaySize.y + si.nPage + 17);		//전체 Size - Display되는 Size + 한페이지크기 + Scroll 크기
+		si.nMin = 0;
+		si.nPos = (UINT)(m_clScrollPos.y / m_dZoomFac);							//처음 기본값
+		si.nTrackPos = 0;
+
+		::ShowScrollBar(this->GetSafeHwnd(), SB_VERT, TRUE);
+		this->SetScrollInfo(SB_VERT, &si);
+	}
+}
+
+//-----------------------------------------------------------------------------
+//
+//
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::PlusZoom()
+{
+#ifndef ON_LINE_MIL
+	return;
+#endif
+
+	if (m_dZoomFac <= 3)
+		m_dZoomFac *= 1.2;
+
+	this->DisplayZoom();
+}
+
+//-----------------------------------------------------------------------------
+//
+//
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::MinusZoom()
+{
+#ifndef ON_LINE_MIL
+	return;
+#endif
+
+	if (m_dZoomFac <= 3)
+		m_dZoomFac /= 1.2;
+
+	this->DisplayZoom();
+}
+
+//-----------------------------------------------------------------------------
+//
+//
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::ImageScroll()
+{
+#ifndef ON_LINE_MIL
+	return;
+#endif
+
+	if (g_clVision.m_MilDisplay[m_nCamNo])
+	{
+		MdispPan(g_clVision.m_MilDisplay[m_nCamNo], (MIL_DOUBLE)((double)m_clScrollPos.x / m_dZoomFac),
+			(MIL_DOUBLE)((double)m_clScrollPos.y / m_dZoomFac));
+	}
+}
+
+//-----------------------------------------------------------------------------
+//
+//
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::DrawRect(CPoint clPoint, CPoint clPtSize)
+{
+#ifndef ON_LINE_MIL
+	return;
+#endif
+
+	//## 실 Size로 변환(현재는 Zoom기능을 쓰고 있는 상태)
+	//추가해야함	converter
+	int sx, sy, ex, ey, cx, cy;
+	double dZoomX;
+	double dZoomY;
+
+	dZoomX = dZoomY = 0.0;
+	sx = sy = ex = ey = cx = cy = 0;
+
+	if (m_dZoomFac >= 1)
+		dZoomX = dZoomY = (double)(1.0 * m_dZoomFac);
+	else
+		dZoomX = dZoomY = (double)(1.0 / m_dZoomFac);
+	
+	if (m_dZoomFac >= 1)
+	{
+		sx = (int)(clPoint.x / dZoomX);
+		sy = (int)(clPoint.y / dZoomY);
+		ex = (int)((clPoint.x + clPtSize.x) / dZoomX);
+		ey = (int)((clPoint.y + clPtSize.y) / dZoomY);
+
+		cx = (int)(sx + (clPtSize.x >> 1) / m_dZoomFac);
+		cy = (int)(sy + (clPtSize.y >> 1) / m_dZoomFac);
+
+	}
+	else
+	{
+		sx = (int)(clPoint.x * dZoomX);
+		sy = (int)(clPoint.y * dZoomY);
+		ex = (int)((clPoint.x + clPtSize.x) * dZoomX);
+		ey = (int)((clPoint.y + clPtSize.y) * dZoomY);
+
+		cx = (int)(sx + ((clPtSize.x >> 1) / m_dZoomFac));
+		cy = (int)(sy + ((clPtSize.y >> 1) / m_dZoomFac));
+	}
+	
+	CPoint clDrawOffset;
+	clDrawOffset.x = (int)(m_clScrollPos.x / m_dZoomFac);
+	clDrawOffset.y = (int)(m_clScrollPos.y / m_dZoomFac);
+
+	m_clRect.left = (int)(clDrawOffset.x + sx);
+	m_clRect.top = (int)(clDrawOffset.y + sy);
+	m_clRect.right = (int)(clDrawOffset.x + ex);
+	m_clRect.bottom = (int)(clDrawOffset.y + ey);
+
+	g_clVision.ClearOverlay(m_nCamNo);
+	CPoint clDrawCenter;
+	clDrawCenter.x = clDrawOffset.x + cx;
+	clDrawCenter.y = clDrawOffset.y + cy;
+
+	g_clVision.DrawMOverlayBox(m_nCamNo, m_clRect, RGB(0, 0, 255), 1);
+	g_clVision.DrawMOverlayCross(m_nCamNo, clDrawCenter, 11, RGB(0, 0, 255), 1);
+
+	//if (m_dZoomFac >= 1) {
+	//	g_clVision.DrawOverlayBox(m_nCamNo, m_clRect, RGB(0, 0, 255), 1);
+	//	g_clVision.DrawOverlayCross(m_nCamNo, clDrawCenter, 11, RGB(0, 0, 255), 1);
+	//}
+	//else 
+	//{
+	//	g_clVision.DrawOverlayBox(m_nCamNo, m_clRect, RGB(0, 0, 255), (int)(ceil(dZoomX)));
+	//	g_clVision.DrawOverlayCross(m_nCamNo, clDrawCenter, 11, RGB(0, 0, 255), (int)(ceil(dZoomX)));
+	//}
+
+
+	////## Tracker 외각 그리기
+	//CPoint pFill;
+	//for (int i = 0; i < 8; i++)
+	//{
+	//	switch (i)
+	//	{
+	//	case 0:
+	//		pFill.x = m_clRect.left;
+	//		pFill.y = m_clRect.top;
+	//		break;
+	//	case 1:
+	//		pFill.x = m_clRect.right;
+	//		pFill.y = m_clRect.top;
+	//		break;
+	//	case 2:
+	//		pFill.x = m_clRect.left;
+	//		pFill.y = m_clRect.bottom;
+	//		break;
+	//	case 3:
+	//		pFill.x = m_clRect.right;
+	//		pFill.y = m_clRect.bottom;
+	//		break;
+	//	case 4:
+	//		pFill.x = m_clRect.left + (m_clRect.right - m_clRect.left) / 2;
+	//		pFill.y = m_clRect.top;
+	//		break;
+	//	case 5:
+	//		pFill.x = m_clRect.left + (m_clRect.right - m_clRect.left) / 2;
+	//		pFill.y = m_clRect.bottom;
+	//		break;
+	//	case 6:
+	//		pFill.x = m_clRect.left;
+	//		pFill.y = m_clRect.top + (m_clRect.bottom - m_clRect.top) / 2;
+	//		break;
+	//	case 7:
+	//		pFill.x = m_clRect.right;
+	//		pFill.y = m_clRect.top + (m_clRect.bottom - m_clRect.top) / 2;
+	//		break;
+	//	}
+
+	//	if (m_dZoomFac >= 1)
+	//		g_clVision.DrawOverlayFillBox(m_nCamNo, pFill, RGB(0, 0, 255), 1, 1);
+	//	else
+	//		g_clVision.DrawOverlayFillBox(m_nCamNo, pFill, RGB(0, 0, 255), (int)(ceil(dZoomX)), (int)(ceil(dZoomX)));
+	//}
+}
+
+//-----------------------------------------------------------------------------
+//
+//
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::DrawMeasure(CPoint clPoint)
+{
+#ifndef ON_LINE_MIL
+	return;
+#endif
+
+	double dZoomX;
+	double dZoomY;
+	CPoint clDrawOffset;
+	CPoint clDrawPt;
+
+	dZoomX = dZoomY = 0.0;
+
+	if (m_dZoomFac >= 1)
+		dZoomX = dZoomY = (double)(1.0 * m_dZoomFac);
+	else
+		dZoomX = dZoomY = (double)(1.0 / m_dZoomFac);
+	
+
+	clDrawOffset.x = (int)(m_clScrollPos.x / m_dZoomFac);
+	clDrawOffset.y = (int)(m_clScrollPos.y / m_dZoomFac);
+
+
+	if (m_dZoomFac >= 1) {
+		clDrawPt.x = (int)(clPoint.x / dZoomX) + clDrawOffset.x;
+		clDrawPt.y = (int)(clPoint.y / dZoomY) + clDrawOffset.y;
+	}
+	else
+	{
+		clDrawPt.x = (int)(clPoint.x * dZoomX) + clDrawOffset.x;
+		clDrawPt.y = (int)(clPoint.y * dZoomY) + clDrawOffset.y;
+	}
+
+	g_clVision.ClearOverlay(m_nCamNo);
+
+	if (m_nMeasureStep == (int)MEASURE_START)
+	{
+		m_clMeasure[0] = clDrawPt;
+		g_clVision.DrawOverlayCross(m_nCamNo, m_clMeasure[0], 20, RGB(255, 0, 0), 1);
+		g_clVision.DrawOverlayCross(m_nCamNo, m_clMeasure[1], 20, RGB(255, 0, 0), 2);
+	}
+	else if (m_nMeasureStep == (int)MEASURE_END)
+	{
+		m_clMeasure[1] = clDrawPt;
+		g_clVision.DrawOverlayCross(m_nCamNo, m_clMeasure[0], 20, RGB(0, 255, 0), 1);
+		g_clVision.DrawOverlayCross(m_nCamNo, m_clMeasure[1], 20, RGB(255, 0, 0), 1);
+
+	}
+	else if (m_nMeasureStep == (int)MEASURE_COMPLETE)
+	{
+		g_clVision.DrawOverlayCross(m_nCamNo, m_clMeasure[0], 20, RGB(0, 255, 0), 1);
+		g_clVision.DrawOverlayCross(m_nCamNo, m_clMeasure[1], 20, RGB(0, 255, 0), 1);
+		g_clVision.DrawOverlayLine(m_nCamNo, m_clMeasure[0], m_clMeasure[1], RGB(0, 255, 0), 1);
+	}
+}
+
+//-----------------------------------------------------------------------------
+//
+//
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::ClearMeasure()
+{
+	m_nMeasureStep = MEASURE_START;
+	m_clMeasure[0].x = m_clCamSize.x / 2 - 30;
+	m_clMeasure[0].y = m_clCamSize.y / 2 - 30;
+	m_clMeasure[1].x = m_clCamSize.x / 2 + 30;
+	m_clMeasure[1].y = m_clCamSize.y / 2 + 30;
+}
+
+//-----------------------------------------------------------------------------
+//
+//	거리측정 오버레이 그린다.(AA는 비전 카메라가 없기 때문에 분해능 없음)
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::DrawDistance()
+{
+	//TCHAR szMsg[SIZE_OF_100BYTE];
+
+	//g_clVision.ClearOverlay(m_nCamNo);
+
+	//// 원Image 크기보다 크게 보려고 할 경우
+	//if (m_dZoomFac >= 1)
+	//{
+	//	g_clVision.DrawOverlayLine(m_nCamNo, m_clMeasure[0].x, 0, m_clMeasure[0].x, m_clCamSize.y, M_COLOR_RED, 1);
+	//	g_clVision.DrawOverlayLine(m_nCamNo, 0, m_clMeasure[0].y, m_clCamSize.x, m_clMeasure[0].y, M_COLOR_MAGENTA, 1);
+
+	//	g_clVision.DrawOverlayLine(m_nCamNo, m_clMeasure[1].x, 0, m_clMeasure[1].x, m_clCamSize.y, M_COLOR_RED, 1);
+	//	g_clVision.DrawOverlayLine(m_nCamNo, 0, m_clMeasure[1].y, m_clCamSize.x, m_clMeasure[1].y, M_COLOR_MAGENTA, 1);
+	//}
+	//else
+	//{
+	//	g_clVision.DrawOverlayLine(m_nCamNo, m_clMeasure[0].x, 0, m_clMeasure[0].x, m_clCamSize.y, M_COLOR_RED, (int)(1.0 / m_dZoomFac + 0.5));
+	//	g_clVision.DrawOverlayLine(m_nCamNo, 0, m_clMeasure[0].y, m_clCamSize.x, m_clMeasure[0].y, M_COLOR_MAGENTA, (int)(1.0 / m_dZoomFac + 0.5));
+
+	//	g_clVision.DrawOverlayLine(m_nCamNo, m_clMeasure[1].x, 0, m_clMeasure[1].x, m_clCamSize.y, M_COLOR_RED, (int)(1.0 / m_dZoomFac + 0.5));
+	//	g_clVision.DrawOverlayLine(m_nCamNo, 0, m_clMeasure[1].y, m_clCamSize.x, m_clMeasure[1].y, M_COLOR_MAGENTA, (int)(1.0 / m_dZoomFac + 0.5));
+	//}
+
+	//_stprintf_s(szMsg, SIZE_OF_100BYTE, _T("GAP-X : %.04lf"), abs(m_clMeasure[0].x - m_clMeasure[1].x) * g_clSysData.m_clCamResol[m_nCamNo].x);
+	//g_clVision.DrawOverlayText(m_nCamNo, 5, m_clCamSize.y - 120, szMsg, M_COLOR_GREEN, _T("Arial"), 18, 26);
+
+	//_stprintf_s(szMsg, SIZE_OF_100BYTE, _T("GAP-Y : %.04lf"), abs(m_clMeasure[0].y - m_clMeasure[1].y) * g_clSysData.m_clCamResol[m_nCamNo].y);
+	//g_clVision.DrawOverlayText(m_nCamNo, 5, m_clCamSize.y - 60, szMsg, M_COLOR_GREEN, _T("Arial"), 18, 26);
+}
+
+//-----------------------------------------------------------------------------
+//
+//	OnLButtonDown
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	CRect clRectCenter;
+	CPoint clPtDragStart;
+	CPoint clPtDragSize;
+	//int nIndex;
+
+	if (m_bLock == true)
+		return;
+
+	if (m_bDrag == false)
+	{
+		if (m_nCamNo == 0)
+		{
+			if (g_pCarAABonderDlg->m_clVisionStaticCcd[m_nCamNo].m_FovSetMode == true)
+			{
+				m_nSelectIndexFOV = this->GetSelectedFOVNo(point);
+				if (m_nSelectIndexCCD != -1)
+				{
+					this->DrawRectFov(m_nSelectIndexCCD);
+				}
+				return;
+			}
+			else if (g_pCarAABonderDlg->m_clVisionStaticCcd[m_nCamNo].m_SnrSetMode == true)
+			{
+				m_nSelectIndexSNR = this->GetSelectedSNRNo(point);
+				if (m_nSelectIndexCCD != -1)
+				{
+					this->DrawRectSnr(m_nSelectIndexCCD);
+				}
+				return;
+			}
+			m_nSelectIndexCCD = this->GetSelectedSfrNo(point);
+
+			if (m_nSelectIndexCCD != -1)
+			{
+				this->DrawRectSfr(m_nSelectIndexCCD);
+
+				//! ROI를 선택 하였을 경우
+				if (m_nSelectIndexCCD >= 0 && m_nSelectIndexCCD < MAX_LAST_INSP_COUNT + 4)
+				{
+					m_bClick = true;
+					m_nCursorType = this->GetSelectedCursor(point);
+					//
+					this->ChangeCursor(m_nCursorType);
+				}
+				return;
+			}
+		}
+        
+		
+		{
+			//이미지 밝기 보이게
+			g_clVision.ClearOverlay(m_nCamNo);
+
+			CPoint _Mp;
+			TCHAR szTemp[SIZE_OF_100BYTE];
+			int pos = 0;
+			int width = 0;
+			int textTempx = 10;
+			int textTempy = 10;
+			width = (int)MbufInquire(g_clVision.m_MilCcdProcChild[m_nCamNo][1], M_PITCH, NULL);
+			
+
+			//_Mp.x = ((float)g_clModelData[m_nCamNo].m_nWidth / 697) * (float)point.x;
+			//_Mp.y = ((float)g_clModelData[m_nCamNo].m_nHeight / 369) * (float)point.y;
+			_Mp.x = point.x * g_clModelData[m_nCamNo].m_nWidth / CCD2_DISP_SIZE_X;
+			_Mp.y = point.y * g_clModelData[m_nCamNo].m_nHeight / CCD2_DISP_SIZE_Y;
+			g_clVision.DrawOverlayCross(m_nCamNo, _Mp, 30, RGB(255, 0, 0), 1);
+			if (_Mp.x > (g_clModelData[m_nCamNo].m_nWidth / 2))
+			{
+				textTempx = -1000;
+			}
+			if (_Mp.y > (g_clModelData[m_nCamNo].m_nHeight / 2))
+			{
+				textTempy = -100;
+			}
+			pos = _Mp.y * width + _Mp.x;
+			_stprintf_s(szTemp, SIZE_OF_100BYTE, _T("(%d,%d) => RGB %d,%d,%d"), _Mp.x, _Mp.y, g_clVision.m_pImgBuff[m_nCamNo][0][pos], g_clVision.m_pImgBuff[m_nCamNo][1][pos], g_clVision.m_pImgBuff[m_nCamNo][2][pos]);
+			g_clVision.DrawMOverlayText(m_nCamNo, _Mp.x+ textTempx, _Mp.y+ textTempy, szTemp, M_COLOR_MAGENTA, _T("맑은 고딕"), 30, 15, FALSE);
+			g_clVision.DrawOverlayAll(m_nCamNo);
+		}
+	}
+	else
+	{
+		switch (m_nDragType)
+		{
+		case MOUSE_DRAG:
+			m_bClick = true;
+			m_clClickPoint = point;
+
+			// 기존 박스를 편집할 때
+			if (m_nCursorType > 0)
+				m_nBoxDrawType = SQUARE_RESIZE;
+
+			// 박스를 이동시킬때
+			if (m_nBoxDrawType != SQUARE_RESIZE)
+			{
+				clRectCenter.left = (LONG)(m_clDrawBox.centerX - MOUSE_DRAG_SIZE_X);
+				clRectCenter.right = (LONG)(m_clDrawBox.centerX + MOUSE_DRAG_SIZE_X);
+				clRectCenter.top = (LONG)(m_clDrawBox.centerY - MOUSE_DRAG_SIZE_Y);
+				clRectCenter.bottom = (LONG)(m_clDrawBox.centerY + MOUSE_DRAG_SIZE_Y);
+
+				// 선택한 좌표가 박스이 중심이라면 박스 이동
+				if (m_clClickPoint.x > clRectCenter.left && m_clClickPoint.x < clRectCenter.right &&
+					m_clClickPoint.y > clRectCenter.top && m_clClickPoint.y < clRectCenter.bottom)
+				{
+					m_nBoxDrawType = SQUARE_MOVE;
+				}
+			}
+
+			// 새로운 박스를 생성할때
+			if (m_nBoxDrawType != SQUARE_RESIZE && m_nBoxDrawType != SQUARE_MOVE)
+			{
+				if (m_clClickPoint.x > m_clDrawBox.left && m_clClickPoint.x < m_clDrawBox.right &&
+					m_clClickPoint.y > m_clDrawBox.top && m_clClickPoint.y < m_clDrawBox.bottom)
+				{
+					return;
+				}
+
+				if (m_clDrawBox.cnt > 0)
+					m_clDrawBox.cnt--;
+
+				m_nBoxDrawType = SQUARE_CREATE;
+
+				m_clDrawBox.left = m_clClickPoint.x;
+				m_clDrawBox.top = m_clClickPoint.y;
+				m_clDrawBox.right = m_clClickPoint.x;
+				m_clDrawBox.bottom = m_clClickPoint.y;
+
+				clPtDragStart.x = m_clDrawBox.left < m_clDrawBox.right ? (LONG)m_clDrawBox.left : (LONG)m_clDrawBox.right;
+				clPtDragStart.y = m_clDrawBox.top < m_clDrawBox.bottom ? (LONG)m_clDrawBox.top : (LONG)m_clDrawBox.bottom;
+				clPtDragSize.x = (LONG)(abs(m_clDrawBox.left - m_clDrawBox.right));
+				clPtDragSize.y = (LONG)(abs(m_clDrawBox.top - m_clDrawBox.bottom));
+
+				this->DrawRect(clPtDragStart, clPtDragSize);
+			}
+
+			SetCapture();
+			break;
+		case DIST_CHECK:
+			m_clClickDist = point;
+			m_bDrawLine = true;
+			SetCapture();
+			break;
+		case DISP_MOVE:
+			m_bClick = true;
+			m_clClickPoint = point;
+			break;
+		case MEASURE:
+			m_bRButtonUp = true;
+			m_bClick = true;
+			this->DrawMeasure(point);
+
+			break;
+		default:
+			break;
+		}
+	}
+
+	CStatic::OnLButtonDown(nFlags, point);
+}
+
+
+//-----------------------------------------------------------------------------
+//
+//	선택된 SNR ROI 영역 인덱스 반환
+//
+//-----------------------------------------------------------------------------
+int CVisionStatic::GetSelectedSNRNo(CPoint point)
+{
+    CRect clRect;
+    CPoint clPtPos;
+    int nSelectNo;
+    int i;
+
+    clPtPos.x = (int)((point.x * ((double)g_clModelData[m_nCamNo].m_nWidth / (double)CCD2_DISP_SIZE_X)) + 0.5);
+    clPtPos.y = (int)((point.y * ((double)g_clModelData[m_nCamNo].m_nHeight / (double)CCD2_DISP_SIZE_Y)) + 0.5);
+    //
+    for (i = 0; i < MAX_SNR_COUNT; i++)
+    {
+        if (PtInRect(m_clRectDrawSnr[i], clPtPos) == TRUE)
+        {
+            nSelectNo = i;
+            return nSelectNo;
+        }
+    }
+    return -1;
+}
+//-----------------------------------------------------------------------------
+//
+//	선택된 FOV ROI 영역 인덱스 반환
+//
+//-----------------------------------------------------------------------------
+int CVisionStatic::GetSelectedFOVNo(CPoint point)
+{
+    CRect clRect;
+    CPoint clPtPos;
+    int nSelectNo;
+    int i;
+
+    clPtPos.x = (int)((point.x * ((double)g_clModelData[m_nCamNo].m_nWidth / (double)CCD2_DISP_SIZE_X)) + 0.5);
+    clPtPos.y = (int)((point.y * ((double)g_clModelData[m_nCamNo].m_nHeight / (double)CCD2_DISP_SIZE_Y)) + 0.5);
+    //
+    for (i = 0; i < MAX_FOV_COUNT; i++)
+    {
+        if (PtInRect(m_clRectFov[i], clPtPos) == TRUE)
+        {
+            nSelectNo = i;
+            return nSelectNo;
+        }
+    }
+    /*for (i = 0; i < MAX_LAST_INSP_COUNT; i++)
+    {
+        clRect.left = m_clPtOffset[i].x;
+        clRect.top = m_clPtOffset[i].y;
+        clRect.right = clRect.left + m_nSfrSizeX;
+        clRect.bottom = clRect.top + m_nSfrSizeY;
+
+        if (PtInRect(clRect, clPtPos) == TRUE)
+        {
+            nSelectNo = i;
+            return nSelectNo;
+        }
+    }*/
+    return -1;
+}
+//-----------------------------------------------------------------------------
+//
+//	선택된 SFR ROI 영역 인덱스 반환
+//
+//-----------------------------------------------------------------------------
+int CVisionStatic::GetSelectedSfrNo(CPoint point)
+{
+	CRect clRect;
+	CPoint clPtPos;
+	int nSelectNo;
+	int i;
+
+    clPtPos.x = (int)((point.x * ((double)g_clModelData[m_nCamNo].m_nWidth / (double)CCD2_DISP_SIZE_X)) + 0.5);
+    clPtPos.y = (int)((point.y * ((double)g_clModelData[m_nCamNo].m_nHeight / (double)CCD2_DISP_SIZE_Y)) + 0.5);
+    for (i = 0; i < MAX_LAST_INSP_COUNT; i++)
+    {
+        clRect.left = m_clPtOffset[i].x;
+        clRect.top = m_clPtOffset[i].y;
+        clRect.right = clRect.left + m_nSfrSizeX;
+        clRect.bottom = clRect.top + m_nSfrSizeY;
+
+        if (PtInRect(clRect, clPtPos) == TRUE)
+        {
+            nSelectNo = i;
+            return nSelectNo;
+        }
+    }
+
+	for (i = 0; i < 4; i++)
+	{
+		if (PtInRect(m_clRectCircle[i], clPtPos) == TRUE)
+		{
+            nSelectNo = MAX_LAST_INSP_COUNT + i;
+			return nSelectNo;
+		}
+	}
+
+	return -1;
+}
+
+//-----------------------------------------------------------------------------
+//
+//	좌표로 선택 커서 타입 반환
+//
+//-----------------------------------------------------------------------------
+int CVisionStatic::GetSelectedCursor(CPoint point)
+{
+	CDrawBox clRectBox;
+	CPoint clPtPos;
+	int nCount;
+	int nMaxCount;
+	int i;
+	int nCursor = -1;
+    int nSquareSelectSizeX = m_nSfrSizeX / 2 - 12;
+    int nSquareSelectSizeY = m_nSfrSizeY / 2 - 12;
+
+	int	iGap;
+
+    clPtPos.x = (int)(point.x * (((double)g_clModelData[m_nCamNo].m_nWidth / (double)CCD2_DISP_SIZE_X)) + 0.5);
+    clPtPos.y = (int)(point.y * (((double)g_clModelData[m_nCamNo].m_nHeight / (double)CCD2_DISP_SIZE_Y)) + 0.5);
+	
+	//clPtPos.x -= m_rectCamDispPos1.left;
+	//clPtPos.y -= m_rectCamDispPos1.top;
+    nCount = MAX_LAST_INSP_COUNT + 4;
+    nMaxCount = MAX_LAST_INSP_COUNT;
+
+	iGap = int((double)g_clModelData[m_nCamNo].m_nWidth / (double)CCD2_DISP_SIZE_X * 5);
+
+	for (i = 0; i < nCount; i++)
+	{
+		if (i < nMaxCount)
+		{//! SFR 영역
+			clRectBox.left = m_clPtOffset[i].x;
+			clRectBox.top = m_clPtOffset[i].y;
+			clRectBox.right = clRectBox.left + m_nSfrSizeX;
+			clRectBox.bottom = clRectBox.top + m_nSfrSizeY;
+			clRectBox.centerX = (clRectBox.left + clRectBox.right) / 2;
+			clRectBox.centerY = (clRectBox.top + clRectBox.bottom) / 2;
+		}
+		else
+		{//! 원형마크 영역
+            
+			clRectBox.left = m_clRectCircle[i - nMaxCount].left;
+			clRectBox.top = m_clRectCircle[i - nMaxCount].top;
+			clRectBox.right = m_clRectCircle[i - nMaxCount].right;
+			clRectBox.bottom = m_clRectCircle[i - nMaxCount].bottom;
+			//
+			clRectBox.centerX = (clRectBox.left + clRectBox.right) / 2;
+			clRectBox.centerY = (clRectBox.top + clRectBox.bottom) / 2;
+			 
+            nSquareSelectSizeX = (clRectBox.right - clRectBox.left)/2 - 20;
+            nSquareSelectSizeY = (clRectBox.bottom - clRectBox.top)/2 - 20;
+
+		}
+
+		/*if ((clPtPos.x > (clRectBox.centerX - nSquareSelectSizeX)) &&
+			(clPtPos.x < (clRectBox.centerX + nSquareSelectSizeX)) &&
+			(clPtPos.y >(clRectBox.centerY - nSquareSelectSizeY)) &&
+			(clPtPos.y < (clRectBox.centerY + nSquareSelectSizeY)))*/
+		if ((clPtPos.x > (clRectBox.left + iGap)) &&
+			(clPtPos.x < (clRectBox.right - iGap)) &&
+			(clPtPos.y >(clRectBox.top + iGap)) &&
+			(clPtPos.y < (clRectBox.bottom - iGap)))
+		{
+			return CENTER;
+		}
+		else if ((clPtPos.x >(clRectBox.left - iGap)) &&
+			(clPtPos.x < (clRectBox.left + iGap)) &&
+			(clPtPos.y >(clRectBox.top)) &&
+			(clPtPos.y < (clRectBox.bottom)))
+		{
+			return LEFT;
+		}
+		else if ((clPtPos.x >(clRectBox.right - iGap)) &&
+			(clPtPos.x < (clRectBox.right + iGap)) &&
+			(clPtPos.y >(clRectBox.top)) &&
+			(clPtPos.y < (clRectBox.bottom)))
+		{
+			return RIGHT;
+		}
+		else if ((clPtPos.x > clRectBox.left) &&
+			(clPtPos.x < clRectBox.right) &&
+			(clPtPos.y >(clRectBox.top - iGap)) &&
+			(clPtPos.y < (clRectBox.top + iGap)))
+		{
+			return TOP;
+		}
+		else if ((clPtPos.x > clRectBox.left) &&
+			(clPtPos.x < clRectBox.right) &&
+			(clPtPos.y >(clRectBox.bottom - iGap)) &&//SQUARE_RESET_SIZE_X
+			(clPtPos.y < (clRectBox.bottom + iGap)))
+		{
+			return BOTTOM;
+		}
+		else
+		{
+			nCursor = STANDARD;
+		}
+	}
+
+	return nCursor;
+}
+
+//-----------------------------------------------------------------------------
+//
+//	OnLButtonUp
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	CPoint clPoint;
+	CPoint clPtDragStart;
+	CPoint clPtDragSize;
+	SCROLLINFO stScrollVert;
+	SCROLLINFO stScrollHoz;
+
+	double dDrawLeft;
+	double dDrawRight;
+	double dDrawTop;
+	double dDrawBottom;
+
+	dDrawLeft = dDrawRight = dDrawTop = dDrawBottom = 0.0;
+
+	if (m_bLock == true)
+		return;
+
+	ReleaseCapture();
+	m_bDrawLine = false;
+
+	if (m_bClick == true)
+	{
+		switch (m_nDragType)
+		{
+			// 마우스 드래그
+		case MOUSE_DRAG:
+			switch (m_nBoxDrawType)
+			{
+			case SQUARE_RESIZE:
+				if (m_clDrawBox.left > m_clDrawBox.right)
+				{
+					dDrawLeft = m_clDrawBox.right;
+					dDrawRight = m_clDrawBox.left;
+					m_clDrawBox.left = dDrawLeft;
+					m_clDrawBox.right = dDrawRight;
+				}
+
+				if (m_clDrawBox.top > m_clDrawBox.bottom)
+				{
+					dDrawTop = m_clDrawBox.bottom;
+					dDrawBottom = m_clDrawBox.top;
+					m_clDrawBox.top = dDrawTop;
+					m_clDrawBox.bottom = dDrawBottom;
+				}
+				break;
+			case SQUARE_CREATE:
+				if (m_clDrawBox.left > m_clDrawBox.right)
+				{
+					dDrawLeft = m_clDrawBox.right;
+					dDrawRight = m_clDrawBox.left;
+					m_clDrawBox.left = dDrawLeft;
+					m_clDrawBox.right = dDrawRight;
+				}
+
+				if (m_clDrawBox.top > m_clDrawBox.bottom)
+				{
+					dDrawTop = m_clDrawBox.bottom;
+					dDrawBottom = m_clDrawBox.top;
+					m_clDrawBox.top = dDrawTop;
+					m_clDrawBox.bottom = dDrawBottom;
+				}
+
+				if (m_clDrawBox.right - m_clDrawBox.left < 20 || m_clDrawBox.bottom - m_clDrawBox.top < 20)
+				{
+					m_clDrawBox.left = m_clDrawBox.right = m_clDrawBox.top = m_clDrawBox.bottom = 0;
+					m_clDrawBox.centerX = m_clDrawBox.centerY = 0;
+					m_clDrawBox.cnt--;
+				}
+
+				clPtDragStart.x = m_clDrawBox.left < m_clDrawBox.right ? (LONG)m_clDrawBox.left : (LONG)m_clDrawBox.right;
+				clPtDragStart.y = m_clDrawBox.top < m_clDrawBox.bottom ? (LONG)m_clDrawBox.top : (LONG)m_clDrawBox.bottom;
+				clPtDragSize.x = (LONG)(abs(m_clDrawBox.left - m_clDrawBox.right));
+				clPtDragSize.y = (LONG)(abs(m_clDrawBox.top - m_clDrawBox.bottom));
+
+				this->DrawRect(clPtDragStart, clPtDragSize);
+
+				break;
+			}
+
+			m_nBoxDrawType = SQUARE_RESET;
+			break;
+			// 화면 이동
+		case DISP_MOVE:
+			this->GetScrollInfo(SB_VERT, &stScrollVert);
+			this->GetScrollInfo(SB_HORZ, &stScrollHoz);
+
+			clPoint.x = point.x - m_clClickPoint.x;
+			clPoint.y = point.y - m_clClickPoint.y;
+
+			m_clScrollPos.x -= clPoint.x;
+			m_clScrollPos.y -= clPoint.y;
+
+			if (m_clScrollPos.x < 0) m_clScrollPos.x = 0;
+			if (m_clScrollPos.y < 0) m_clScrollPos.y = 0;
+
+			stScrollHoz.nPos = m_clScrollPos.x;
+			stScrollVert.nPos = m_clScrollPos.y;
+
+			this->SetScrollInfo(SB_VERT, &stScrollVert, TRUE);
+			this->SetScrollInfo(SB_HORZ, &stScrollHoz, TRUE);
+
+			this->ImageScroll();
+			break;
+		}
+	}
+
+	m_bClick = false;
+
+	CStatic::OnLButtonUp(nFlags, point);
+}
+
+//-----------------------------------------------------------------------------
+//
+//	OnMouseMove
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::OnMouseMove(UINT nFlags, CPoint point)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	CPoint clPoint;
+	CPoint clPtDragStart;
+	CPoint clPtDragSize;
+	double dDrawX, dDrawY;
+	double dZoomX, dZoomY;
+	CPoint clPtDrawOfs;
+	CPoint clPtDraw;
+	int nMoveX, nMoveY;
+	int nMaxCount;
+
+	dDrawX = dDrawY = 0.0;
+	dZoomX = dZoomY = 0.0;
+	nMoveX = nMoveY = 0;
+
+	if (m_bLock == true)		return;
+
+	m_clClickPoint = point;
+
+	if (m_bDrag == false)
+	{
+        nMaxCount = MAX_LAST_INSP_COUNT;
+		
+		if (m_bClick == true && m_nSelectIndexCCD != -1)
+		{
+			if (m_nSelectIndexCCD >= 0 && m_nSelectIndexCCD < nMaxCount)
+			{
+				this->SetDrawMoveSfr(m_nSelectIndexCCD, point);
+			}
+			else
+			{
+				this->SetDrawMoveCircle(m_nSelectIndexCCD - nMaxCount, point);
+			}
+
+			this->DrawRectSfr(m_nSelectIndexCCD);
+
+			return;
+		}
+	}
+	else
+	{
+		if (m_bClick == true && m_nDragType == MOUSE_DRAG)
+		{
+			switch (m_nBoxDrawType)
+			{
+			case SQUARE_RESIZE:
+				switch (m_nCursorType)
+				{
+				case LEFT:
+					m_clDrawBox.left = m_clClickPoint.x;
+					break;
+				case LEFTTOP:
+					m_clDrawBox.left = m_clClickPoint.x;
+					m_clDrawBox.top = m_clClickPoint.y;
+					break;
+				case LEFTBOTTOM:
+					m_clDrawBox.left = m_clClickPoint.x;
+					m_clDrawBox.bottom = m_clClickPoint.y;
+					break;
+				case RIGHT:
+					m_clDrawBox.right = m_clClickPoint.x;
+					break;
+				case RIGHTTOP:
+					m_clDrawBox.right = m_clClickPoint.x;
+					m_clDrawBox.top = m_clClickPoint.y;
+					break;
+				case RIGHTBOTTOM:
+					m_clDrawBox.right = m_clClickPoint.x;
+					m_clDrawBox.bottom = m_clClickPoint.y;
+					break;
+				case TOP:
+					m_clDrawBox.top = m_clClickPoint.y;
+					break;
+				case BOTTOM:
+					m_clDrawBox.bottom = m_clClickPoint.y;
+					break;
+				}
+
+				// 박스 사이즈가 너무 작은 경우
+				if (m_clDrawBox.right - m_clDrawBox.left < 20 || m_clDrawBox.bottom - m_clDrawBox.top < 20)
+				{
+					m_bClick = false;
+
+					// 20 Pixel 이하가 됐을 경우 클릭하기 편하도록 10Pixel씩 증가
+					switch (m_nCursorType)
+					{
+					case LEFT:
+						m_clDrawBox.left = m_clDrawBox.left - SQUARE_RESET_SIZE_X;
+						break;
+					case LEFTTOP:
+						m_clDrawBox.left = m_clDrawBox.left - SQUARE_RESET_SIZE_X;
+						m_clDrawBox.top = m_clDrawBox.top - SQUARE_RESET_SIZE_Y;
+						break;
+					case LEFTBOTTOM:
+						m_clDrawBox.left = m_clDrawBox.left - SQUARE_RESET_SIZE_X;
+						m_clDrawBox.bottom = m_clDrawBox.bottom + SQUARE_RESET_SIZE_Y;
+						break;
+					case RIGHT:
+						m_clDrawBox.right = m_clDrawBox.right + SQUARE_RESET_SIZE_X;
+						break;
+					case RIGHTTOP:
+						m_clDrawBox.right = m_clDrawBox.right + SQUARE_RESET_SIZE_X;
+						m_clDrawBox.top = m_clDrawBox.top - SQUARE_RESET_SIZE_Y;
+						break;
+					case RIGHTBOTTOM:
+						m_clDrawBox.right = m_clDrawBox.right + SQUARE_RESET_SIZE_X;
+						m_clDrawBox.bottom = m_clDrawBox.bottom + SQUARE_RESET_SIZE_Y;
+						break;
+					case TOP:
+						m_clDrawBox.top = m_clDrawBox.top - SQUARE_RESET_SIZE_Y;
+						break;
+					case BOTTOM:
+						m_clDrawBox.bottom = m_clDrawBox.bottom + SQUARE_RESET_SIZE_Y;
+						break;
+					}
+
+					m_nBoxDrawType = SQUARE_RESET;
+				}
+
+				m_clDrawBox.centerX = m_clDrawBox.left + ((m_clDrawBox.right - m_clDrawBox.left) / 2);
+				m_clDrawBox.centerY = m_clDrawBox.top + ((m_clDrawBox.bottom - m_clDrawBox.top) / 2);
+
+				this->ChangeCursor(m_nCursorType);
+
+				break;
+			case SQUARE_CREATE:
+				m_clDrawBox.right = m_clClickPoint.x;
+				m_clDrawBox.bottom = m_clClickPoint.y;
+				m_clDrawBox.centerX = m_clDrawBox.left + ((m_clDrawBox.right - m_clDrawBox.left) / 2);
+				m_clDrawBox.centerY = m_clDrawBox.top + ((m_clDrawBox.bottom - m_clDrawBox.top) / 2);
+
+				break;
+			case SQUARE_MOVE:
+				dDrawX = m_clDrawBox.centerX - m_clClickPoint.x;
+				dDrawY = m_clDrawBox.centerY - m_clClickPoint.y;
+
+				m_clDrawBox.left = m_clDrawBox.left - dDrawX;
+				m_clDrawBox.right = m_clDrawBox.right - dDrawX;
+				m_clDrawBox.top = m_clDrawBox.top - dDrawY;
+				m_clDrawBox.bottom = m_clDrawBox.bottom - dDrawY;
+
+				m_clDrawBox.centerX = m_clClickPoint.x;
+				m_clDrawBox.centerY = m_clClickPoint.y;
+
+				this->ChangeCursor(m_nCursorType);
+				break;
+			}
+
+			clPtDragStart.x = m_clDrawBox.left < m_clDrawBox.right ? (LONG)m_clDrawBox.left : (LONG)m_clDrawBox.right;
+			clPtDragStart.y = m_clDrawBox.top < m_clDrawBox.bottom ? (LONG)m_clDrawBox.top : (LONG)m_clDrawBox.bottom;
+			clPtDragSize.x = (LONG)(abs(m_clDrawBox.left - m_clDrawBox.right));
+			clPtDragSize.y = (LONG)(abs(m_clDrawBox.top - m_clDrawBox.bottom));
+
+			this->DrawRect(clPtDragStart, clPtDragSize);
+		}
+		else if (m_nDragType == DIST_CHECK)
+		{
+			if (m_bDrawLine == false)
+			{
+				m_nDragDistType = this->ChangeCursorMeasureMode(point);
+			}
+
+			if (m_bDrawLine == true)
+			{
+				if (m_dZoomFac >= 1)
+					dZoomX = dZoomY = (double)(1.0 * m_dZoomFac);
+				else
+					dZoomX = dZoomY = (double)(1.0 / m_dZoomFac);
+
+
+				clPtDrawOfs.x = (int)(m_clScrollPos.x / m_dZoomFac);
+				clPtDrawOfs.y = (int)(m_clScrollPos.y / m_dZoomFac);
+
+				if (m_dZoomFac >= 1)
+				{
+					nMoveX = (int)((point.x / dZoomX + 0.5) + clPtDrawOfs.x) - (int)((m_clClickDist.x / dZoomX + 0.5) + clPtDrawOfs.x);
+					nMoveY = (int)((point.y / dZoomY + 0.5) + clPtDrawOfs.y) - (int)((m_clClickDist.y / dZoomY + 0.5) + clPtDrawOfs.y);
+				}
+				else
+				{
+					nMoveX = (int)(point.x * dZoomX + 0.5) - (int)(m_clClickDist.x * dZoomX + 0.5);
+					nMoveY = (int)(point.y * dZoomY + 0.5) - (int)(m_clClickDist.y * dZoomY + 0.5);
+				}
+
+				m_clClickDist = point;
+
+				switch (m_nDragDistType)
+				{
+				case 1:		m_clMeasure[0].x += nMoveX;		break;
+				case 2:		m_clMeasure[0].y += nMoveY;		break;
+				case 3:		m_clMeasure[1].x += nMoveX;		break;
+				case 4:		m_clMeasure[1].y += nMoveY;		break;
+				}
+
+				this->DrawDistance();
+				SetCapture();
+			}
+			else
+			{
+				m_nDragDistType = this->ChangeCursorMeasureMode(point);
+			}
+		}
+		else if (m_bClick == true && m_nDragType == MEASURE)
+		{
+			clPoint = point;
+			this->DrawMeasure(clPoint);
+		}
+		else if (m_bClick == false && m_nDragType == MOUSE_DRAG)
+		{
+			m_nCursorType = this->GetLineType();
+			this->ChangeCursor(m_nCursorType);
+		}
+	}
+
+	CStatic::OnMouseMove(nFlags, point);
+}
+
+//-----------------------------------------------------------------------------
+//
+//	OnRButtonUp
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::OnRButtonUp(UINT nFlags, CPoint point)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	CPoint clPoint;
+
+	if (m_bLock == true)
+		return;
+
+	if ((m_nMeasureStep < MEASURE_COMPLETE) && (m_nDragType == MEASURE) && (m_bRButtonUp == true))
+	{
+		m_bRButtonUp = false;
+		m_nMeasureStep++;
+
+		clPoint.x = 10;
+		clPoint.y = 10;
+
+		this->DrawMeasure(clPoint);
+	}
+
+	if ((m_nMeasureStep >= MEASURE_COMPLETE) && (m_nDragType == MEASURE))
+	{
+		m_bDrag = false;
+	}
+
+	CStatic::OnRButtonUp(nFlags, point);
+}
+
+//-----------------------------------------------------------------------------
+//
+//	OnHScroll
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	SCROLLINFO sif;
+	this->GetScrollInfo(SB_HORZ, &sif);
+
+	if (nSBCode == SB_ENDSCROLL)
+		return;
+
+	switch (nSBCode)
+	{
+	case SB_LINELEFT:
+	case SB_PAGELEFT:
+		sif.nPos -= sif.nPage;
+		if (sif.nPos < 0)
+			sif.nPos = 0;
+
+		m_clScrollPos.x = sif.nPos;
+		this->ImageScroll();
+		break;
+	case SB_LINERIGHT:
+	case SB_PAGERIGHT:
+		sif.nPos += sif.nPage;
+		if (sif.nPos >= (int)(sif.nMax - sif.nPage))
+			sif.nPos = sif.nMax - sif.nPage;
+
+		m_clScrollPos.x = sif.nPos;
+		this->ImageScroll();
+		break;
+	case SB_THUMBTRACK:
+		sif.nPos = nPos;
+
+		m_clScrollPos.x = nPos;
+		this->ImageScroll();
+		break;
+	case SB_ENDSCROLL:
+		break;
+	}
+
+	this->SetScrollInfo(SB_HORZ, &sif, TRUE);
+	Invalidate(FALSE);
+
+	CStatic::OnHScroll(nSBCode, nPos, pScrollBar);
+}
+
+//-----------------------------------------------------------------------------
+//
+//	OnVScroll
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	SCROLLINFO sif;
+	this->GetScrollInfo(SB_VERT, &sif);
+
+	switch (nSBCode)
+	{
+	case SB_LINELEFT:
+	case SB_PAGELEFT:
+		sif.nPos -= sif.nMax / 10;
+		if (sif.nPos < 0)
+			sif.nPos = 0;
+
+		m_clScrollPos.y = sif.nPos;
+		this->ImageScroll();
+		break;
+	case SB_LINERIGHT:
+	case SB_PAGERIGHT:
+		sif.nPos += sif.nPage;
+		if (sif.nPos >= (int)(sif.nMax - sif.nPage))
+			sif.nPos = sif.nMax - sif.nPage;
+
+		m_clScrollPos.y = sif.nPos;
+		this->ImageScroll();
+		break;
+	case SB_THUMBTRACK:
+		sif.nPos = nPos;
+
+		m_clScrollPos.y = nPos;
+		this->ImageScroll();
+		break;
+	case SB_ENDSCROLL:
+		break;
+	}
+
+	this->SetScrollInfo(SB_VERT, &sif, TRUE);
+	Invalidate(FALSE);
+
+	CStatic::OnVScroll(nSBCode, nPos, pScrollBar);
+}
+//-----------------------------------------------------------------------------
+//
+//	모델 데이터의 Snr 영역을 내부에 저장
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::SetSnrRoi()
+{
+    int nCount;
+    int i;
+    for (i = 0; i < MAX_SNR_COUNT; i++)
+    {
+		if (g_clModelData[0].m_nModelType == 0)	//LEFT
+			m_clRectDrawSnr[i] = g_clModelData[m_nCamNo].m_clSfrInfo.m_clRectSnr[i];
+		else
+			m_clRectDrawSnr[i] = g_clModelData[m_nCamNo].m_clSfrInfo.m_clRectSnr2[i];
+
+		
+    }
+}
+//-----------------------------------------------------------------------------
+//
+//	모델 데이터의 fov 영역을 내부에 저장
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::SetFovRoi()
+{
+    int nCount;
+    int i;
+    for (i = 0; i < MAX_FOV_COUNT; i++)
+    {
+        m_clRectFov[i] = g_clModelData[m_nCamNo].m_clSfrInfo.m_clRectFov[i];
+    }
+}
+//-----------------------------------------------------------------------------
+//
+//	모델 데이터의 ROI 영역을 내부에 저장
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::SetSfrRoi()
+{
+	int nCount;
+	int i;
+	
+    nCount = MAX_LAST_INSP_COUNT;
+
+	for (i = 0; i < nCount; i++)
+	{
+		m_clPtOffset[i] = g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtOffset[i];
+	}
+
+	for (i = 0; i < 4; i++)
+	{
+		m_clRectCircle[i] = g_clModelData[m_nCamNo].m_clSfrInfo.m_clRectCircle[i];
+	}
+}
+
+//-----------------------------------------------------------------------------
+//
+//	SFR ROI 영역 초기화
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::InitSfrRoi()
+{
+	int i;
+	double dOffsetX, dOffsetY;
+	int nCount;
+
+    nCount = MAX_LAST_INSP_COUNT;
+
+	g_clModelData[m_nCamNo].m_nRoiSizeX = m_nSfrSizeX = 80;
+	g_clModelData[m_nCamNo].m_nRoiSizeY = m_nSfrSizeY = 80;
+
+	for (i = 0; i < nCount; i++)
+	{
+		m_clPtOffset[i].x = m_clPtOffset[i].y = 0;
+
+		switch (i)
+		{
+		case 0:		dOffsetX = 2.15;	dOffsetY = 2.31;	break;
+		case 1:		dOffsetX = 4.25;	dOffsetY = 4.82;	break;
+		case 2:		dOffsetX = 1.38;	dOffsetY = 4.82;	break;
+		case 3:		dOffsetX = 1.38;	dOffsetY = 1.53;	break;
+		case 4:		dOffsetX = 4.25;	dOffsetY = 1.53;	break;
+		case 5:		dOffsetX = 1.51;	dOffsetY = 2.41;	break;
+		case 6:		dOffsetX = 3.20;	dOffsetY = 2.41;	break;
+		case 7:		dOffsetX = 19.2;	dOffsetY = 20.6;	break;
+		case 8:		dOffsetX = 1.15;	dOffsetY = 19.0;	break;
+		case 9:		dOffsetX = 1.15;	dOffsetY = 1.27;	break;
+		case 10:	dOffsetX = 20.9;	dOffsetY = 1.28;	break;
+		case 11:	dOffsetX = 2.19/*1.36*/;	dOffsetY = 20.6/*1.50*/;	break;
+		case 12:	dOffsetX = 2.19;	dOffsetY = 1.23;	break;
+		/*case 13:	dOffsetX = 5.61;	dOffsetY = 1.51;	break;
+		case 14:	dOffsetX = 11.1;	dOffsetY = 2.41;	break;
+		case 15:	dOffsetX = 19.2;	dOffsetY = 20.6;	break;
+		case 16:	dOffsetX = 1.15;	dOffsetY = 19.0;	break;
+		case 17:	dOffsetX = 1.15;	dOffsetY = 1.27;	break;
+		case 18:	dOffsetX = 20.9;	dOffsetY = 1.28;	break;*/
+		}
+
+		m_clPtOffset[i].x = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth / dOffsetX);
+		m_clPtOffset[i].y = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight/* - 4*/) / dOffsetY);
+
+		m_clRectROI[i].left = m_clPtOffset[i].x;
+		m_clRectROI[i].top = m_clPtOffset[i].y;
+		m_clRectROI[i].right = m_clRectROI[i].left + m_nSfrSizeX;
+		m_clRectROI[i].bottom = m_clRectROI[i].top + m_nSfrSizeY;
+	}
+    //
+	m_clRectDrawSnr[0].left = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.25);
+	m_clRectDrawSnr[0].top = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight) * 0.2);
+	m_clRectDrawSnr[0].right = (LONG)(m_clRectDrawSnr[0].left + 50);
+	m_clRectDrawSnr[0].bottom = (LONG)(m_clRectDrawSnr[0].top + 50);
+
+	m_clRectDrawSnr[1].left = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.40);
+	m_clRectDrawSnr[1].top = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight) * 0.2);
+	m_clRectDrawSnr[1].right = (LONG)(m_clRectDrawSnr[1].left + 50);
+	m_clRectDrawSnr[1].bottom = (LONG)(m_clRectDrawSnr[1].top + 50);
+
+	m_clRectDrawSnr[2].left = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.55);
+	m_clRectDrawSnr[2].top = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight) * 0.2);
+	m_clRectDrawSnr[2].right = (LONG)(m_clRectDrawSnr[2].left + 50);
+	m_clRectDrawSnr[2].bottom = (LONG)(m_clRectDrawSnr[2].top + 50);
+    //m_clRectSnr[0].left = 
+    //
+	m_clRectCircle[0].left = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.25);
+	m_clRectCircle[0].top = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight/* - 4*/) * 0.03);
+	m_clRectCircle[0].right = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.41);
+	m_clRectCircle[0].bottom = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight/* - 4*/) * 0.28);
+
+	m_clRectCircle[1].left = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.59);
+	m_clRectCircle[1].top = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight/* - 4*/) * 0.03);
+	m_clRectCircle[1].right = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.73);
+	m_clRectCircle[1].bottom = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight/* - 4*/) * 0.28);
+
+	m_clRectCircle[2].left = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.25);
+	m_clRectCircle[2].top = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight/* - 4*/) * 0.72);
+	m_clRectCircle[2].right = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.41);
+	m_clRectCircle[2].bottom = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight/* - 4*/) * 0.97);
+
+	m_clRectCircle[3].left = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.59);
+	m_clRectCircle[3].top = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight/* - 4*/) * 0.72);
+	m_clRectCircle[3].right = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.73);
+	m_clRectCircle[3].bottom = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight/* - 4*/) * 0.97);
+    //
+    //
+    m_clRectFov[0].left = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.25);
+    m_clRectFov[0].top = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight) * 0.03);
+    m_clRectFov[0].right = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.41);
+    m_clRectFov[0].bottom = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight) * 0.28);
+    
+    m_clRectFov[1].left = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.59);
+    m_clRectFov[1].top = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight) * 0.03);
+    m_clRectFov[1].right = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.73);
+    m_clRectFov[1].bottom = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight) * 0.28);
+
+    m_clRectFov[2].left = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.25);
+    m_clRectFov[2].top = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight) * 0.72);
+    m_clRectFov[2].right = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.41);
+    m_clRectFov[2].bottom = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight) * 0.97);
+
+    m_clRectFov[3].left = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.59);
+    m_clRectFov[3].top = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight) * 0.72);
+    m_clRectFov[3].right = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.73);
+    m_clRectFov[3].bottom = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight) * 0.97);
+    //  1           2              \    1         2           3
+    //                             \
+    //  3           4              \    4         5           6
+    //
+    //
+
+#if  (____MODEL_NAME == TESLA_MAIN_NARROW)
+    m_clRectFov[4].left = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.59);
+    m_clRectFov[4].top = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight/* - 4*/) * 0.72);
+    m_clRectFov[4].right = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.73);
+    m_clRectFov[4].bottom = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight/* - 4*/) * 0.97);
+
+    m_clRectFov[5].left = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.59);
+    m_clRectFov[5].top = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight/* - 4*/) * 0.72);
+    m_clRectFov[5].right = (LONG)((double)g_clModelData[m_nCamNo].m_nWidth * 0.73);
+    m_clRectFov[5].bottom = (LONG)((double)(g_clModelData[m_nCamNo].m_nHeight/* - 4*/) * 0.97);
+
+#endif
+    this->DrawRectSfr(999);
+    
+}
+
+//-----------------------------------------------------------------------------
+//
+//	Snr ROI 영역 그리기
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::DrawRectSnr(int nIndex)
+{
+#ifndef ON_LINE_MIL
+    return;
+#endif
+    TCHAR szPos[SIZE_OF_100BYTE];
+    int nGapX = 40;
+    int nGapY = 40;
+    int i;
+    int ntxtNum = 0;
+    g_clVision.ClearOverlay(m_nCamNo);
+
+    // Snr 영역
+    for (i = 0; i < MAX_SNR_COUNT; i++)
+    {
+        g_clVision.DrawMOverlayBox(m_nCamNo, m_clRectDrawSnr[i], M_COLOR_BLUE, 1, FALSE, PS_DOT);
+        //g_clVision.DrawMOverlayCross(m_nCamNo, (m_clRectSnr[i].right - m_clRectSnr[i].left) / 2 + m_clRectSnr[i].left, (m_clRectSnr[i].bottom - m_clRectSnr[i].top) / 2 + m_clRectSnr[i].top, 15, M_COLOR_GREEN, 1, FALSE, PS_SOLID);
+        _stprintf_s(szPos, SIZE_OF_100BYTE, _T("%d"), (i+1));
+        g_clVision.DrawMOverlayText(m_nCamNo, m_clRectDrawSnr[i].left + 10, m_clRectDrawSnr[i].top + 10, szPos, M_COLOR_WHITE, _T("Arial"), 15, 15);
+    }
+    //}
+    g_clVision.DrawOverlayAll(m_nCamNo);
+}
+//-----------------------------------------------------------------------------
+//
+//	Fov ROI 영역 그리기
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::DrawRectFov(int nIndex)
+{
+#ifndef ON_LINE_MIL
+    return;
+#endif
+    TCHAR szPos[SIZE_OF_100BYTE];
+    int nCount;
+    int nGapX = 40;
+    int nGapY = 40;
+    int i;
+    int ntxtNum = 0;
+    g_clVision.ClearOverlay(m_nCamNo);
+    
+    // sNR 영역
+    for (i = 0; i < MAX_FOV_COUNT; i++)
+    {
+        ntxtNum++;
+        if (i > 2 && i < 6)continue;
+
+        g_clVision.DrawMOverlayBox(m_nCamNo, m_clRectFov[i], M_COLOR_RED, 1, FALSE, PS_DOT);
+        g_clVision.DrawMOverlayCross(m_nCamNo, (m_clRectFov[i].right - m_clRectFov[i].left) / 2 + m_clRectFov[i].left, (m_clRectFov[i].bottom - m_clRectFov[i].top) / 2 + m_clRectFov[i].top, 15, M_COLOR_GREEN, 1, FALSE, PS_SOLID);
+        _stprintf_s(szPos, SIZE_OF_100BYTE, _T("%d"), i);// ntxtNum);
+        g_clVision.DrawMOverlayText(m_nCamNo, m_clRectFov[i].left + 10, m_clRectFov[i].top + 10, szPos, M_COLOR_WHITE, _T("Arial"), 15, 15);
+        
+    }
+    //}
+
+    g_clVision.DrawOverlayAll(m_nCamNo);
+}
+
+//-----------------------------------------------------------------------------
+//
+//	SFR ROI 영역을 오버레이로 그린다.
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::DrawRectSfr(int nIndex)
+{
+#ifndef ON_LINE_MIL
+	return;
+#endif
+	TCHAR szPos[SIZE_OF_100BYTE];
+	int nCount;
+	int nGapX = 40;
+	int nGapY = 40;
+	int i;
+
+	g_clVision.ClearOverlay(m_nCamNo);
+
+    nCount = MAX_LAST_INSP_COUNT;
+
+	// 검사영역
+	for (i = 0; i < nCount; i++)
+	{
+		m_clRectROI[i].left = m_clPtOffset[i].x;
+		m_clRectROI[i].top = m_clPtOffset[i].y;
+		m_clRectROI[i].right = m_clRectROI[i].left + m_nSfrSizeX;
+		m_clRectROI[i].bottom = m_clRectROI[i].top + m_nSfrSizeY;
+
+
+        if (nIndex == i)
+            g_clVision.DrawMOverlayBox(m_nCamNo, m_clRectROI[i], M_COLOR_MAGENTA, 1, FALSE);
+        else
+            g_clVision.DrawMOverlayBox(m_nCamNo, m_clRectROI[i], M_COLOR_BLUE, 1, FALSE);
+		
+		_stprintf_s(szPos, SIZE_OF_100BYTE, _T("%d"), i);
+		g_clVision.DrawMOverlayText(m_nCamNo, m_clRectROI[i].left + 10, m_clRectROI[i].top + 10, szPos, M_COLOR_RED, _T("Arial"), 15, 15);		
+	}
+
+	// 원형마크 영역
+	for (i = 0; i < 4; i++)
+	{
+		g_clVision.DrawMOverlayBox(m_nCamNo, m_clRectCircle[i], M_COLOR_GREEN, 1, FALSE, PS_DOT);
+		g_clVision.DrawMOverlayCross(m_nCamNo, 
+			(m_clRectCircle[i].right - m_clRectCircle[i].left) / 2 + m_clRectCircle[i].left, 
+			(m_clRectCircle[i].bottom - m_clRectCircle[i].top) / 2 + m_clRectCircle[i].top, 15, M_COLOR_GREEN, 1, FALSE, PS_SOLID);
+		//
+		_stprintf_s(szPos, SIZE_OF_100BYTE, _T("%d"), i);
+		g_clVision.DrawMOverlayText(m_nCamNo, m_clRectCircle[i].left + 10, m_clRectCircle[i].top + 10, szPos, M_COLOR_YELLOW, _T("Arial"), 13, 13);
+	}
+
+	g_clVision.DrawOverlayAll(m_nCamNo);
+}
+
+//
+//-----------------------------------------------------------------------------
+//
+//	SNR 영역 사이즈 조절 및 이동
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::MoveRectSnr(int nMoveType, int nType, int nMoveSize)
+{
+    int nCount;
+    int nIndex;
+
+    if (m_nSelectIndexSNR < 0)
+        return;
+
+    nCount = MAX_SNR_COUNT;
+
+    switch (nType)
+    {
+    case MOVE_UP:
+        if (nMoveType == MOVE_POS)
+        {
+            nIndex = m_nSelectIndexSNR;
+			m_clRectDrawSnr[nIndex].top -= nMoveSize;
+			m_clRectDrawSnr[nIndex].bottom -= nMoveSize;
+        }
+        else
+        {
+            nIndex = m_nSelectIndexSNR;
+			m_clRectDrawSnr[0].bottom -= nMoveSize;
+			m_clRectDrawSnr[1].bottom -= nMoveSize;
+			m_clRectDrawSnr[2].bottom -= nMoveSize;
+
+        }
+        break;
+    case MOVE_DOWN:
+        if (nMoveType == MOVE_POS)
+        {
+            nIndex = m_nSelectIndexSNR;
+			m_clRectDrawSnr[nIndex].top += nMoveSize;
+			m_clRectDrawSnr[nIndex].bottom += nMoveSize;
+        }
+        else
+        {
+            nIndex = m_nSelectIndexSNR;
+			m_clRectDrawSnr[0].bottom += nMoveSize;
+			m_clRectDrawSnr[1].bottom += nMoveSize;
+			m_clRectDrawSnr[2].bottom += nMoveSize;
+        }
+        break;
+    case MOVE_LEFT:
+        if (nMoveType == MOVE_POS)
+        {
+            nIndex = m_nSelectIndexSNR;
+			m_clRectDrawSnr[nIndex].left -= nMoveSize;
+			m_clRectDrawSnr[nIndex].right -= nMoveSize;
+        }
+        else
+        {
+            nIndex = m_nSelectIndexSNR;
+			m_clRectDrawSnr[0].right -= nMoveSize;
+			m_clRectDrawSnr[1].right -= nMoveSize;
+			m_clRectDrawSnr[2].right -= nMoveSize;
+        }
+        break;
+    case MOVE_RIGHT:
+        if (nMoveType == MOVE_POS)
+        {
+            nIndex = m_nSelectIndexSNR;
+			m_clRectDrawSnr[nIndex].left += nMoveSize;
+			m_clRectDrawSnr[nIndex].right += nMoveSize;
+        }
+        else
+        {
+            nIndex = m_nSelectIndexSNR;
+			m_clRectDrawSnr[0].right += nMoveSize;
+			m_clRectDrawSnr[1].right += nMoveSize;
+			m_clRectDrawSnr[2].right += nMoveSize;
+        }
+        break;
+    }
+
+    this->DrawRectSnr(m_nSelectIndexSNR);
+}
+//
+//-----------------------------------------------------------------------------
+//
+//	FOV 영역 사이즈 조절 및 이동
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::MoveRectFov(int nMoveType, int nType, int nMoveSize)
+{
+    int nCount;
+    int nIndex;
+
+    if (m_nSelectIndexFOV < 0)
+        return;
+
+    nCount = MAX_FOV_COUNT;
+
+    switch (nType)
+    {
+    case MOVE_UP:
+        if (nMoveType == MOVE_POS)
+        {
+            nIndex = m_nSelectIndexFOV;
+            m_clRectFov[nIndex].top -= nMoveSize;
+            m_clRectFov[nIndex].bottom -= nMoveSize;
+        }
+        else
+        {
+            nIndex = m_nSelectIndexFOV;
+            m_clRectFov[nIndex].bottom -= nMoveSize;
+            
+        }
+        break;
+    case MOVE_DOWN:
+        if (nMoveType == MOVE_POS)
+        {
+            nIndex = m_nSelectIndexFOV;
+            m_clRectFov[nIndex].top += nMoveSize;
+            m_clRectFov[nIndex].bottom += nMoveSize;
+        }
+        else
+        {
+            nIndex = m_nSelectIndexFOV;
+            m_clRectFov[nIndex].bottom += nMoveSize;
+        }
+        break;
+    case MOVE_LEFT:
+        if (nMoveType == MOVE_POS)
+        {
+            nIndex = m_nSelectIndexFOV;
+            m_clRectFov[nIndex].left -= nMoveSize;
+            m_clRectFov[nIndex].right -= nMoveSize;
+        }
+        else
+        {
+            nIndex = m_nSelectIndexFOV;
+            m_clRectFov[nIndex].right -= nMoveSize;
+        }
+        break;
+    case MOVE_RIGHT:
+        if (nMoveType == MOVE_POS)
+        {
+            nIndex = m_nSelectIndexFOV;
+            m_clRectFov[nIndex].left += nMoveSize;
+            m_clRectFov[nIndex].right += nMoveSize;
+        }
+        else
+        {
+            nIndex = m_nSelectIndexFOV;
+            m_clRectFov[nIndex].right += nMoveSize;
+        }
+        break;
+    }
+
+    this->DrawRectFov(m_nSelectIndexFOV);
+}
+
+//-----------------------------------------------------------------------------
+//
+//	ROI 영역 사이즈 조절 및 이동
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::MoveRectSfr(int nMoveType, int nType, int nMoveSize)
+{
+	int nCount;
+	int nIndex;
+
+	if(m_nSelectIndexCCD < 0)
+		return;
+
+    nCount = MAX_LAST_INSP_COUNT;
+
+	switch(nType)
+	{
+	case MOVE_UP:
+		if(nMoveType == MOVE_POS)
+		{
+			// 검사 영역
+			if(m_nSelectIndexCCD < nCount)
+			{
+				m_clPtOffset[m_nSelectIndexCCD].y -= nMoveSize;
+			}
+			// 원형마크 영역
+			else
+			{
+				nIndex = m_nSelectIndexCCD - nCount;
+				m_clRectCircle[nIndex].top -= nMoveSize;
+				m_clRectCircle[nIndex].bottom -= nMoveSize;
+			}
+		}
+		else
+		{
+			// 검사 영역
+			if(g_clModelData[m_nCamNo].m_nDomeChartUse == 1)
+			{
+				if(m_nSelectIndexCCD < nCount)
+				{
+					m_nSfrSizeX -= nMoveSize;
+					m_nSfrSizeY -= nMoveSize;
+
+				}
+				else
+				{
+					nIndex = m_nSelectIndexCCD - nCount;
+					//m_clRectCircle[nIndex].right -= nMoveSize;
+					m_clRectCircle[nIndex].top -= nMoveSize;
+				}	
+			}
+			else
+			{
+				if(m_nSelectIndexCCD < nCount)
+				{
+					m_nSfrSizeY -= nMoveSize;
+				}
+				else
+				{
+					nIndex = m_nSelectIndexCCD - nCount;
+					m_clRectCircle[nIndex].top -= nMoveSize;
+				}
+			}
+		}
+		break;
+	case MOVE_DOWN:
+		if(nMoveType == MOVE_POS)
+		{
+			// 검사 영역
+			if(m_nSelectIndexCCD < nCount)
+			{
+				m_clPtOffset[m_nSelectIndexCCD].y += nMoveSize;
+			}
+			// 원형마크 영역
+			else
+			{
+				nIndex = m_nSelectIndexCCD - nCount;
+				m_clRectCircle[nIndex].top += nMoveSize;
+				m_clRectCircle[nIndex].bottom += nMoveSize;
+			}
+		}
+		else
+		{
+			// 검사 영역
+			if(g_clModelData[m_nCamNo].m_nDomeChartUse == 1)
+			{
+				if(m_nSelectIndexCCD < nCount)
+				{
+					m_nSfrSizeX += nMoveSize;
+					m_nSfrSizeY += nMoveSize;
+				}
+				else
+				{
+					nIndex = m_nSelectIndexCCD - nCount;
+					//m_clRectCircle[nIndex].bottom += nMoveSize;
+					m_clRectCircle[nIndex].top += nMoveSize;
+				}
+			}
+			else
+			{
+				if(m_nSelectIndexCCD < nCount)
+				{
+					m_nSfrSizeY += nMoveSize;
+				}
+				else
+				{
+					nIndex = m_nSelectIndexCCD - nCount;
+					m_clRectCircle[nIndex].top += nMoveSize;
+				}
+			}
+		}
+		break;
+	case MOVE_LEFT:
+		if(nMoveType == MOVE_POS)
+		{
+			// 검사 영역
+			if(m_nSelectIndexCCD < nCount)
+			{
+				m_clPtOffset[m_nSelectIndexCCD].x -= nMoveSize;
+			}
+			// 원형마크 영역
+			else
+			{
+				nIndex = m_nSelectIndexCCD - nCount;
+				m_clRectCircle[nIndex].left -= nMoveSize;
+				m_clRectCircle[nIndex].right -= nMoveSize;
+			}
+		}
+		else
+		{
+			// 검사 영역
+			if(g_clModelData[m_nCamNo].m_nDomeChartUse == 1)
+			{
+				if(m_nSelectIndexCCD < nCount)
+				{
+					m_nSfrSizeX -= nMoveSize;
+					m_nSfrSizeY -= nMoveSize;
+				}
+				else
+				{
+					nIndex = m_nSelectIndexCCD - nCount;
+					m_clRectCircle[nIndex].right -= nMoveSize;
+					//m_clRectCircle[nIndex].top -= nMoveSize;
+				}
+			}
+			else
+			{
+				if(m_nSelectIndexCCD < nCount)
+				{
+					m_nSfrSizeX -= nMoveSize;
+				}
+				else
+				{
+					nIndex = m_nSelectIndexCCD - nCount;
+					m_clRectCircle[nIndex].right -= nMoveSize;
+				}
+			}
+		}
+		break;
+	case MOVE_RIGHT:
+		if(nMoveType == MOVE_POS)
+		{
+			// 검사 영역
+			if(m_nSelectIndexCCD < nCount)
+			{
+				m_clPtOffset[m_nSelectIndexCCD].x += nMoveSize;
+			}
+			// 원형마크 영역
+			else
+			{
+				nIndex = m_nSelectIndexCCD - nCount;
+				m_clRectCircle[nIndex].left += nMoveSize;
+				m_clRectCircle[nIndex].right += nMoveSize;
+			}
+		}
+		else
+		{
+			// 검사 영역
+			if(g_clModelData[m_nCamNo].m_nDomeChartUse == 1)
+			{
+				if(m_nSelectIndexCCD < nCount)
+				{
+					m_nSfrSizeX += nMoveSize;
+					m_nSfrSizeY += nMoveSize;
+				}
+				else
+				{
+					nIndex = m_nSelectIndexCCD - nCount;
+					m_clRectCircle[nIndex].right += nMoveSize;
+					//m_clRectCircle[nIndex].top += nMoveSize;
+				}
+			}
+			else
+			{
+				if(m_nSelectIndexCCD < nCount)
+				{
+					m_nSfrSizeX += nMoveSize;
+				}
+				else
+				{
+					nIndex = m_nSelectIndexCCD - nCount;
+					m_clRectCircle[nIndex].right += nMoveSize;
+				}
+			}
+		}
+		break;
+	}
+	TCHAR szPos[SIZE_OF_100BYTE];
+	if (m_nSelectIndexCCD < nCount)
+	{
+		
+	}
+	else
+	{
+
+		_stprintf_s(szPos, SIZE_OF_100BYTE, _T("circle[%d] x:%lu, y: %lu / sizeX: %lu, sizeY: %lu"), nIndex,
+			m_clRectCircle[nIndex].left, m_clRectCircle[nIndex].top,
+			(m_clRectCircle[nIndex].right - m_clRectCircle[nIndex].left),
+			(m_clRectCircle[nIndex].bottom , m_clRectCircle[nIndex].top)
+		);
+		AddLog(szPos, 0, m_nCamNo);
+	}
+	this->DrawRectSfr(m_nSelectIndexCCD);
+}
+
+//-----------------------------------------------------------------------------
+//
+//	SNR 마크 저장
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::RegistSnrMark()
+{
+    TCHAR szPos[SIZE_OF_100BYTE];
+    int nPitch, nSizeX, nSizeY;
+    int i;
+
+    
+    /*nPitch = (int)MbufInquire(g_clVision.m_MilCcdProcChild[m_nCamNo][1], M_PITCH, M_NULL);
+    nSizeX = (int)MbufInquire(g_clVision.m_MilCcdProcChild[m_nCamNo][1], M_SIZE_X, M_NULL);
+    nSizeY = (int)MbufInquire(g_clVision.m_MilCcdProcChild[m_nCamNo][1], M_SIZE_Y, M_NULL);*/
+
+    //if (g_FindFovPos(m_nCamNo, g_clVision.m_pImgBuff[m_nCamNo][2], nPitch, nSizeX, nSizeY, m_clRectSnr) == false)
+    //{
+    //    g_ShowMsgPopup(_T("ERROR"), _T("FiducialMark Find Fail!"), RGB_COLOR_RED);
+
+    //    //return;
+    //}
+
+    for (i = 0; i < MAX_SNR_COUNT; i++)
+    {
+		if (g_clModelData[0].m_nModelType == 0)	//LEFT
+		{
+			g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtSnr[i] = g_clTaskWork[m_nCamNo].m_clPtSnr[i];
+			g_clModelData[m_nCamNo].m_clSfrInfo.m_clRectSnr[i] = m_clRectDrawSnr[i];
+		}
+		else
+		{
+			g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtSnr2[i] = g_clTaskWork[m_nCamNo].m_clPtSnr2[i];
+			g_clModelData[m_nCamNo].m_clSfrInfo.m_clRectSnr2[i] = m_clRectDrawSnr[i];
+		}
+
+    }
+
+    g_clModelData[m_nCamNo].Save(g_clSysData.m_szModelName);
+
+    g_clVision.ClearOverlay(m_nCamNo);
+
+
+	for (i = 0; i < MAX_SNR_COUNT; i++)
+	{
+		g_clVision.DrawMOverlayBox(m_nCamNo, m_clRectDrawSnr[i], M_COLOR_YELLOW, 1, FALSE, PS_DOT);
+
+		_stprintf_s(szPos, SIZE_OF_100BYTE, _T("%d"), i);
+		g_clVision.DrawMOverlayText(m_nCamNo, m_clRectDrawSnr[i].left + 10, m_clRectDrawSnr[i].top + 10, szPos, M_COLOR_BLUE, _T("Arial"), 15, 15);
+	}
+
+
+    g_clVision.DrawOverlayAll(m_nCamNo);
+}
+
+//-----------------------------------------------------------------------------
+//
+//	FOV DISTORTION ROTATION 마크 저장
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::RegistFovMark()
+{
+    int nPitch, nSizeX, nSizeY;
+    int i;
+
+   
+
+    nPitch = (int)MbufInquire(g_clVision.m_MilCcdProcChild[m_nCamNo][1], M_PITCH, M_NULL);
+    nSizeX = (int)MbufInquire(g_clVision.m_MilCcdProcChild[m_nCamNo][1], M_SIZE_X, M_NULL);
+    nSizeY = (int)MbufInquire(g_clVision.m_MilCcdProcChild[m_nCamNo][1], M_SIZE_Y, M_NULL);
+
+	/*if(g_FindCirclePos(m_nCamNo, g_clVision.m_pImgBuff[m_nCamNo][1], nPitch, nSizeX, nSizeY, g_clModelData[m_nCamNo].m_clSfrInfo.m_clRectCircle) == false)
+		return;
+
+    if (g_FindFovPos(m_nCamNo, g_clVision.m_pImgBuff[m_nCamNo][2], nPitch, nSizeX, nSizeY, m_clRectFov) == false)
+    {
+        g_ShowMsgPopup(_T("ERROR"), _T("FiducialMark Find Fail!"), RGB_COLOR_RED);
+
+        return;
+    }*/
+
+    for (i = 0; i < MAX_FOV_COUNT; i++)
+    {
+        g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtFov[i] = g_clTaskWork[m_nCamNo].m_clPtFov[i];
+        g_clModelData[m_nCamNo].m_clSfrInfo.m_clRectFov[i] = m_clRectFov[i];
+    }
+
+    g_clModelData[m_nCamNo].Save(g_clSysData.m_szModelName);
+
+    g_clVision.ClearOverlay(m_nCamNo);
+    int markNumber = MAX_FOV_COUNT;         //광각은 4개 , 협각은 6개
+    for (i = 0; i < markNumber; i++)
+    {
+        if (i > 2 && i < 6)continue;//가운데 3개 제외
+        g_clVision.DrawMOverlayBox(m_nCamNo, g_clModelData[m_nCamNo].m_clSfrInfo.m_clRectFov[i], M_COLOR_BLUE, 2, FALSE, PS_DOT);
+    }
+
+    g_clVision.DrawOverlayAll(m_nCamNo);
+}
+
+//-----------------------------------------------------------------------------
+//
+//	원형마크 저장
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::RegistCircleMark()
+{
+	int nPitch, nSizeX, nSizeY;
+	int i;
+
+	g_clVision.ClearOverlay(m_nCamNo);
+	
+	for (i = 0; i < 4; i++)
+	{		
+		g_clVision.DrawMOverlayBox(m_nCamNo, m_clRectCircle[i], M_COLOR_GREEN, 2, FALSE, PS_DOT);
+	}
+
+	nPitch = (int)MbufInquire(g_clVision.m_MilCcdProcChild[m_nCamNo][1], M_PITCH, M_NULL);
+	nSizeX = (int)MbufInquire(g_clVision.m_MilCcdProcChild[m_nCamNo][1], M_SIZE_X, M_NULL);
+	nSizeY = (int)MbufInquire(g_clVision.m_MilCcdProcChild[m_nCamNo][1], M_SIZE_Y, M_NULL);
+
+	if (g_FindCirclePos(m_nCamNo, g_clVision.m_pImgBuff[m_nCamNo][2], nPitch, nSizeX, nSizeY, m_clRectCircle) == false)
+	{
+		g_ShowMsgPopup(_T("ERROR"), _T("원형 마크 찾기 실패"), RGB_COLOR_RED);
+		return;
+	}
+
+	for (i = 0; i < 4; i++)
+	{
+		g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtCircle[i] = g_clTaskWork[m_nCamNo].m_clPtCircle[i];
+		g_clModelData[m_nCamNo].m_clSfrInfo.m_clRectCircle[i] = m_clRectCircle[i];
+	}
+
+	/*g_clModelData.m_clSfrInfo.m_nSizeX = m_clRectROI[0].right - m_clRectROI[i].left;
+	g_clModelData.m_clSfrInfo.m_nSizeY = m_clRectROI[0].bottom - m_clRectROI[i].top;
+	for (i = 0; i < MAX_LAST_INSP_COUNT; i++)
+	{
+		g_clModelData.m_clSfrInfo.m_clPtOffset[i].x = m_clRectROI[i].left;
+		g_clModelData.m_clSfrInfo.m_clPtOffset[i].y = m_clRectROI[i].top;
+	}*/
+
+	g_clModelData[m_nCamNo].Save(g_clSysData.m_szModelName);
+
+	g_clVision.DrawOverlayAll(m_nCamNo);
+}
+
+//-----------------------------------------------------------------------------
+//
+//	ROI 영역 모델 데이터에 저장
+//
+//-----------------------------------------------------------------------------
+void CVisionStatic::SaveSfrRoi()
+{
+	TCHAR szPos[SIZE_OF_100BYTE];
+	int nCount;
+	int i;
+
+	g_clVision.ClearOverlay(m_nCamNo);
+
+	g_clModelData[m_nCamNo].m_clSfrInfo.m_nSizeX = m_clRectROI[0].right - m_clRectROI[0].left;
+	g_clModelData[m_nCamNo].m_clSfrInfo.m_nSizeY = m_clRectROI[0].bottom - m_clRectROI[0].top;
+
+    nCount = MAX_LAST_INSP_COUNT;
+
+	for (i = 0; i < nCount; i++)
+	{
+		g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtOffset[i].x = m_clRectROI[i].left;
+		g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtOffset[i].y = m_clRectROI[i].top;
+
+		if(g_clModelData[m_nCamNo].m_nDomeChartUse == 1)
+		{
+			g_clVision.DrawMOverlayCircle(m_nCamNo, g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtOffset[i].x, g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtOffset[i].y,
+				g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtOffset[i].x + g_clModelData[m_nCamNo].m_clSfrInfo.m_nSizeX,
+				g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtOffset[i].y + g_clModelData[m_nCamNo].m_clSfrInfo.m_nSizeY, M_COLOR_BLUE, 1, FALSE);
+			g_clVision.DrawMOverlayCross(m_nCamNo, (g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtOffset[i].x + (g_clModelData[m_nCamNo].m_clSfrInfo.m_nSizeX / 2)),
+				(g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtOffset[i].y + (g_clModelData[m_nCamNo].m_clSfrInfo.m_nSizeY / 2)), 10, M_COLOR_GREEN, 1, FALSE, PS_SOLID);
+		}
+		else
+		{
+			g_clVision.DrawMOverlayBox(m_nCamNo, g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtOffset[i].x, g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtOffset[i].y,
+				g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtOffset[i].x + g_clModelData[m_nCamNo].m_clSfrInfo.m_nSizeX,
+				g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtOffset[i].y + g_clModelData[m_nCamNo].m_clSfrInfo.m_nSizeY, M_COLOR_BLUE, 1, FALSE);
+		}
+		
+		_stprintf_s(szPos, SIZE_OF_100BYTE, _T("%d"), i);
+		g_clVision.DrawMOverlayText(m_nCamNo, g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtOffset[i].x + 10, g_clModelData[m_nCamNo].m_clSfrInfo.m_clPtOffset[i].y + 10,
+			szPos, M_COLOR_GREEN, _T("Arial"), 15, 15);
+	}
+
+	//if(g_clModelData[m_nCamNo].m_nDomeChartUse == 0)
+	//{
+		for (i = 0; i < 4; i++)
+		{
+			g_clModelData[m_nCamNo].m_clSfrInfo.m_clRectCircle[i] = m_clRectCircle[i];
+
+			g_clVision.DrawMOverlayBox(m_nCamNo, g_clModelData[m_nCamNo].m_clSfrInfo.m_clRectCircle[i], M_COLOR_GREEN, 2, FALSE, PS_DOT);
+
+			_stprintf_s(szPos, SIZE_OF_100BYTE, _T("%d"), i);
+			g_clVision.DrawMOverlayText(m_nCamNo, g_clModelData[m_nCamNo].m_clSfrInfo.m_clRectCircle[i].left + 10, g_clModelData[m_nCamNo].m_clSfrInfo.m_clRectCircle[i].top + 10,
+				szPos, M_COLOR_GREEN, _T("Arial"), 30, 25);
+		}
+	//}
+
+	g_clModelData[m_nCamNo].Save(g_clSysData.m_szModelName);
+
+	g_clVision.DrawOverlayAll(m_nCamNo);
+}

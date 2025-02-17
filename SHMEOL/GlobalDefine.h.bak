@@ -1,0 +1,590 @@
+//-----------------------------------------------------------------------------
+//
+//	GlobalDefine.h
+//
+//-----------------------------------------------------------------------------
+#ifndef __GLOBALDEFINE_H__
+#define __GLOBALDEFINE_H__
+
+
+//#define         NORINDA_MODE
+//
+#define ON_LINE_MODE
+
+//=======================================================================
+#define	 TESLA_WIDE					1555		
+#define  TESLA_MAIN_NARROW			1666		
+//
+
+
+//#define ____MODEL_NAME				TESLA_WIDE
+#define ____MODEL_NAME				TESLA_MAIN_NARROW
+//=======================================================================
+
+
+#define VER_STR							_T("TESLA 20191210_1")	
+//#define VER_STR							_T("TESLA 20191114_1")				//columnfpn 4개로 추가 mes , log
+//#define VER_STR							_T("TESLA 20191107_6")
+//#define VER_STR							_T("TESLA 20191107_3")				//임시로 NG면 완공안되게 알람쳐서 막자
+//#define VER_STR							_T("TESLA 20191107_2")
+//#define VER_STR							_T("TESLA 20191106_2")			//m_LogDefectColumnFPN 추후에 4개 추가
+//#define VER_STR							_T("TESLA 20191031_1")				//언락후 재 공급요청
+//#define VER_STR							_T("TESLA 20191029_1")
+//#define VER_STR							_T("TESLA 20191016_1")				//RI Dll 변경 , Corner Variation ui 추가
+//#define VER_STR							_T("TESLA 20191010_1")			//검사 jpg이미지 저장
+//#define VER_STR							_T("TESLA 20190927_1")
+//#define VER_STR							_T("TESLA 20190921_1")				//mes 까지 저장 , spec 비교까지 완료
+//#define VER_STR							_T("TESLA 20190920_1")			//이미지 밝기 표시 , 
+//#define VER_STR							_T("TESLA 20190908_1")
+//#define VER_STR					    _T("TESLA 20190906_1")                  //raw data저장 정상적으로 됨
+//#define VER_STR					    _T("TESLA 20190904_2")                  //자동돌려봄
+//#define VER_STR					    _T("TESLA 20190902_1")              //fov , distortion 분리 
+//#define VER_STR					    _T("TESLA 20190831_1")
+//#define VER_STR					    _T("TESLA 20190824_1")
+//#define VER_STR					    _T("TESLA 20190820_1") 
+//#define VER_STR					    _T("TESLA 20190819_1")              //원점,운전준비확인 , z모터는 stepping로 
+//#define VER_STR					    _T("TESLA 20190818_3")                      //검사 어느정도 정리
+//#define VER_STR					    _T("TESLA 20190818_2")					//aa 조명 채널 완료 저장값이랑, wide 센터 차트 늘려라
+//#define VER_STR					    _T("TESLA 20190818_1")						//NARROW 조명까지 맞춤
+//#define VER_STR					    _T("TESLA 20190816_3")                      //조명 채널수정 , AUTO 시퀀스 함수 추가
+//#define VER_STR					    _T("TESLA 20190816_2")                          //눈뜨는거 확인 1파라만
+//#define VER_STR					    _T("TESLA 20190816_1")                      //wide 모터수 수정
+//#define VER_STR					    _T("TESLA 20190815_2")							//운전준비까지완료 자동 시퀀스 수정중 , row 데이터 3개 추가
+//#define VER_STR					    _T("TESLA 20190815_1")						//ri 스펙까지 완료
+//#define VER_STR					    _T("TESLA 20190814_1")                      //RI 스펙 로드까지 완료 SAVE 하고 나머지 6개값 바꿔라
+//#define VER_STR					    _T("TESLA 20190810_6")                  //stain spec까지 완료
+//#define VER_STR					    _T("TESLA 20190810_1")              //stain spec 수정
+//#define VER_STR					    _T("TESLA 20190809_3")                          //fov,distortion,rotate 검사완료
+//#define VER_STR					    _T("TESLA 20190809_2")                          //FOV 원형마크 찾기 수정시작
+//#define VER_STR					    _T("TESLA 20190809_1")                      //fov , distortion , rotate 수정
+//#define VER_STR					    _T("TESLA 20190806_1")					//SPEC 수정중
+//#define VER_STR					    _T("TESLA 20190805_4")							//func_Insp_Illumination 까지확인
+//#define VER_STR					    _T("TESLA 20190805_3")							//검사DLL수정중
+//#define VER_STR					    _T("TESLA 20190805_2")						//Defect 검사 포팅완료
+//#define VER_STR					    _T("TESLA 20190805_1")						 //2PARA IO수정
+//#define VER_STR					    _T("TESLA 20190731.5")                  //그래프 수정 , ui수정중
+//#define VER_STR					    _T("TESLA 20190731.4")                  //io수정 , sfr패턴으로 찾기 , 팝업창 수정
+//#define VER_STR					_T("TESLA 20190730.4")              //뉴 sfr dll 포팅완료
+//#define VER_STR					_T("TESLA 20190730.3")              //구버전 sfr 값 측정까지완료
+//#define VER_STR					_T("TESLA 20190730.2")
+//#define VER_STR					_T("TESLA 20190730.1")                  //이물 알고리즘 수정중
+//#define VER_STR					_T("TESLA 20190726.1")          //윤현순 선임 dll 포팅
+//#define VER_STR					_T("TESLA 20190720.1")
+
+
+
+#ifdef NORINDA_MODE
+//#define ON_LINE_MIL
+//#define ON_LINE_SOCKET	
+#else
+	#ifdef ON_LINE_MODE
+		#define ON_LINE_MOTOR
+		#define ON_LINE_DIO
+		//#define ON_LINE_MIL
+		#define ON_LINE_GRABBER
+		#define ON_LINE_LIGHT
+		//#define ON_LINE_LASER
+		#define ON_LINE_SOCKET	
+	#endif
+#endif
+
+
+#define     GRAPH_NO_USE
+
+
+#define UNIT_AA1					0
+#define UNIT_AA2					1
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//	Program Path
+//
+#define BASE_DATA_PATH				_T("D:\\EVMS\\TP\\Data")
+#define BASE_MODEL_PATH				_T("D:\\EVMS\\TP\\Data\\Model")
+#define BASE_LOG_PATH				_T("D:\\EVMS\\TP\\Log")
+#define BASE_INSP_PATH				_T("D:\\EVMS\\TP\\Log\\Inspection")
+#define BASE_IMAGE_PATH				_T("D:\\EVMS\\TP\\Log\\Image")
+#define BASE_ALARM_PATH				_T("D:\\EVMS\\TP\\Alarm")
+#define	MIU_DIR				        _T("D:\\EVMS\\TP\\Initialize")
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+enum MODE_TYPE	{ MODE_STOP = 0, MODE_READY, MODE_AUTO, MODE_PAUSE, MODE_ERR };	//!! 모드 상태 변수 0=정지상태, 1=운전준비상태, 2=자동운전상태, 3=일시정지상태
+#if  (____MODEL_NAME == TESLA_WIDE)
+
+    enum LIGHT_DATA_INDEX { LIGHT_CHART_1 = 0, LIGHT_CHART_2, LIGHT_CHART_3, LIGHT_OC_6500K, LIGHT_OC_5000k, MAX_LIGHT_COUNT };
+    enum LIGHT_CH { LIGHT_CHART_CH_1 = 0, LIGHT_CHART_CH_2 = 1, LIGHT_CHART_CH_3 = 2, LIGHT_CHART_CH_4 = 3, LIGHT_CHART_CH_5 = 4, LIGHT_CHART_CH_6 = 5, LIGHT_RIGHT_CHART = 6, LIGHT_LEFT_CHART = 7,LIGHT_OC_6500K_CH = 8, LIGHT_OC_5000k_CH = 9 };
+
+#else
+    enum LIGHT_DATA_INDEX { LIGHT_CHART_1 = 0, LIGHT_CHART_2,  LIGHT_OC_6500K, LIGHT_OC_5000k, MAX_LIGHT_COUNT };
+    enum LIGHT_CH { LIGHT_CHART_CH_1 = 0, LIGHT_CHART_CH_2 = 1, LIGHT_CHART_CH_3 = 2, LIGHT_CHART_CH_4 = 3, LIGHT_OC_6500K_CH = 4, LIGHT_OC_5000k_CH = 5 };
+    //enum LIGHT_TYPE { LIGHT_CHART_CH1 = 0, LIGHT_CHART_CH2, LIGHT_OC_SENSOR, LIGHT_OC_COMPL, MAX_LIGHT_COUNT };
+    //enum LIGHT_CH { LIGHT_CH_CHART2_1 = 0, LIGHT_CH_CHART2_2 = 1, LIGHT_CH_OC2 = 2, LIGHT_CH_CHART1_1 = 4, LIGHT_CH_CHART1_2 = 5, LIGHT_CH_OC1 = 6 };
+
+#endif
+
+enum MOTOR_SPEED					{ SPEED_AUTO_H = 0, SPEED_AUTO_L, SPEED_MANUAL, MOTOR_SPEED_COUNT };				//!! 모터 구동 속도
+enum TEACH_POS						{ WAIT_POS = 0, SUPPLY_POS, UNLOAD_POS, HOLDER_ALIGN_POS, HOLDER_BCR_POS, LASER_IN_POS, LASER_OUT_POS, DARK_POS, CHART_POS, OC_6500K_POS, OC_5000k_POS, MAX_POS_COUNT };//ILLUMINATE_POS = 6500k
+//OC_5000k_POS = Only Color Sensitivity(이미지 2장필요)                                                                   //DEFECT_POS
+//OC_6500K_POS = Color Sensitivity,Blemish,Defect,RI,Color Uniformity
+
+
+//static TCHAR* POS_NAME[MAX_POS_COUNT] = { _T("WAIT POS"), _T("SUPPLY POS"), _T("HOLDER ALIGN"),       _T("LASER IN POS"), _T("LASER OUT POS"),_T("DARK POS") ,_T("CHART POS") , _T("OC_6500K POS") , _T("OC_5000k POS") };
+static TCHAR* POS_NAME[MAX_POS_COUNT] = { _T("WAIT_POS"), _T("SUPPLY_POS"), _T("UNLOAD_POS"), _T("HOLDER_ALIGN_POS"), _T("HOLDER_BCR_POS"), _T("LASER_IN_POS"), _T("LASER_OUT_POS") ,_T("DARK_POS"),_T("CHART_POS") ,  _T("OC_6500K_POS") , _T("OC_5000k_POS") };
+
+
+enum FOV_TYPE { FOV_INSP = 0, DISTORTION_INSP };
+enum FIDUCIAL_MARK_TYPE { DOT_TYPE = 0, GRID_TYPE = 2 };
+//FiducialMarkType
+
+enum BOX_MOVE_TYPE					{ MOVE_POS = 0, MOVE_SIZE };
+enum SFR_MOVE_TYPE					{ MOVE_UP = 0, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT };
+
+enum RAW_CAPTURE_TYPE               { MID_6500K_RAW = 0, LOW_LEVEL_RAW, MID_5000k_RAW, CHART_RAW};
+
+enum SFR_TYPE						{ SFR_FIRST = 0, SFR_SECOND, SFR_FINAL, OC_INSP, SFR_BEFORE_UV, SFR_AFTER_UV, SFR_OFFSET_DATA, SFR_AFTER_OFFSET_MOVE, SFR_SHIFT, SFR_TILT};
+
+enum MTF_POS						{ MTF_CENTER, MTF_LEFT_UPPER, MTF_RIGHT_UPPER, MTF_LEFT_BOTTOM, MTF_RIGHT_BOTTOM, MAX_MTF_COUNT };
+enum MTF_INSP_MODE					{ MTF_17P = 0, MTF_24P };
+enum GRAB_MODE						{ GRAB_SNAP = 0, GRAB_LIVE };
+enum CCD_GRAB_MODE					{ CCD_GRAB_STOP = 0, CCD_GRAB_REQUEST, CCD_GRAB_PROCEEDING, CCD_GRAB_PAUSE, CCD_GRAB_LIVE};
+
+enum MEASURE_TYPE					{ MEASURE_START = 0, MEASURE_END, MEASURE_COMPLETE };
+enum MOUSE_CLICK_TYPE				{ MOUSE_DRAG = 0, TRACK_DRAG, DISP_MOVE, MEASURE, DIST_CHECK };
+enum MOUSE_CURSOR					{ MOVE_ALL = 0, MOVE_WIDTH_LEFT, MOVE_WIDTH_RIGHT, MOVE_HEIGHT_TOP, MOVE_HEIGHT_BOTTOM, MOVE_NW, MOVE_NE, MOVE_SW, MOVE_SE };
+enum SQUARE_TYPE					{ SQUARE_RESET = 0, SQUARE_CREATE, SQUARE_RESIZE, SQUARE_MOVE };
+enum SQUARE_DIR						{ STANDARD = -1, CENTER, LEFT, TOP, RIGHT, BOTTOM, LEFTTOP, LEFTBOTTOM, RIGHTTOP, RIGHTBOTTOM };
+
+enum PCB_SOCKET_IF					{ PCB_ITF_CHK = 0, PCB_ALR, PCB_ALR_ACK, PCB_ALR_OK, PCB_VAC_REQ, PCB_CLR_ACK, PCB_ALI, PCB_BCR, PCB_BCR_USE, PCB_BCR_ERROR, PBN_ITF_CHK, PBN_BLW_REQ, PBN_CLR_REQ, PCB_ESC, PBN_ESC_ACK,
+									  PCB_ITF_ACK, PCB_PROD_CHK,MES_LOG_ACK, MAX_PCB_IF_COUNT };
+enum LEN_SOCKET_IF					{ LEN_ITF_CHK, LEN_VAC_REQ, LEN_CLR_ACK, LEN_ALI, LEN_BCR, LNE_ITF_CHK, LNE_BLW_REQ, LNE_CLR_REQ, LEN_ESC, LNE_ESC_ACK, LEN_VAC_ACK, LEN_ITF_ACK, MAX_LENS_IF_COUNT };
+enum ULD_SOCKET_IF					{ ULD_ITF_CHK, ULD_BLW_REQ, ULD_CLR_ACK, ULD_ESC_ACK, ULE_ITF_CHK, ULE_BLW_REQ, ULE_CLR_ACK, ULD_VAC_REQ, ULE_ESC_ACK, MAX_ULD_IF_COUNT};
+
+//enum OUTPUT_MODE { ASCII_MODE = 0, FLOAT_MODE, DEC_MODE , BLANK_MODE};
+enum OUTPUT_MODE { ASCII_MODE = 0, ASCII_MODE_2, FLOAT_MODE, DEC_MODE, HEX_MODE };
+//
+static TCHAR* DEFECT_SPEC_NAME[] =
+{ _T("AnBlockSizeHo"),	_T("AnBlockSizeDark"),		_T("AnBlockSizeBright"),	_T("AnThresholdTypeHot"),	_T("AnThresholdTypeDark"),		
+_T("AnThresholdTypeBright"),	_T("nThresholdTypeLineDefect"),_T("nAlgorithmTypeLineDefect"),_T("AdDefectThresholdHot"),	_T("AdDefectThresholdDark"),	
+_T("AdDefectThresholdBright"),	_T("dDefectThresholdRowInDark"),_T("dDefectThresholdRowInBright"),_T("dDefectThresholdColumnInDark"),_T("dDefectThresholdColumnInBright"),
+_T("dDefectThresholdColumnFPN"),	_T("AnMaxHotDefectNum"),		_T("AnMaxDarkDefectNum"),		_T("AnMaxBrightDefectNum"),_T("nMaxHotCoupletNum"),
+_T("nMaxDarkCoupletNum"),	_T("nMaxBrightCoupletNum"),	_T("AnMaxHotClusterNum"),		_T("AnMaxDarkClusterNum"),		_T("AnMaxBrightClusterNum"),
+_T("nMaxRowDefectNumInDark"),	_T("nMaxRowDefectNumInBright"),	_T("nMaxColumnDefectNumInDark"),_T("nMaxColumnDefectNumInBright"),_T("AnEnableChannel"),				
+_T("AnDefectInCluster"),	_T("ADefectInClusterChannel") //,		_T("nDefectType")
+//_T("AnDefectInCouplet"), _T("ADefectInColumnFPN")
+};
+
+static TCHAR* OC_SPEC_NAME[2] =
+{ 
+    _T("AnFiducialMarkNum"), _T("AnFiducialMarkType")
+};
+//
+static TCHAR* COLOR_SENS_SPEC_NAME[8] =
+{ _T("AdSpecDevMaxRG"),_T("AdSpecDevMinRG"),_T("AdSpecDevMaxBG"),
+_T("AdSpecDevMinBG"),_T("AdSpecDevMaxGrGb"),_T("AdSpecDevMinGrGb")
+,_T("AnAdjustType"),_T("AnTypicalValueType")
+};
+//
+static TCHAR* SNR_SPEC_NAME[2] =
+{ _T("AdSNRThreshold"),_T("AdDRThreshold")
+};
+//
+
+
+static TCHAR* UNIFORMITY_SPEC_NAME[7] =
+{ _T("AnGridSizeX"),		_T("AnGridSizeY"),		
+_T("AnColorSpaceType"),		_T("AnMaxDiffType"),
+_T("AspecMaxDiffRG"),		_T("AspecMaxDiffBG"),	
+_T("AspecMaxDiffRB")
+};                                                         
+//
+
+static TCHAR* RI_SPEC_NAME[] =
+{ _T("AdSpecRIcornerMin"),		_T("AdSpecRIcornerMax"),		
+_T("AnSpecRIminMin"),	_T("AnSpecRIminMax"),		_T("AnCenterIntensity"),	_T("AnRINormalizeIndex")
+};
+
+static TCHAR* STAIN_BLEMISH_SPEC_NAME[] =
+{ 
+    _T("AnBlockWidth"),			_T("AnBlockHeight"),		_T("AnClusterSize"),
+    _T("AnDefectInCluster"),	_T("AdDefectRatio"),		_T("AnMaxSingleDefectNum"),
+    _T("AbEnableCircle"),		_T("AnPosOffsetX"),			_T("AnPosOffsetY"),
+    _T("AdRadiusRatioX"),		_T("AdRadiusRatioY"),		_T("AdThresholdRatio"),
+    _T("AdROIRange"),			_T("AnUsedFixedCircle"),	_T("AbEnableMultiCircle"),
+    _T("AdZoneSizeRatio1"),		_T("AdZoneSizeRatio2"),		_T("AdZoneSizeRatio3"),
+    _T("AdThreshold1"),			_T("AdThreshold2"),			_T("AdThreshold3")
+};
+
+static TCHAR* STAIN_LCB_SPEC_NAME[] =
+{
+    _T("AdCenterThreshold"),     _T("AdEdgeThreshold"),	_T("AdCornerThreshold"),_T("AnMaxSingleDefectNum"),
+    _T("AnMinDefectWidthHeigh"), _T("AnCenterMaxR"),	_T("AnCenterMaxGR"),	_T("AnCenterMaxGB"),	_T("AnCenterMaxB"),
+	_T("AnEdgeMaxR"),			_T("AnEdgeMaxGR"),		_T("AnEdgeMaxGB"),		_T("AnEdgeMaxB"),
+	_T("AnCornerMaxR"),			_T("AnCornerMaxGR"),	_T("AnCornerMaxGB"),	_T("AnCornerMaxB"),
+	_T("AbEnableCircle"),        _T("AnPosOffsetX"),	_T("AnPosOffsetY"),     _T("AdRadiusRatioX"),	     
+	_T("AdRadiusRatioY"),       _T("AdThresholdRatio"),
+    _T("AdROIRange"),            _T("AnUsedFixedCircle"),    _T("AbEnableMultiCircle"),
+    _T("AdZoneSizeRatio1"),		 _T("AdZoneSizeRatio2"),	_T("AdZoneSizeRatio3"),
+    _T("AdThreshold1"),			 _T("AdThreshold2"),		_T("AdThreshold3")
+};
+
+static TCHAR* STAIN_YMEAN_SPEC_NAME[] =
+{
+    _T("AdEdgeSize"),
+    _T("AdCenterThreshold"),        _T("AdEdgeThreshold"),  _T("AdCornerThreshold"),
+    _T("AnDefecBlockSize"),         _T("AnLscBlockSize"),   _T("AnCalcType"),
+    _T("AnnMaxRecursiveCount"),     _T("AdMaxDefectSize"),  _T("AdPixelSize"),
+    _T("AbEnableCircle"),			_T("AnPosOffsetX"),			_T("AnPosOffsetY"),
+    _T("AdRadiusRatioX"),			_T("AdRadiusRatioY"),		_T("AdThresholdRatio"),
+    _T("AdROIRange"),				_T("AnUsedFixedCircle"),    _T("AbEnableMultiCircle"),
+    _T("AdZoneSizeRatio1"),			_T("AdZoneSizeRatio2"),		_T("AdZoneSizeRatio3"),
+    _T("AdThreshold1"),				_T("AdThreshold2"),			_T("AdThreshold3")
+};
+
+static TCHAR* IC_SPEC_NAME[] =
+{
+	_T("AnOpticalCenterSpecX"),    _T("AnOpticalCenterSpecY"),
+	_T("AdPixelPitch"),_T("AdThresholdRatio"),_T("AnOCBlocSize"),_T("AnEdgeTopMargin")
+};
+
+
+static TCHAR* CHART_SPEC_NAME[5] =
+{
+  _T("AdRealGapX"), _T("AdRealGapY"),	
+  _T("AnFiducialMarkType"),		_T("AdModuleChartDistance"),
+    _T("AnDistortionAlrotithmType")
+};
+
+static TCHAR* CHART_PCB_TYPE[2] =
+{
+	_T("LEFT"), _T("RIGHT")
+};
+//static TCHAR* RI_SPEC_NAME[8] =
+//{
+//    _T("AnSpecPixelCntInBlock"),    _T("AnEnableChannel"),
+//    _T("AdSpecCenterIntensity1"),_T("AdSpecCenterIntensity2"),_T("AdSpecCenterIntensity3"),_T("AdSpecCenterIntensity4")
+//	,_T("AnCornerVariationMin"),_T("AnCornerVariationMax")
+//};
+
+
+//
+//-------------------------------------------------------------------------------------------
+#define		MAIN_BG_COLOR            RGB(47,60,67)// RGB(20,30,10)
+#define		TRAY_GOOD_YES            RGB(130,104,141)
+#define		TRAY_GOOD_NO             RGB(100,100,100)
+#define		TOP_STATIC_COLOR		 RGB(174,54,27)
+#define		TOP_STATIC_TEXT_COLOR	 A_COLOR_WHITE
+#define		TOP_STATIC_BARCODE_COLOR	 A_COLOR_GREEN
+//
+#define		SENSOR_ON_COLOR			RGB(254,132,125)
+#define		SENSOR_OFF_COLOR		RGB(59,151,154)
+//
+#define		BOTTOM_BTN_COLOR_ON            RGB(162,158,196)
+#define		BOTTOM_BTN_COLOR_OFF           RGB(100,100,100)
+//메시지창
+#define		MESSAGE_BG_COLOR						RGB(212,223,85)
+#define		MESSAGE_TXT_COLOR						RGB(0,0,0)
+#define		MESSAGE_BTN_COLOR						RGB(95,95,95)
+
+#define CV_LAVENDER					CV_RGB(230,230,250)
+#define CV_GREEN					CV_RGB(0,128,0)
+#define CV_LIGHTGREEN				CV_RGB(144,238,144)
+#define CV_YELLOW					CV_RGB(255,255,0)
+#define CV_BLACK					CV_RGB(0,0,0)
+#define CV_RED						CV_RGB(255,0,0)
+#define CV_BLUE						CV_RGB(0,0,255)
+//-------------------------------------------------------------------------------------------
+///////////////////////////////////////////////////////////////////////////////
+//
+//	COUNT DEFINE
+//
+#if  (____MODEL_NAME == TESLA_WIDE)
+#define MAX_UNIT_COUNT					1
+#elif (____MODEL_NAME == TESLA_MAIN_NARROW)
+#define MAX_UNIT_COUNT					2
+#endif
+
+
+#define MAX_POPUP_COUNT					5
+
+#define MAX_MODEL_COUNT					20
+#define MAX_MARK_COUNT					4
+#if  (____MODEL_NAME == TESLA_WIDE)
+#define	MAX_LAST_INSP_COUNT				5		// AA 최종 이미지에서 챠트 보이는 전체 마크 중 기존 검사 마크 이외에 추가 SFR 값 측정 해야 될 마크 개수..
+#define	MAX_SFR_INSP_COUNT				12		// AA 최종 이미지에서 SFR 값 측정 해야 될 ROI 개수..
+#elif  (____MODEL_NAME == TESLA_MAIN_NARROW)
+#define	MAX_LAST_INSP_COUNT				9//11		// AA 최종 이미지에서 챠트 보이는 전체 마크 중 기존 검사 마크 이외에 추가 SFR 값 측정 해야 될 마크 개수..
+#define	MAX_SFR_INSP_COUNT				20//24		// AA 최종 이미지에서 SFR 값 측정 해야 될 ROI 개수..
+#endif
+
+#define MAX_CCD_STEP_COUNT				150
+#define MAX_SFR_DATA_COUNT				4000
+#define MAX_DEFECT_COUNT				10
+
+
+
+#define MAX_SNR_COUNT				3       //흰,빨,검순서
+//
+#if  (____MODEL_NAME == TESLA_WIDE)
+#define MAX_FOV_COUNT				9       //광각 
+
+#elif  (____MODEL_NAME == TESLA_MAIN_NARROW)
+#define MAX_FOV_COUNT				9       //협각
+
+#endif
+///////////////////////////////////////////////////////////////////////////////
+//
+//	SIZE DEFINE
+//
+#define	M_PI							3.14159265358979323846f
+
+#define SIZE_OF_100BYTE					100
+#define SIZE_OF_1K						1024
+#define SIZE_OF_5K						10//(SIZE_OF_1K * 5)
+
+#define CCD1_CAM_SIZE_X					1280
+#define CCD1_CAM_SIZE_Y					960
+
+#define CCD1_DISP_SIZE_X				640//695//640
+#define CCD1_DISP_SIZE_Y				480//364//330
+
+#define CCD2_CAM_SIZE_X					1280//1280
+#define CCD2_CAM_SIZE_Y					960//1080
+
+#define CCD2_DISP_SIZE_X				640//695695//640
+#define CCD2_DISP_SIZE_Y				480//364364//540
+
+#define MAX_MARK_SIZE_X					1000
+#define MAX_MARK_SIZE_Y					900
+
+#define AXIS_MOVE_TIME					10000
+#define ENCORDER_GAP					0.05
+
+#define MAX_MOTOR_MOVE_TIME				30000
+
+#define MAX_GRAPH_COUNT					3
+#define MAX_GRAPH_OVERLAP_COUNT			5
+#define MAX_GRAPH_PIXEL_SIZE			8192
+///////////////////////////////////////////////////////////////////////////////
+//
+//
+
+#define	SFR_ROI_VERTICAL			0
+#define	SFR_ROI_HORIZONTAL			1
+//
+#define SFR_N_4_POSITION_X				0.125
+#define SFR_N_8_POSITION_X				0.0625
+
+
+// Cneter SFR 검사 Box 번호..
+#define	SFR_CENTER_INDEX				0	
+#define	SFR_CENTER_INDEX_2				1	
+#define	SFR_CENTER_INDEX_3				2
+#define	SFR_CENTER_INDEX_4				3
+
+// 0.4 필드 코너부 SFR 검사 Box 번호..
+#define	SFR_LEFT_UP_INDEX_1_40			4
+#define	SFR_LEFT_UP_INDEX_2_40			5
+
+#define	SFR_RIGHT_UP_INDEX_1_40			6
+#define	SFR_RIGHT_UP_INDEX_2_40			7
+
+#define	SFR_LEFT_DOWN_INDEX_1_40		8
+#define	SFR_LEFT_DOWN_INDEX_2_40		9
+
+#define	SFR_RIGHT_DOWN_INDEX_1_40		10
+#define	SFR_RIGHT_DOWN_INDEX_2_40		11
+
+#define	SFR_LEFT_UP_INDEX_1_80			12
+#define	SFR_LEFT_UP_INDEX_2_80			13
+
+#define	SFR_RIGHT_UP_INDEX_1_80			14
+#define	SFR_RIGHT_UP_INDEX_2_80			15
+
+#define	SFR_LEFT_DOWN_INDEX_1_80		16
+#define	SFR_LEFT_DOWN_INDEX_2_80		17
+
+#define	SFR_RIGHT_DOWN_INDEX_1_80		18
+#define	SFR_RIGHT_DOWN_INDEX_2_80		19
+
+
+#define	SFR_LEFT_CENTER_INDEX_1_40		12
+#define	SFR_LEFT_CENTER_INDEX_2_40		13
+
+#define	SFR_RIGHT_CENTER_INDEX_1_40		14
+#define	SFR_RIGHT_DCENTER_INDEX_2_40	15
+
+
+// 0.7 필드 코너부 SFR 검사 Box 번호..						
+#define	SFR_LEFT_UP_INDEX				16
+#define	SFR_LEFT_UP_INDEX_2				17
+
+#define	SFR_RIGHT_UP_INDEX				18
+#define	SFR_RIGHT_UP_INDEX_2			19
+
+#define	SFR_RIGHT_DOWN_INDEX			20
+#define	SFR_RIGHT_DOWN_INDEX_2			21
+
+#define	SFR_LEFT_DOWN_INDEX				22
+#define	SFR_LEFT_DOWN_INDEX_2			23
+
+
+// Cneter SFR 검사 Box 번호..
+#define	_SFR_CENTER_INDEX				0	
+#define	_SFR_CENTER_INDEX_2				1	
+
+// 0.4 필드 코너부 SFR 검사 Box 번호..
+#define	_SFR_CENTER_UP_INDEX_1_40		2
+#define	_SFR_CENTER_UP_INDEX_2_40		3
+
+#define	_SFR_CENTER_DOWN_INDEX_1_40		4
+#define	_SFR_CENTER_DOWN_INDEX_2_40		5
+
+#define	_SFR_CENTER_LEFT_INDEX_1_40		6
+#define	_SFR_CENTER_LEFT_INDEX_2_40		7
+
+#define	_SFR_CENTER_RIGHT_INDEX_1_40	8
+#define	_SFR_CENTER_RIGHT_INDEX_2_40	9
+
+// 0.58필드 
+#define	_SFR_LEFT_UP_INDEX_1_58			10
+#define	_SFR_LEFT_UP_INDEX_2_58			11
+
+#define	_SFR_RIGHT_UP_INDEX_1_58		12
+#define	_SFR_RIGHT_UP_INDEX_2_58		13
+
+#define	_SFR_LEFT_DOWN_INDEX_1_58		14
+#define	_SFR_LEFT_DOWN_INDEX_2_58		15
+
+#define	_SFR_RIGHT_DOWN_INDEX_1_58		16
+#define	_SFR_RIGHT_DOWN_INDEX_2_58		17
+
+
+// 0.90필드 
+#define	_SFR_LEFT_UP_INDEX_1_90			18
+#define	_SFR_LEFT_UP_INDEX_2_90			19
+
+#define	_SFR_RIGHT_UP_INDEX_1_90		20
+#define	_SFR_RIGHT_UP_INDEX_2_90		21
+
+#define	_SFR_LEFT_DOWN_INDEX_1_90		22
+#define	_SFR_LEFT_DOWN_INDEX_2_90		23
+
+#define	_SFR_RIGHT_DOWN_INDEX_1_90		24
+#define	_SFR_RIGHT_DOWN_INDEX_2_90		25
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// IMAGE CONVERT
+//
+#define	BGGR				1	//BGBG
+#define RGGB				2	//RGRG
+#define GBRG				3	//GBGB
+#define GRBG				4	//GRGR
+#define RCCC				5	//RCCC
+#define CCCR				6	
+#define CRCC				7
+#define	CCRC				8
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// COLOR DEFINE
+//
+#define RGB_DLG_BG						RGB(40, 39, 35)
+#define RGB_CTRL_BG						RGB(174,54,27)//RGB(55, 73, 93)
+
+#define RGB_COLOR_WHITE					RGB(255, 255, 255)
+#define RGB_COLOR_BLACK					RGB(0, 0, 0)
+#define RGB_COLOR_RED					RGB(255, 0, 0)
+#define RGB_COLOR_GREEN					RGB(0, 255, 0)
+#define RGB_COLOR_BLUE					RGB(0, 0, 255)
+#define RGB_COLOR_GRAY					RGB(100, 100, 100)
+
+
+#define GRID_COLOR_TITLE			    RGB(142,168,219)
+#define	GRID_COLOR_BLACK                RGB(0,0,0)
+#define	GRID_COLOR_WHITE                RGB(255,255,255)
+#define	GRID_COLOR_GREEN			    RGB(128, 255, 128)
+#define	GRID_COLOR_RED				    RGB(255, 94, 164)
+#define	GRID_COLOR_SPARE_MOTOR		    RGB(128, 128, 128)
+#define	GRID_COLOR_SELECT			    RGB(244, 216, 234)
+#define	GRID_COLOR_DIO_OUT			    RGB(128, 255, 128)
+#define	GRID_COLOR_DIO_IN			    RGB(255, 94, 164)
+///////////////////////////////////////////////////////////////////////////////
+//
+//	STRUCTURE DEFINE
+//
+//typedef struct STRUC_LOG_NODE
+//{
+//	TCHAR szBuff[SIZE_OF_5K];
+//	int nBuffSize;
+//	int nLogType;
+//	int nUnit;
+//} STRUC_LOG_NODE;
+
+
+class CDPoint
+{
+public:
+	CDPoint()
+	{
+		x = y = 0.0;
+	}
+
+public:
+	double x;
+	double y;
+};
+
+class CDMotor
+{
+public:
+	CDMotor()
+	{
+		x = y = t = 0.0;
+	}
+public:
+	double x;
+	double y;
+	double t;
+};
+
+class CDrawBox
+{
+public:
+	CDrawBox()
+	{
+		cnt = w = 0;
+		left = right = 0.0;
+		top = bottom = 0.0;
+		centerX = centerY = 0.0;
+	}
+
+public:
+	int cnt;
+	int w;
+	double left;
+	double right;
+	double top;
+	double bottom;
+	double centerX;
+	double centerY;
+	COLORREF c;
+};
+
+
+typedef struct STRUC_MARK_POS
+{
+	int nMarkNo;
+	double dMarkX;
+	double dMarkY;
+	double dAngle;
+	double dScore;
+	CDPoint clDPtMarkSize;
+	CDPoint clDPtMarkCenter;
+	TCHAR szMode[SIZE_OF_100BYTE];
+} STRUC_MARK_POS;
+
+#endif

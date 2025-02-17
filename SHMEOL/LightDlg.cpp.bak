@@ -1,0 +1,815 @@
+// LightDlg.cpp : 구현 파일입니다.
+//
+
+#include "stdafx.h"
+#include "AutoInsp.h"
+#include "LightDlg.h"
+#include "afxdialogex.h"
+
+// CLightDlg 대화 상자입니다.
+
+IMPLEMENT_DYNAMIC(CLightDlg, CDialogEx)
+
+CLightDlg::CLightDlg(CWnd* pParent /*=NULL*/)
+	: CDialogEx(CLightDlg::IDD, pParent)
+{
+	m_nUnit = UNIT_AA1;
+}
+
+CLightDlg::~CLightDlg()
+{
+}
+
+void CLightDlg::DoDataExchange(CDataExchange* pDX)
+{
+	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_STATIC_LIGHT_TITLE, m_clColorStaticTitle);
+	DDX_Control(pDX, IDC_STATIC_LIGHT_CHART, m_clColorStaticChart[0]);
+	DDX_Control(pDX, IDC_STATIC_LIGHT_CHART2, m_clColorStaticChart[1]);
+	DDX_Control(pDX, IDC_STATIC_LIGHT_TOP_CHART_VALUE, m_clColorStaticChartVal[0]);
+    DDX_Control(pDX, IDC_STATIC_LIGHT_LEFT_CHART_VALUE, m_clColorStaticChartVal[1]);
+    DDX_Control(pDX, IDC_STATIC_LIGHT_RIGHT_CHART_VALUE, m_clColorStaticChartVal[2]);
+
+    
+	DDX_Control(pDX, IDC_STATIC_LIGHT_OC, m_clColorStaticOC[0]);
+	DDX_Control(pDX, IDC_STATIC_LIGHT_OC2, m_clColorStaticOC[1]);
+	DDX_Control(pDX, IDC_STATIC_LIGHT_OC_VAL, m_clColorStaticOCVal[0]);
+	DDX_Control(pDX, IDC_STATIC_LIGHT_OC_VAL2, m_clColorStaticOCVal[1]);
+	DDX_Control(pDX, IDC_SLIDER_LIGHT_TOP_CHART, m_clSliderCtrlChart[0]);
+    DDX_Control(pDX, IDC_SLIDER_LIGHT_LEFT_CHART, m_clSliderCtrlChart[1]);
+    DDX_Control(pDX, IDC_SLIDER_LIGHT_RIGHT_CHART, m_clSliderCtrlChart[2]);
+	DDX_Control(pDX, IDC_SLIDER_LIGHT_DEFECT, m_clSliderCtrlOC[0]);
+	DDX_Control(pDX, IDC_SLIDER_LIGHT_STAIN, m_clSliderCtrlOC[1]);
+	DDX_Control(pDX, IDC_BUTTON_LIGHT_SAVE, m_clColorButtonSave);
+	DDX_Control(pDX, IDC_COMBO_LIGHT_DOME, m_clComboDomeChannel);
+}
+
+
+BEGIN_MESSAGE_MAP(CLightDlg, CDialogEx)
+	ON_WM_PAINT()
+	ON_WM_SHOWWINDOW()
+	ON_WM_HSCROLL()
+	ON_STN_CLICKED(IDC_STATIC_LIGHT_TOP_CHART_VALUE, &CLightDlg::OnStnClickedStaticLightChartVal)
+	ON_STN_CLICKED(IDC_STATIC_LIGHT_OC_VAL, &CLightDlg::OnStnClickedStaticLightOcVal)
+	ON_BN_CLICKED(IDC_BUTTON_LIGHT_SAVE, &CLightDlg::OnBnClickedButtonLightSave)	
+	ON_BN_CLICKED(IDC_BUTTON1, &CLightDlg::OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BUTTON2, &CLightDlg::OnBnClickedButton2)
+	ON_CBN_SELCHANGE(IDC_COMBO_LIGHT_DOME, &CLightDlg::OnCbnSelchangeComboLightDome)
+	ON_STN_CLICKED(IDC_STATIC_LIGHT_OC_VAL2, &CLightDlg::OnStnClickedStaticLightOcVal2)
+	ON_STN_CLICKED(IDC_STATIC_LIGHT_LEFT_CHART_VALUE, &CLightDlg::OnStnClickedStaticLightChartVal2)
+    ON_STN_CLICKED(IDC_STATIC_LIGHT_RIGHT_CHART_VALUE, &CLightDlg::OnStnClickedStaticLightRightChartValue)
+END_MESSAGE_MAP()
+
+
+// CLightDlg 메시지 처리기입니다.
+
+//-----------------------------------------------------------------------------
+//
+//	OnPaint
+//
+//-----------------------------------------------------------------------------
+void CLightDlg::OnPaint()
+{
+	CPaintDC dc(this); // device context for painting
+	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
+	// 그리기 메시지에 대해서는 CDialogEx::OnPaint()을(를) 호출하지 마십시오.
+	CRect rect;
+	GetClientRect(rect);
+
+	dc.FillSolidRect(rect, RGB_DLG_BG);
+}
+
+//-----------------------------------------------------------------------------
+//
+//	다이얼로그 초기화
+//
+//-----------------------------------------------------------------------------
+BOOL CLightDlg::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	// TODO:  여기에 추가 초기화 작업을 추가합니다.
+	// 컨트롤 초기화
+	this->InitCtrl();
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
+}
+
+//-----------------------------------------------------------------------------
+//
+//	컨트롤 초기화
+//
+//-----------------------------------------------------------------------------
+void CLightDlg::InitCtrl()
+{
+	// 폰트 생성
+	m_clFontSmall.CreateFont(16, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, _T("맑은 고딕"));
+	m_clFontMid.CreateFont(23, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, _T("맑은 고딕"));
+	m_clFontBig.CreateFont(32, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, _T("맑은 고딕"));
+
+	m_clColorStaticTitle.SetBkColor(RGB_CTRL_BG);
+	m_clColorStaticTitle.SetTextColor(RGB_COLOR_WHITE);
+	m_clColorStaticTitle.SetFont(&m_clFontBig);
+    m_clColorStaticTitle.SetFontBold(TRUE);
+    m_clColorStaticTitle.SetBorder(FALSE);
+    m_clColorStaticTitle.SetFontSize(15);
+
+	m_clColorStaticChart[0].SetBkColor(RGB_DLG_BG);
+	m_clColorStaticChart[0].SetTextColor(RGB_COLOR_WHITE);
+	m_clColorStaticChart[0].SetFont(&m_clFontMid);
+
+	m_clColorStaticChart[1].SetBkColor(RGB_DLG_BG);
+	m_clColorStaticChart[1].SetTextColor(RGB_COLOR_WHITE);
+	m_clColorStaticChart[1].SetFont(&m_clFontMid);
+
+	m_clColorStaticOC[0].SetBkColor(RGB_DLG_BG);
+	m_clColorStaticOC[0].SetTextColor(RGB_COLOR_WHITE);
+	m_clColorStaticOC[0].SetFont(&m_clFontMid);
+
+	m_clColorStaticOC[1].SetBkColor(RGB_DLG_BG);
+	m_clColorStaticOC[1].SetTextColor(RGB_COLOR_WHITE);
+	m_clColorStaticOC[1].SetFont(&m_clFontMid);
+
+	m_clColorStaticChartVal[0].SetBkColor(RGB_COLOR_WHITE);
+	m_clColorStaticChartVal[0].SetFont(&m_clFontMid);
+
+    m_clColorStaticChartVal[1].SetBkColor(RGB_COLOR_WHITE);
+    m_clColorStaticChartVal[1].SetFont(&m_clFontMid);
+
+    m_clColorStaticChartVal[2].SetBkColor(RGB_COLOR_WHITE);
+    m_clColorStaticChartVal[2].SetFont(&m_clFontMid);
+
+	m_clColorStaticOCVal[0].SetBkColor(RGB_COLOR_WHITE);
+	m_clColorStaticOCVal[0].SetFont(&m_clFontMid);
+
+	m_clColorStaticOCVal[1].SetBkColor(RGB_COLOR_WHITE);
+	m_clColorStaticOCVal[1].SetFont(&m_clFontMid);
+
+	m_clSliderCtrlChart[0].SetRange(0, 255);
+	m_clSliderCtrlChart[0].SetTicFreq(5);
+
+    m_clSliderCtrlChart[1].SetRange(0, 255);
+    m_clSliderCtrlChart[1].SetTicFreq(5);
+
+    m_clSliderCtrlChart[2].SetRange(0, 255);
+    m_clSliderCtrlChart[2].SetTicFreq(5);
+
+	m_clSliderCtrlOC[0].SetRange(0, 255);
+	m_clSliderCtrlOC[0].SetTicFreq(5);
+
+	m_clSliderCtrlOC[1].SetRange(0, 255);
+	m_clSliderCtrlOC[1].SetTicFreq(5);
+
+	//m_clColorButtonSave.SetCtrlFont(20, 0, _T("맑은 고딕"));
+
+	m_clComboDomeChannel.SetFont(&m_clFontMid);
+	m_clComboDomeChannel.SetCurSel(0);
+
+#if  (____MODEL_NAME == XPENG_WIDE)
+	
+#elif(____MODEL_NAME == XPENG_MAIN_NARROW)
+	//IDC_STATIC_RIGHT_CHART
+	GetDlgItem(IDC_STATIC_LEFT_CHART)->SetWindowText("OC 6500K");
+	GetDlgItem(IDC_STATIC_RIGHT_CHART)->SetWindowText("OC 2800K");
+	GetDlgItem(IDC_STATIC_OC_6500K)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_STATIC_OC_2800K)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_SLIDER_LIGHT_STAIN)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_SLIDER_LIGHT_DEFECT)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_STATIC_LIGHT_OC_VAL2)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_STATIC_LIGHT_OC_VAL)->ShowWindow(SW_HIDE);
+#endif
+	//GetDlgItem(IDC_COMBO_LIGHT_DOME)->ShowWindow(SW_HIDE);
+}
+
+//-----------------------------------------------------------------------------
+//
+//	유닛 설정
+//
+//-----------------------------------------------------------------------------
+void CLightDlg::SetUnit(int nUnit)
+{
+	TCHAR szTitle[SIZE_OF_100BYTE];
+
+	m_nUnit = nUnit;
+
+	_stprintf_s(szTitle, SIZE_OF_100BYTE, _T("[INSP #%d] LIGHT"), m_nUnit + 1);
+	GetDlgItem(IDC_STATIC_LIGHT_TITLE)->SetWindowText(szTitle);
+
+	this->ShowLightData();
+
+	if(g_clModelData[m_nUnit].m_nDomeChartUse == 1)
+	{
+		GetDlgItem(IDC_COMBO_LIGHT_DOME)->ShowWindow(SW_SHOW);
+	}
+	else
+	{
+		GetDlgItem(IDC_COMBO_LIGHT_DOME)->ShowWindow(SW_HIDE);
+	}
+}
+
+//-----------------------------------------------------------------------------
+//
+// 
+//
+//-----------------------------------------------------------------------------
+void CLightDlg::OnStnClickedStaticLightChartVal()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CString sPos = _T("");
+	int nValue;
+
+	m_clColorStaticChartVal[0].GetWindowText(sPos);
+	CKeyPadDlg* pDlg = new CKeyPadDlg(sPos, 10);
+	if (pDlg != NULL)
+	{
+		if (pDlg->DoModal() == IDOK)
+		{
+			nValue = (int)pDlg->GetReturnVal();
+			if (nValue < 0 || nValue > 255)
+			{
+				delete pDlg;
+				g_ShowMsgPopup(_T("ERROR"), _T("조명값이 잘 못되었습니다.(범위 : 0 ~ 255)"), RGB_COLOR_RED);
+				return;
+			}
+
+			sPos.Format(_T("%d"), nValue);
+			m_clColorStaticChartVal[0].SetWindowText(sPos);
+			m_clSliderCtrlChart[0].SetPos(nValue);
+#ifdef ON_LINE_LIGHT
+			if(m_nUnit == UNIT_AA1)
+			{
+#if  (____MODEL_NAME == XPENG_WIDE)
+				LightControl.ctrlLedVolume(LIGHT_CHART_CH_1, nValue);
+				Sleep(100);
+				LightControl.ctrlLedVolume(LIGHT_CHART_CH_1 + 1, nValue);
+				LightControl.ctrlLedVolume(LIGHT_CHART_CH_1 + 2, nValue);
+				LightControl.ctrlLedVolume(LIGHT_CHART_CH_1 + 3, nValue);
+				LightControl.ctrlLedVolume(LIGHT_CHART_CH_1 + 4, nValue);
+				LightControl.ctrlLedVolume(LIGHT_CHART_CH_1 + 5, nValue);
+
+#elif (____MODEL_NAME == XPENG_MAIN_NARROW)
+				LightControl.ctrlLedVolume(LIGHT_CHART_CH_1, nValue);
+#endif
+				//if (g_clModelData[m_nUnit].m_nDomeChartUse == 1)
+				//{
+				//	if (m_clComboDomeChannel.GetCurSel() == 0)
+				//	{
+				//		g_pCarAABonderDlg->m_clSerialThread.SendLightOnOffSet(m_nUnit, 'H', 0, true, true);
+				//		Sleep(100);
+				//		g_pCarAABonderDlg->m_clSerialThread.SendLightSet(m_nUnit, 'C', 0, nValue, true);
+				//	}
+				//	else
+				//	{
+				//		g_pCarAABonderDlg->m_clSerialThread.SendLightOnOffSet(m_nUnit, 'H', m_clComboDomeChannel.GetCurSel(), true, false);
+				//		Sleep(100);
+				//		g_pCarAABonderDlg->m_clSerialThread.SendLightSet(m_nUnit, 'C', m_clComboDomeChannel.GetCurSel(), nValue, false);
+				//	}
+				//}
+				//else
+				//{
+				//	//func_Light_SetValue(0, LIGHT_CH_CHART1_1, nValue);
+				//	Sleep(100);
+				//	//func_Light_SetValue(0, LIGHT_CH_CHART1_2, nValue);
+				//}
+			}
+			else
+			{
+				LightControl.ctrlLedVolume(LIGHT_CHART_CH_1 + m_nUnit, nValue);
+
+			}
+#endif
+		}
+
+		delete pDlg;
+	}
+}
+
+//-----------------------------------------------------------------------------
+//
+//
+//
+//-----------------------------------------------------------------------------
+void CLightDlg::OnStnClickedStaticLightChartVal2()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CString sPos = _T("");
+	int nValue;
+
+	m_clColorStaticChartVal[1].GetWindowText(sPos);
+	CKeyPadDlg* pDlg = new CKeyPadDlg(sPos, 10);
+	if (pDlg != NULL)
+	{
+		if (pDlg->DoModal() == IDOK)
+		{
+			nValue = (int)pDlg->GetReturnVal();
+			if (nValue < 0 || nValue > 255)
+			{
+				delete pDlg;
+				g_ShowMsgPopup(_T("ERROR"), _T("조명값이 잘 못되었습니다.(범위 : 0 ~ 255)"), RGB_COLOR_RED);
+				return;
+			}
+
+			sPos.Format(_T("%d"), nValue);
+			m_clColorStaticChartVal[1].SetWindowText(sPos);
+			m_clSliderCtrlChart[1].SetPos(nValue);
+#ifdef ON_LINE_LIGHT
+			if(m_nUnit == UNIT_AA1)
+			{
+
+#if  (____MODEL_NAME == XPENG_WIDE)
+				LightControl.ctrlLedVolume(LIGHT_LEFT_CHART, nValue);
+#elif (____MODEL_NAME == XPENG_MAIN_NARROW)
+				LightControl.ctrlLedVolume(LIGHT_OC_6500K_CH, nValue);
+#endif
+			}
+			else
+			{
+				LightControl.ctrlLedVolume(LIGHT_OC_6500K_CH + m_nUnit, nValue);
+			}
+#endif
+		}
+
+		delete pDlg;
+	}
+}
+
+//-----------------------------------------------------------------------------
+//
+//
+//
+//-----------------------------------------------------------------------------
+void CLightDlg::OnStnClickedStaticLightOcVal()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CString sPos = _T("");
+	int nValue;
+
+	m_clColorStaticOCVal[0].GetWindowText(sPos);
+	CKeyPadDlg* pDlg = new CKeyPadDlg(sPos, 10);
+	if (pDlg != NULL)
+	{
+		if (pDlg->DoModal() == IDOK)
+		{
+			nValue = (int)pDlg->GetReturnVal();
+			if (nValue < 0 || nValue > 255)
+			{
+				delete pDlg;
+				g_ShowMsgPopup(_T("ERROR"), _T("조명값이 잘 못되었습니다.(범위 : 0 ~ 255)"), RGB_COLOR_RED);
+				return;
+			}
+
+			sPos.Format(_T("%d"), nValue);
+			m_clColorStaticOCVal[0].SetWindowText(sPos);
+			m_clSliderCtrlOC[0].SetPos(nValue);
+#ifdef ON_LINE_LIGHT
+			if(m_nUnit == UNIT_AA1)
+			{
+#if  (____MODEL_NAME == XPENG_WIDE)
+				LightControl.ctrlLedVolume(LIGHT_OC_2800K, nValue);
+
+#endif
+			}
+			else
+			{
+				//func_Light_SetValue(0, LIGHT_CH_OC2, nValue);
+			}
+#endif
+		}
+
+		delete pDlg;
+	}
+}
+
+//-----------------------------------------------------------------------------
+//
+//
+//
+//-----------------------------------------------------------------------------
+void CLightDlg::OnStnClickedStaticLightOcVal2()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CString sPos = _T("");
+	int nValue;
+
+	m_clColorStaticOCVal[1].GetWindowText(sPos);
+	CKeyPadDlg* pDlg = new CKeyPadDlg(sPos, 10);
+	if (pDlg != NULL)
+	{
+		if (pDlg->DoModal() == IDOK)
+		{
+			nValue = (int)pDlg->GetReturnVal();
+			if (nValue < 0 || nValue > 255)
+			{
+				delete pDlg;
+				g_ShowMsgPopup(_T("ERROR"), _T("조명값이 잘 못되었습니다.(범위 : 0 ~ 255)"), RGB_COLOR_RED);
+				return;
+			}
+
+			sPos.Format(_T("%d"), nValue);
+			m_clColorStaticOCVal[1].SetWindowText(sPos);
+			m_clSliderCtrlOC[1].SetPos(nValue);
+#ifdef ON_LINE_LIGHT
+			if(m_nUnit == UNIT_AA1)
+			{
+#if  (____MODEL_NAME == XPENG_WIDE)
+				LightControl.ctrlLedVolume(LIGHT_OC_6500K_CH, nValue);
+
+#endif
+			}
+			else
+			{
+				//func_Light_SetValue(0, LIGHT_CH_OC2, nValue);
+			}
+#endif
+		}
+
+		delete pDlg;
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+//
+//
+//
+//-----------------------------------------------------------------------------
+void CLightDlg::OnBnClickedButtonLightSave()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (g_clTaskWork[m_nUnit].m_nAutoFlag == MODE_AUTO)
+	{
+		AddLog(_T("[INFO] 자동 운전 중 사용 불가"), 1, m_nUnit);
+		return;
+	}
+
+	if (g_clTaskWork[m_nUnit].m_nAutoFlag == MODE_PAUSE)
+	{
+		AddLog(_T("[INFO] 일시 정지 중 사용 불가"), 1, m_nUnit);
+		return;
+	}
+
+	if (g_ShowMsgModal(_T("확인"), _T("조명 값을 저장하시겠습니까?"), RGB_COLOR_RED) == false)
+		return;
+
+	this->GetLightData();
+
+	g_clModelData[m_nUnit].Save(g_clSysData.m_szModelName);
+
+	AddLog(_T("[INFO] 조명값 저장"), 0, m_nUnit);
+}
+
+//-----------------------------------------------------------------------------
+//
+//	조명값 저장
+//
+//-----------------------------------------------------------------------------
+void CLightDlg::GetLightData()
+{
+	// CHART
+	
+#if  (____MODEL_NAME == XPENG_WIDE)
+    g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_1] = m_clSliderCtrlChart[0].GetPos();
+    g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_2] = m_clSliderCtrlChart[1].GetPos();
+	g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_3] = m_clSliderCtrlChart[2].GetPos();
+    // OC(SENSOR)
+    g_clModelData[m_nUnit].m_nLight[LIGHT_OC_6500K] = m_clSliderCtrlOC[0].GetPos();
+
+    // OC(COMPL)
+    g_clModelData[m_nUnit].m_nLight[LIGHT_OC_2800K] = m_clSliderCtrlOC[1].GetPos();
+
+#elif (____MODEL_NAME == XPENG_MAIN_NARROW)
+    g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_1] = m_clSliderCtrlChart[0].GetPos();
+
+    // OC(SENSOR)
+    g_clModelData[m_nUnit].m_nLight[LIGHT_OC_6500K] = m_clSliderCtrlChart[1].GetPos();
+
+    // OC(COMPL)
+    g_clModelData[m_nUnit].m_nLight[LIGHT_OC_2800K] = m_clSliderCtrlChart[2].GetPos();
+#endif
+    //m_clSliderCtrlChart[0]
+    //m_clSliderCtrlChart[1]
+    //m_clSliderCtrlChart[2]
+
+	
+}
+
+//-----------------------------------------------------------------------------
+//
+//	OnShowWindow
+//
+//-----------------------------------------------------------------------------
+void CLightDlg::OnShowWindow(BOOL bShow, UINT nStatus)
+{
+	CDialogEx::OnShowWindow(bShow, nStatus);
+
+	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
+	if (bShow == TRUE)
+	{		
+		this->ShowLightData();		
+
+#if  (____MODEL_NAME == XPENG_WIDE)
+		LightControl.ctrlLedVolume(LIGHT_CHART_CH_1, g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_1]); Sleep(100);		
+		LightControl.ctrlLedVolume(LIGHT_CHART_CH_1 + 1, g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_1]); Sleep(100);
+		LightControl.ctrlLedVolume(LIGHT_CHART_CH_1 + 2, g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_1]); Sleep(100);
+		LightControl.ctrlLedVolume(LIGHT_CHART_CH_1 + 3, g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_1]); Sleep(100);
+		LightControl.ctrlLedVolume(LIGHT_CHART_CH_1 + 4, g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_1]); Sleep(100);
+		LightControl.ctrlLedVolume(LIGHT_CHART_CH_1 + 5, g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_1]); Sleep(100);
+
+		LightControl.ctrlLedVolume(LIGHT_LEFT_CHART, g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_2]); Sleep(100);
+		LightControl.ctrlLedVolume(LIGHT_RIGHT_CHART, g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_3]); Sleep(100);
+
+#elif (____MODEL_NAME == XPENG_MAIN_NARROW)
+		LightControl.ctrlLedVolume(LIGHT_CHART_CH_1 + m_nUnit, g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_1]);
+#endif
+		LightControl.ctrlLedVolume(LIGHT_OC_6500K_CH + m_nUnit, g_clModelData[m_nUnit].m_nLight[LIGHT_OC_6500K]); Sleep(100);
+		LightControl.ctrlLedVolume(LIGHT_OC_2800K_CH + m_nUnit, g_clModelData[m_nUnit].m_nLight[LIGHT_OC_2800K]);
+		
+
+	}
+}
+
+//-----------------------------------------------------------------------------
+//
+//	조명값 표시
+//
+//-----------------------------------------------------------------------------
+void CLightDlg::ShowLightData()
+{
+	TCHAR szData[SIZE_OF_100BYTE];
+
+#if  (____MODEL_NAME == XPENG_WIDE)
+    //m_clColorStaticChart[0].SetWindowText(_T("차트 조명(CH1)"));
+    _stprintf_s(szData, SIZE_OF_100BYTE, _T("%d"), g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_1]);
+    m_clColorStaticChartVal[0].SetWindowText(szData);
+    m_clSliderCtrlChart[0].SetPos(g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_1]);
+
+    //m_clColorStaticChart[1].SetWindowText(_T("차트 조명(CH2)"));
+    _stprintf_s(szData, SIZE_OF_100BYTE, _T("%d"), g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_2]);
+    m_clColorStaticChartVal[1].SetWindowText(szData);
+    m_clSliderCtrlChart[1].SetPos(g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_2]);
+
+    //m_clColorStaticChart[2].SetWindowText(_T("차트 조명(CH2)"));
+    _stprintf_s(szData, SIZE_OF_100BYTE, _T("%d"), g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_3]);
+    m_clColorStaticChartVal[2].SetWindowText(szData);
+    m_clSliderCtrlChart[2].SetPos(g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_3]);
+
+    _stprintf_s(szData, SIZE_OF_100BYTE, _T("%d"), g_clModelData[m_nUnit].m_nLight[LIGHT_OC_6500K]);
+    m_clColorStaticOCVal[0].SetWindowText(szData);
+    m_clSliderCtrlOC[0].SetPos(g_clModelData[m_nUnit].m_nLight[LIGHT_OC_6500K]);
+
+    _stprintf_s(szData, SIZE_OF_100BYTE, _T("%d"), g_clModelData[m_nUnit].m_nLight[LIGHT_OC_2800K]);
+    m_clColorStaticOCVal[1].SetWindowText(szData);
+    m_clSliderCtrlOC[1].SetPos(g_clModelData[m_nUnit].m_nLight[LIGHT_OC_2800K]);
+
+#elif (____MODEL_NAME == XPENG_MAIN_NARROW)
+
+    _stprintf_s(szData, SIZE_OF_100BYTE, _T("%d"), g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_1]);
+    m_clColorStaticChartVal[0].SetWindowText(szData);
+    m_clSliderCtrlChart[0].SetPos(g_clModelData[m_nUnit].m_nLight[LIGHT_CHART_1]);
+
+    _stprintf_s(szData, SIZE_OF_100BYTE, _T("%d"), g_clModelData[m_nUnit].m_nLight[LIGHT_OC_6500K]);
+    m_clColorStaticChartVal[1].SetWindowText(szData);
+    m_clSliderCtrlChart[1].SetPos(g_clModelData[m_nUnit].m_nLight[LIGHT_OC_6500K]);
+
+    _stprintf_s(szData, SIZE_OF_100BYTE, _T("%d"), g_clModelData[m_nUnit].m_nLight[LIGHT_OC_2800K]);
+    m_clColorStaticChartVal[2].SetWindowText(szData);
+    m_clSliderCtrlChart[2].SetPos(g_clModelData[m_nUnit].m_nLight[LIGHT_OC_2800K]);
+#endif
+	
+}
+
+//-----------------------------------------------------------------------------
+//
+//	OnHScroll
+//
+//-----------------------------------------------------------------------------
+void CLightDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	TCHAR szPos[SIZE_OF_100BYTE];
+	int nPosi = 0;
+
+	if (nSBCode == SB_ENDSCROLL)
+		return;
+
+	if (pScrollBar->m_hWnd == GetDlgItem(IDC_SLIDER_LIGHT_TOP_CHART)->m_hWnd)
+	{
+		nPosi = m_clSliderCtrlChart[0].GetPos();
+
+		_stprintf_s(szPos, SIZE_OF_100BYTE, _T("%d"), nPosi);
+		m_clColorStaticChartVal[0].SetWindowText(szPos);
+#ifdef ON_LINE_LIGHT	
+		if(m_nUnit == UNIT_AA1)
+		{
+#if  (____MODEL_NAME == XPENG_WIDE)
+			LightControl.ctrlLedVolume(LIGHT_CHART_CH_1, nPosi);
+			Sleep(100);
+			LightControl.ctrlLedVolume(LIGHT_CHART_CH_1+1, nPosi);
+			LightControl.ctrlLedVolume(LIGHT_CHART_CH_1+2, nPosi);
+			LightControl.ctrlLedVolume(LIGHT_CHART_CH_1+3, nPosi);
+			LightControl.ctrlLedVolume(LIGHT_CHART_CH_1+4, nPosi);
+			LightControl.ctrlLedVolume(LIGHT_CHART_CH_1+5, nPosi);
+
+			LightControl.ctrlLedVolume(LIGHT_OC_6500K_CH + m_nUnit, nPosi);
+			LightControl.ctrlLedVolume(LIGHT_OC_2800K_CH + m_nUnit, nPosi);
+
+#elif (____MODEL_NAME == XPENG_MAIN_NARROW)
+			LightControl.ctrlLedVolume(LIGHT_CHART_CH_1, nPosi);
+#endif
+		}
+		else
+		{
+#if  (____MODEL_NAME == XPENG_WIDE)
+			LightControl.ctrlLedVolume(LIGHT_CHART_CH_1, nPosi);
+#elif (____MODEL_NAME == XPENG_MAIN_NARROW)
+			LightControl.ctrlLedVolume(LIGHT_CHART_CH_1+ m_nUnit, nPosi);
+#endif
+		
+		}	
+#endif
+	}
+    else if (pScrollBar->m_hWnd == GetDlgItem(IDC_SLIDER_LIGHT_LEFT_CHART)->m_hWnd)//main,narrow일때 oc 6500
+    {
+        nPosi = m_clSliderCtrlChart[1].GetPos();
+
+        _stprintf_s(szPos, SIZE_OF_100BYTE, _T("%d"), nPosi);
+        m_clColorStaticChartVal[1].SetWindowText(szPos);
+#ifdef ON_LINE_LIGHT	
+        if (m_nUnit == UNIT_AA1)
+        {
+#if  (____MODEL_NAME == XPENG_WIDE)
+			LightControl.ctrlLedVolume(LIGHT_LEFT_CHART, nPosi);
+#elif (____MODEL_NAME == XPENG_MAIN_NARROW)
+			LightControl.ctrlLedVolume(LIGHT_OC_6500K_CH, nPosi);
+#endif
+        }
+        else
+        {
+			LightControl.ctrlLedVolume(LIGHT_OC_6500K_CH+ m_nUnit, nPosi);
+        }
+#endif
+    }
+    else if (pScrollBar->m_hWnd == GetDlgItem(IDC_SLIDER_LIGHT_RIGHT_CHART)->m_hWnd)//main,narrow일때 oc 2800
+    {
+        nPosi = m_clSliderCtrlChart[2].GetPos();
+
+        _stprintf_s(szPos, SIZE_OF_100BYTE, _T("%d"), nPosi);
+        m_clColorStaticChartVal[2].SetWindowText(szPos);
+#ifdef ON_LINE_LIGHT	
+        if (m_nUnit == UNIT_AA1)
+        {
+#if  (____MODEL_NAME == XPENG_WIDE)
+			LightControl.ctrlLedVolume(LIGHT_RIGHT_CHART, nPosi);
+#elif (____MODEL_NAME == XPENG_MAIN_NARROW)
+			LightControl.ctrlLedVolume(LIGHT_OC_2800K_CH, nPosi);
+#endif
+        }
+        else
+        {
+			LightControl.ctrlLedVolume(LIGHT_OC_2800K_CH + m_nUnit, nPosi);
+        }
+#endif
+    }
+	else if (pScrollBar->m_hWnd == GetDlgItem(IDC_SLIDER_LIGHT_DEFECT)->m_hWnd)
+	{
+		nPosi = m_clSliderCtrlOC[0].GetPos();
+
+		_stprintf_s(szPos, SIZE_OF_100BYTE, _T("%d"), nPosi);
+		m_clColorStaticOCVal[0].SetWindowText(szPos);
+#ifdef ON_LINE_LIGHT
+		LightControl.ctrlLedVolume(LIGHT_OC_2800K_CH, nPosi);
+#endif
+	}
+	else if (pScrollBar->m_hWnd == GetDlgItem(IDC_SLIDER_LIGHT_STAIN)->m_hWnd)
+	{
+		nPosi = m_clSliderCtrlOC[1].GetPos();
+
+		_stprintf_s(szPos, SIZE_OF_100BYTE, _T("%d"), nPosi);
+		m_clColorStaticOCVal[1].SetWindowText(szPos);
+#ifdef ON_LINE_LIGHT
+		LightControl.ctrlLedVolume(LIGHT_OC_6500K_CH, nPosi);
+#endif
+	}
+
+	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
+}
+
+//-----------------------------------------------------------------------------
+//
+//	Combo Box : Dome 조명값
+//
+//-----------------------------------------------------------------------------
+void CLightDlg::OnCbnSelchangeComboLightDome()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	TCHAR szData[SIZE_OF_100BYTE];
+
+	/*if (g_clModelData[m_nUnit].m_nDomeChartUse == 1 && m_clComboDomeChannel.GetCurSel() == 0)
+	{
+		_stprintf_s(szData, SIZE_OF_100BYTE, _T("%d"), g_clModelData[m_nUnit].m_nDomeLightVal[0]);
+		m_clColorStaticChartVal[0].SetWindowText(szData);
+		m_clSliderCtrlChart[0].SetPos(g_clModelData[m_nUnit].m_nDomeLightVal[0]);
+	}
+	else if (g_clModelData[m_nUnit].m_nDomeChartUse == 1 && m_clComboDomeChannel.GetCurSel() != 0)
+	{
+		_stprintf_s(szData, SIZE_OF_100BYTE, _T("%d"), g_clModelData[m_nUnit].m_nDomeLightVal[m_clComboDomeChannel.GetCurSel()]);
+		m_clColorStaticChartVal[0].SetWindowText(szData);
+		m_clSliderCtrlChart[0].SetPos(g_clModelData[m_nUnit].m_nDomeLightVal[m_clComboDomeChannel.GetCurSel()]);
+	}*/
+}
+
+//-----------------------------------------------------------------------------
+//
+//	PreTranslateMessage
+//
+//-----------------------------------------------------------------------------
+BOOL CLightDlg::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+
+	if (pMsg->message == WM_LBUTTONDOWN)
+	{
+		if (pMsg->hwnd == GetDlgItem(IDC_BUTTON_LIGHT_SAVE)->m_hWnd)
+		{
+			//m_clColorButtonSave.SetSelected(true);
+		}		
+	}
+	else if(pMsg->message == WM_LBUTTONUP)
+	{
+		if (pMsg->hwnd == GetDlgItem(IDC_BUTTON_LIGHT_SAVE)->m_hWnd)
+		{
+			//m_clColorButtonSave.SetSelected(false);
+		}
+	}
+	if (pMsg->message == WM_KEYDOWN)
+	{
+		if (pMsg->wParam == VK_RETURN || pMsg->wParam == VK_ESCAPE)
+		{
+			return TRUE;
+		}
+	}
+
+	return CDialogEx::PreTranslateMessage(pMsg);
+}
+
+void CLightDlg::OnBnClickedButton1()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	g_pCarAABonderDlg->m_clSerialThread.SendLightSet(m_nUnit, 'C', 1, 50, false);
+}
+
+
+void CLightDlg::OnBnClickedButton2()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	g_pCarAABonderDlg->m_clSerialThread.SendLightOnOffSet(m_nUnit, 'H', 1, true, false);
+
+}
+
+
+
+
+void CLightDlg::OnStnClickedStaticLightRightChartValue()
+{
+    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+    CString sPos = _T("");
+    int nValue;
+
+    m_clColorStaticChartVal[2].GetWindowText(sPos);
+    CKeyPadDlg* pDlg = new CKeyPadDlg(sPos, 10);
+    if (pDlg != NULL)
+    {
+        if (pDlg->DoModal() == IDOK)
+        {
+            nValue = (int)pDlg->GetReturnVal();
+            if (nValue < 0 || nValue > 255)
+            {
+                delete pDlg;
+                g_ShowMsgPopup(_T("ERROR"), _T("조명값이 잘 못되었습니다.(범위 : 0 ~ 255)"), RGB_COLOR_RED);
+                return;
+            }
+
+            sPos.Format(_T("%d"), nValue);
+            m_clColorStaticChartVal[2].SetWindowText(sPos);
+            m_clSliderCtrlChart[2].SetPos(nValue);
+#ifdef ON_LINE_LIGHT
+            if (m_nUnit == UNIT_AA1)
+            {
+ 
+#if  (____MODEL_NAME == XPENG_WIDE)
+				LightControl.ctrlLedVolume(LIGHT_RIGHT_CHART, nValue);
+#elif (____MODEL_NAME == XPENG_MAIN_NARROW)
+				LightControl.ctrlLedVolume(LIGHT_OC_2800K_CH, nValue);
+#endif
+            }
+            else
+            {
+				LightControl.ctrlLedVolume(LIGHT_OC_2800K_CH + m_nUnit, nValue);
+            }
+#endif
+        }
+
+        delete pDlg;
+    }
+}

@@ -1,0 +1,1824 @@
+#include "stdafx.h"
+#include "DioControl.h"
+#include "DioDefine.h"
+
+CDioControl::CDioControl(void)
+{
+	int i;
+	for(i = 0; i < MAX_DIO_COUNT; i++)
+	{
+		m_dwDIn[i] = 0;
+		m_dwDOut[i] = 0;
+	}
+
+	// DIO 초기화
+	//this->InitDio();
+}
+
+CDioControl::~CDioControl(void)
+{
+	// DIO Close
+	this->CloseDio();
+}
+
+//-----------------------------------------------------------------------------
+//
+// DIO 모듈 초기화
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::InitDio()
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+
+	TCHAR szLog[SIZE_OF_1K];
+	DWORD dwRetVal;
+	DWORD dwLevel;
+	long lCount;
+
+	dwLevel = HIGH;
+	dwRetVal = 0;
+	lCount = 0;
+
+	if (AxlIsOpened() == false)
+	{
+		dwRetVal = AxlOpenNoReset(7);
+		if (dwRetVal != AXT_RT_SUCCESS)
+		{
+			_stprintf_s(szLog, SIZE_OF_1K, _T("DIO 라이브러리 초기화 실패"));
+			//AddLog(szLog, 1, 999);
+            AddLog(szLog, 1, 0);
+            AddLog(szLog, 1, 1);
+			return false;
+		}
+	}
+
+	// 장착된 DIO 모듈 개수 확인
+	dwRetVal = AxdInfoGetModuleCount(&lCount);
+	if (dwRetVal != AXT_RT_SUCCESS)
+	{
+		_stprintf_s(szLog, SIZE_OF_1K, _T("DIO 모듈 개수 확인 실패"));
+		//AddLog(szLog, 1, 999);
+        AddLog(szLog, 1, 0);
+        AddLog(szLog, 1, 1);
+		return false;
+	}
+
+	if (lCount <= 0)
+	{
+		_stprintf_s(szLog, SIZE_OF_1K, _T("시스템에 장착된 DIO 모듈이 없음"));
+		//AddLog(szLog, 1, 999);
+        AddLog(szLog, 1, 0);
+        AddLog(szLog, 1, 1);
+		return false;
+	}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+// DIO 모듈 Close
+//
+//-----------------------------------------------------------------------------
+void CDioControl::CloseDio()
+{
+#ifndef ON_LINE_DIO
+	return;
+#endif
+
+	if (AxlIsOpened())
+	{
+		AxlClose();
+	}
+}
+
+//-----------------------------------------------------------------------------
+//
+// INPUT READ
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::ReadDIn(int nModuleNo)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+
+	DWORD dwInputVal;
+	bool bRetVal;
+	int nIndex;
+
+	dwInputVal = 0;
+	bRetVal = false;
+
+	nIndex = (nModuleNo / 2);
+
+	if (AxdiReadInportDword(nModuleNo, 0, &dwInputVal) == AXT_RT_SUCCESS)
+	{
+		m_dwDIn[nIndex] = dwInputVal;
+
+		bRetVal = true;
+	}
+
+	return bRetVal;
+}
+
+//-----------------------------------------------------------------------------
+//
+// OUTPUT WRITE
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::WriteDOut(int nModuleNo, DWORD dwOut)
+{
+	bool bRetVal;
+	int nIndex;
+
+	bRetVal = false;
+
+	nIndex = (nModuleNo / 2);
+
+#ifndef ON_LINE_DIO
+	m_dwDOut[nIndex] = dwOut;
+	return true;
+#endif
+
+	m_clMutexWrite.Lock();
+	if (AxdoWriteOutportDword(nModuleNo, 0, dwOut) == AXT_RT_SUCCESS)
+	{
+		m_dwDOut[nIndex] = dwOut;
+
+		bRetVal = true;
+	}
+	m_clMutexWrite.Unlock();
+
+	return bRetVal;
+}
+
+//-----------------------------------------------------------------------------
+//
+// PCB 제품 확인
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::PcbSocketCheck(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return bFlag;
+#endif
+
+	int ch = nUnit * 0;
+	static DWORD dwTickCount;
+	int iModuleNo = (nUnit * 0) + 1;// (nUnit * 2) + 1;
+	DWORD _shift = (nUnit * 16);
+	// 전진
+	if (bFlag == true)
+	{
+		if (m_dwDIn[ch] & DIO_IN_PCB_SOCKET_VACCUM_ON << _shift)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	// 후진
+	else
+	{
+		if (!(m_dwDIn[ch] & DIO_IN_PCB_SOCKET_VACCUM_ON << _shift))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	if (bWait == true)
+	{
+
+		dwTickCount = GetTickCount();
+
+		while (1)
+		{
+			if (bFlag == true)
+			{
+				if (m_dwDIn[ch] & DIO_IN_PCB_SOCKET_VACCUM_ON << _shift)
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (!(m_dwDIn[ch] & DIO_IN_PCB_SOCKET_VACCUM_ON << _shift))
+				{
+					break;
+				}
+			}
+
+			if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+			{
+				return false;
+			}
+
+			Sleep(10);
+		}
+	}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+// PCB 흡착/탈착
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::PcbVacuum(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+	int ch = nUnit * 0;
+	static DWORD dwTickCount;
+	DWORD dwOutputVal;
+	int iModuleNo = (nUnit * 0) + 1;// (nUnit * 2) + 1;
+	DWORD _shift = (nUnit * 16);
+
+	dwOutputVal = m_dwDOut[ch];
+
+	// 흡착
+	if (bFlag == true)
+	{
+		dwOutputVal = dwOutputVal & ~(DIO_OUT_PCB_SOCKET_VACUUM_ON << _shift);
+		dwOutputVal = dwOutputVal & ~(DIO_OUT_PCB_SOCKET_VACUUM_OFF << _shift);
+	}
+	// 탈착
+	else
+	{
+		dwOutputVal = dwOutputVal | (DIO_OUT_PCB_SOCKET_VACUUM_ON << _shift);
+		dwOutputVal = dwOutputVal | (DIO_OUT_PCB_SOCKET_VACUUM_OFF << _shift);
+	}
+
+	this->WriteDOut(iModuleNo, dwOutputVal);
+
+	Sleep(100);
+
+	if (bFlag == false)
+	{
+		dwOutputVal = dwOutputVal & ~(DIO_OUT_PCB_SOCKET_VACUUM_OFF << _shift);
+		this->WriteDOut(iModuleNo, dwOutputVal);
+	}
+
+	if (bWait == true)
+	{
+		dwTickCount = GetTickCount();
+		while (1)
+		{
+			if (bFlag == true)
+			{
+				if (m_dwDIn[nUnit] & (DIO_IN_PCB_SOCKET_VACCUM_ON << _shift))
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (!(m_dwDIn[nUnit] & (DIO_IN_PCB_SOCKET_VACCUM_ON << _shift)))
+				{
+					break;
+				}
+			}
+
+			if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+			{
+				return false;
+			}
+
+			Sleep(10);
+		}
+	}
+
+	if (bFlag == true)
+		Sleep((DWORD)(g_clModelData[nUnit].m_dPCBGripUpDelay * 1000));
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+// PCB 흡착/탈착 감지
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::PcbVacuumCheck(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+
+	int ch = nUnit * 0;
+	static DWORD dwTickCount;
+	int iModuleNo = (nUnit * 0) + 1;// (nUnit * 2) + 1;
+	DWORD _shift = (nUnit * 16);
+	// 전진
+	if (bFlag == true)
+	{
+		if (m_dwDIn[ch] & DIO_IN_PCB_SOCKET_VACCUM_ON << _shift)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	// 후진
+	else
+	{
+		if (!(m_dwDIn[ch] & DIO_IN_PCB_SOCKET_VACCUM_ON << _shift))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	if (bWait == true)
+	{
+
+		dwTickCount = GetTickCount();
+
+		while (1)
+		{
+			if (bFlag == true)
+			{
+				if (m_dwDIn[ch] & DIO_IN_PCB_SOCKET_VACCUM_ON << _shift)
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (!(m_dwDIn[ch] & DIO_IN_PCB_SOCKET_VACCUM_ON << _shift))
+				{
+					break;
+				}
+			}
+
+			if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+			{
+				return false;
+			}
+
+			Sleep(10);
+		}
+	}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+// PCB Grip 전진/후진
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::PcbGrip(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+	int ch = nUnit * 0;
+	static DWORD dwTickCount;
+	DWORD dwOutputVal;
+	int iModuleNo = (nUnit * 0) + 1;// (nUnit * 2) + 1;
+	DWORD _shift = (nUnit * 16);
+	dwOutputVal = m_dwDOut[ch];
+	TCHAR szLog[SIZE_OF_1K];
+
+	if (PcbGripUpCheck(nUnit, true) == true)
+	{
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[INTERLOCK] PCB GRIP 후진 (GRIP UP 상태) 실패"));
+		AddLog(szLog, 0, nUnit);
+		return false;
+	}
+
+	// 전진
+	if (bFlag == true)
+	{
+		dwOutputVal = dwOutputVal | (DIO_OUT_PCB_SOCKET_FORWARD << _shift);
+		dwOutputVal = dwOutputVal & ~(DIO_OUT_PCB_SOCKET_BACKWARD << _shift);
+	}
+	// 후진
+	else
+	{
+		dwOutputVal = dwOutputVal | (DIO_OUT_PCB_SOCKET_BACKWARD << _shift);
+		dwOutputVal = dwOutputVal & ~(DIO_OUT_PCB_SOCKET_FORWARD << _shift);
+	}
+
+	this->WriteDOut(iModuleNo, dwOutputVal);
+
+	if (bWait == true)
+	{
+		dwTickCount = GetTickCount();
+		while (1)
+		{
+			if (bFlag == true)
+			{
+				if (m_dwDIn[ch] & (DIO_IN_PCB_SOCKET_FORWARD << _shift))
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (m_dwDIn[ch] & (DIO_IN_PCB_SOCKET_BACKWARD << _shift))
+				{
+					break;
+				}
+			}
+
+			if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+			{
+				return false;
+			}
+
+			Sleep(10);
+		}
+	}
+
+	Sleep((DWORD)(g_clModelData[nUnit].m_dPCBGripDelay * 1000));
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+// PCB Grip 전진/후진 감지
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::PcbGripCheck(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+	
+	int ch = nUnit * 0;
+	static DWORD dwTickCount;
+	int iModuleNo = (nUnit * 0) + 1;// (nUnit * 2) + 1;
+	DWORD _shift = (nUnit * 16);
+	// 전진
+	if (bFlag == true)
+	{
+		if (m_dwDIn[ch] & DIO_IN_PCB_SOCKET_FORWARD << _shift)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	// 후진
+	else
+	{
+		if (m_dwDIn[ch] & DIO_IN_PCB_SOCKET_BACKWARD << _shift)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	if (bWait == true)
+	{
+
+		dwTickCount = GetTickCount();
+
+		while (1)
+		{
+			if (bFlag == true)
+			{
+				if (m_dwDIn[ch] & DIO_IN_PCB_SOCKET_FORWARD << _shift)
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (m_dwDIn[ch] & DIO_IN_PCB_SOCKET_BACKWARD << _shift)
+				{
+					break;
+				}
+			}
+
+			if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+			{
+				return false;
+			}
+
+			Sleep(10);
+		}
+	}
+
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+//
+// PCB Grip 상승/하강
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::PcbGripUp(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+	int ch = nUnit * 0;
+	static DWORD dwTickCount;
+	DWORD dwOutputVal;
+	int iModuleNo = (nUnit * 0) + 1;// (nUnit * 2) + 1;
+	DWORD _shift = (nUnit * 16);
+	dwOutputVal = m_dwDOut[ch];
+
+	// 전진
+	if (bFlag == true)
+	{
+		dwOutputVal = dwOutputVal | (DIO_OUT_PCB_SOCKET_UP << _shift);
+		dwOutputVal = dwOutputVal & ~(DIO_OUT_PCB_SOCKET_DOWN << _shift);
+	}
+	// 후진
+	else
+	{
+		dwOutputVal = dwOutputVal | (DIO_OUT_PCB_SOCKET_DOWN << _shift);
+		dwOutputVal = dwOutputVal & ~(DIO_OUT_PCB_SOCKET_UP << _shift);
+	}
+
+	this->WriteDOut(iModuleNo, dwOutputVal);
+
+	if (bWait == true)
+	{
+		dwTickCount = GetTickCount();
+		while (1)
+		{
+			if (bFlag == true)
+			{
+				if (m_dwDIn[ch] & (DIO_IN_PCB_SOCKET_UP << _shift))
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (m_dwDIn[ch] & (DIO_IN_PCB_SOCKET_DOWN << _shift))
+				{
+					break;
+				}
+			}
+
+			if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+			{
+				return false;
+			}
+
+			Sleep(10);
+		}
+	}
+
+	Sleep((DWORD)(g_clModelData[nUnit].m_dPCBGripUpDelay * 1000));
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+// PCB Grip 상승/하강 감지
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::PcbGripUpCheck(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+
+	int ch = nUnit * 0;
+	static DWORD dwTickCount;
+	int iModuleNo = (nUnit * 0) + 1;// (nUnit * 2) + 1;
+	DWORD _shift = (nUnit * 16);
+	// 상승
+	if (bFlag == true)
+	{
+		if (m_dwDIn[ch] & DIO_IN_PCB_SOCKET_UP << _shift)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	// 하강
+	else
+	{
+		if (m_dwDIn[ch] & DIO_IN_PCB_SOCKET_DOWN << _shift)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	if (bWait == true)
+	{
+
+		dwTickCount = GetTickCount();
+
+		while (1)
+		{
+			if (bFlag == true)
+			{
+				if (m_dwDIn[ch] & DIO_IN_PCB_SOCKET_UP << _shift)
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (m_dwDIn[ch] & DIO_IN_PCB_SOCKET_DOWN << _shift)
+				{
+					break;
+				}
+			}
+
+			if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+			{
+				return false;
+			}
+
+			Sleep(10);
+		}
+	}
+
+	return true;
+}
+
+
+//-----------------------------------------------------------------------------
+//
+// LENS 제품 확인
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::LensSocketCheck(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+
+	//static DWORD dwTickCount;
+
+	//// ON
+	//if (bFlag == true)
+	//{
+	//	if (m_dwDIn[nUnit] & DIO_IN_LENS_SOCKET_CHECK)
+	//	{
+	//		return false;
+	//	}
+	//	else
+	//	{
+	//		return true;
+	//	}
+	//}
+	//// OFF
+	//else
+	//{
+	//	if (!(m_dwDIn[nUnit] & DIO_IN_LENS_SOCKET_CHECK))
+	//	{
+	//		return false;
+	//	}
+	//	else
+	//	{
+	//		return true;
+	//	}
+	//}
+
+	//if (bWait == true)
+	//{
+	//	dwTickCount = GetTickCount();
+
+	//	while (1)
+	//	{
+	//		if (bFlag == true)
+	//		{
+	//			if (m_dwDIn[nUnit] & DIO_IN_LENS_SOCKET_CHECK)
+	//			{
+	//				break;
+	//			}
+	//		}
+	//		else
+	//		{
+	//			if (!(m_dwDIn[nUnit] & DIO_IN_LENS_SOCKET_CHECK))
+	//			{
+	//				break;
+	//			}
+	//		}
+
+	//		if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+	//		{
+	//			return false;
+	//		}
+
+	//		Sleep(10);
+	//	}
+	//}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+// LENS Grip 전진/후진
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::LensGrip(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+
+	//static DWORD dwTickCount;
+	//DWORD dwOutputVal;
+	//int iModuleNo = (nUnit * 2) + 1;
+
+	//dwOutputVal = m_dwDOut[nUnit];
+
+	//// 전진
+	//if (bFlag == true)
+	//{
+	//	dwOutputVal = dwOutputVal | DIO_OUT_LENS_GRIP_FORWARD;
+	//	dwOutputVal = dwOutputVal & ~DIO_OUT_LENS_GRIP_BACKWARD;
+	//}
+	//// 후진
+	//else
+	//{
+	//	dwOutputVal = dwOutputVal | DIO_OUT_LENS_GRIP_BACKWARD;
+	//	dwOutputVal = dwOutputVal & ~DIO_OUT_LENS_GRIP_FORWARD;
+	//}
+
+	//if(this->WriteDOut(iModuleNo, dwOutputVal) == false)
+	//	return false;
+
+	//if (bWait == true)
+	//{
+	//	dwTickCount = GetTickCount();
+	//	while (1)
+	//	{
+	//		if (bFlag == true)
+	//		{
+	//			if (m_dwDIn[nUnit] & DIO_IN_LENS_GRIP_FORWARD)
+	//			{
+	//				break;
+	//			}
+	//		}
+	//		else
+	//		{
+	//			if (m_dwDIn[nUnit] & DIO_IN_LENS_GRIP_BACKWARD)
+	//			{
+	//				break;
+	//			}
+	//		}
+
+	//		if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+	//		{
+	//			return false;
+	//		}
+
+	//		Sleep(10);
+	//	}
+	//}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+// LENS Grip 전진/후진 감지
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::LensGripCheck(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+
+	//static DWORD dwTickCount;
+
+	//// 전진
+	//if (bFlag == true)
+	//{
+	//	if (m_dwDIn[nUnit] & DIO_IN_LENS_GRIP_FORWARD)
+	//	{
+	//		return true;
+	//	}
+	//	else
+	//	{
+	//		return false;
+	//	}
+	//}
+	//// 후진
+	//else
+	//{
+	//	if (m_dwDIn[nUnit] & DIO_IN_LENS_GRIP_BACKWARD)
+	//	{
+	//		return true;
+	//	}
+	//	else
+	//	{
+	//		return false;
+	//	}
+	//}
+
+	//if (bWait == true)
+	//{
+
+	//	dwTickCount = GetTickCount();
+
+	//	while (1)
+	//	{
+	//		if (bFlag == true)
+	//		{
+	//			if (m_dwDIn[nUnit] & DIO_IN_LENS_GRIP_FORWARD)
+	//			{
+	//				break;
+	//			}
+	//		}
+	//		else
+	//		{
+	//			if (m_dwDIn[nUnit] & DIO_IN_LENS_GRIP_BACKWARD)
+	//			{
+	//				break;
+	//			}
+	//		}
+
+	//		if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+	//		{
+	//			return false;
+	//		}
+
+	//		Sleep(10);
+	//	}
+	//}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+// LENS Stage Grip 전진/후진
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::LensStageGrip(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+
+	//static DWORD dwTickCount;
+	//DWORD dwOutputVal;
+	//int iModuleNo = (nUnit * 2) + 1;
+
+	//dwOutputVal = m_dwDOut[nUnit];
+
+	//// 전진
+	//if (bFlag == true)
+	//{
+	//	dwOutputVal = dwOutputVal | DIO_OUT_LENS_STAGE_GRIP_FOR;
+	//	dwOutputVal = dwOutputVal & ~DIO_OUT_LENS_STAGE_GRIP_BACK;
+	//}
+	//// 후진
+	//else
+	//{
+	//	dwOutputVal = dwOutputVal | DIO_OUT_LENS_STAGE_GRIP_BACK;
+	//	dwOutputVal = dwOutputVal & ~DIO_OUT_LENS_STAGE_GRIP_FOR;
+	//}
+
+	//this->WriteDOut(iModuleNo, dwOutputVal);
+
+	//if (bWait == true)
+	//{
+	//	dwTickCount = GetTickCount();
+	//	while (1)
+	//	{
+	//		if (bFlag == true)
+	//		{
+	//			if (m_dwDIn[nUnit] & DIO_IN_LENS_STAGE_GRIP_FOR)
+	//			{
+	//				break;
+	//			}
+	//		}
+	//		else
+	//		{
+	//			if (m_dwDIn[nUnit] & DIO_IN_LENS_STAGE_GRIP_BACK)
+	//			{
+	//				break;
+	//			}
+	//		}
+
+	//		if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+	//		{
+	//			return false;
+	//		}
+
+	//		Sleep(10);
+	//	}
+	//}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+// LENS Stage Grip 전진/후진 감지
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::LensStageGripCheck(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+
+	//static DWORD dwTickCount;
+
+	//// 전진
+	//if (bFlag == true)
+	//{
+	//	if (m_dwDIn[nUnit] & DIO_IN_LENS_STAGE_GRIP_FOR)
+	//	{
+	//		return true;
+	//	}
+	//	else
+	//	{
+	//		return false;
+	//	}
+	//}
+	//// 후진
+	//else
+	//{
+	//	if (m_dwDIn[nUnit] & DIO_IN_LENS_STAGE_GRIP_BACK)
+	//	{
+	//		return true;
+	//	}
+	//	else
+	//	{
+	//		return false;
+	//	}
+	//}
+
+	//if (bWait == true)
+	//{
+
+	//	dwTickCount = GetTickCount();
+
+	//	while (1)
+	//	{
+	//		if (bFlag == true)
+	//		{
+	//			if (m_dwDIn[nUnit] & DIO_IN_LENS_STAGE_GRIP_FOR)
+	//			{
+	//				break;
+	//			}
+	//		}
+	//		else
+	//		{
+	//			if (m_dwDIn[nUnit] & DIO_IN_LENS_STAGE_GRIP_BACK)
+	//			{
+	//				break;
+	//			}
+	//		}
+
+	//		if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+	//		{
+	//			return false;
+	//		}
+
+	//		Sleep(10);
+	//	}
+	//}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+// 검사 FEED 전진/ 후진
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::FeedMove(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+
+	//static DWORD dwTickCount;
+	//DWORD dwOutputVal;
+	//int iModuleNo = (nUnit * 2) + 1;
+
+	//dwOutputVal = m_dwDOut[nUnit];
+
+	//// 전진
+	//if (bFlag == true)
+	//{
+	//	dwOutputVal = dwOutputVal | DIO_OUT_FEED_FORWARD;
+	//	dwOutputVal = dwOutputVal & ~DIO_OUT_FEED_BACKWARD;
+	//}
+	//// 후진
+	//else
+	//{
+	//	dwOutputVal = dwOutputVal | DIO_OUT_FEED_BACKWARD;
+	//	dwOutputVal = dwOutputVal & ~DIO_OUT_FEED_FORWARD;
+	//}
+
+	//this->WriteDOut(iModuleNo, dwOutputVal);
+
+	//if (bWait == true)
+	//{
+	//	dwTickCount = GetTickCount();
+	//	while (1)
+	//	{
+	//		if (bFlag == true)
+	//		{
+	//			if (m_dwDIn[nUnit] & DIO_IN_FEED_FORWARD)
+	//			{
+	//				break;
+	//			}
+	//		}
+	//		else
+	//		{
+	//			if (m_dwDIn[nUnit] & DIO_IN_FEED_BACKWARD)
+	//			{
+	//				break;
+	//			}
+	//		}
+
+	//		if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+	//		{
+	//			return false;
+	//		}
+
+	//		Sleep(10);
+	//	}
+	//}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+// 검사 FEED 전진/ 후진 감지
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::FeedMoveCheck(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+
+	//static DWORD dwTickCount;
+
+	//// 전진
+	//if (bFlag == true)
+	//{
+	//	if (m_dwDIn[nUnit] & DIO_IN_FEED_FORWARD)
+	//	{
+	//		return true;
+	//	}
+	//	else
+	//	{
+	//		return false;
+	//	}
+	//}
+	//// 후진
+	//else
+	//{
+	//	if (m_dwDIn[nUnit] & DIO_IN_FEED_BACKWARD)
+	//	{
+	//		return true;
+	//	}
+	//	else
+	//	{
+	//		return false;
+	//	}
+	//}
+
+	//if (bWait == true)
+	//{
+
+	//	dwTickCount = GetTickCount();
+
+	//	while (1)
+	//	{
+	//		if (bFlag == true)
+	//		{
+	//			if (m_dwDIn[nUnit] & DIO_IN_FEED_FORWARD)
+	//			{
+	//				break;
+	//			}
+	//		}
+	//		else
+	//		{
+	//			if (m_dwDIn[nUnit] & DIO_IN_FEED_BACKWARD)
+	//			{
+	//				break;
+	//			}
+	//		}
+
+	//		if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+	//		{
+	//			return false;
+	//		}
+
+	//		Sleep(10);
+	//	}
+	//}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+// DARK PUSHER 상승 / 하강
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::DarkPusher(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+	int ch = nUnit * 0;
+	static DWORD dwTickCount;
+	DWORD dwOutputVal;
+	int iModuleNo = (nUnit * 0) + 1;
+	DWORD _shift = (nUnit * 16);
+	dwOutputVal = m_dwDOut[nUnit];
+
+	// 상승
+	if (bFlag == true)
+	{
+		dwOutputVal = dwOutputVal | (DIO_OUT_DARK_PUSHER_UP<<_shift); 
+		dwOutputVal = dwOutputVal & ~(DIO_OUT_DARK_PUSHER_DOWN << _shift);
+	}
+	// 하강
+	else
+	{
+		dwOutputVal = dwOutputVal | (DIO_OUT_DARK_PUSHER_DOWN << _shift);
+		dwOutputVal = dwOutputVal & ~(DIO_OUT_DARK_PUSHER_UP << _shift);
+	}
+
+	this->WriteDOut(iModuleNo, dwOutputVal);
+
+	if (bWait == true)
+	{
+		dwTickCount = GetTickCount();
+		while (1)
+		{
+			if (bFlag == true)
+			{
+				if (m_dwDIn[ch] & (DIO_IN_DARK_PUSHER_UP << _shift))
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (m_dwDIn[ch] & (DIO_IN_DARK_PUSHER_DOWN << _shift))
+				{
+					break;
+				}
+			}
+
+			if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+			{
+				return false;
+			}
+
+			Sleep(10);
+		}
+	}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+// DARK PUSHER 상승 / 하강 감지
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::DarkPusherCheck(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+	int ch = nUnit * 0;
+	static DWORD dwTickCount;
+	DWORD _shift = (nUnit * 16);
+	// 상승
+	if (bFlag == true)
+	{
+		if (m_dwDIn[ch] & (DIO_IN_DARK_PUSHER_UP<< _shift))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	// 하강
+	else
+	{
+		if (m_dwDIn[ch] & (DIO_IN_DARK_PUSHER_DOWN << _shift))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	if (bWait == true)
+	{
+
+		dwTickCount = GetTickCount();
+
+		while (1)
+		{
+			if (bFlag == true)
+			{
+				if (m_dwDIn[ch] & (DIO_IN_DARK_PUSHER_UP << _shift))
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (m_dwDIn[ch] & (DIO_IN_DARK_PUSHER_DOWN << _shift))
+				{
+					break;
+				}
+			}
+
+			if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+			{
+				return false;
+			}
+
+			Sleep(10);
+		}
+	}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+//	UV 조명 On/Off
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::UVOn(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+
+	//static DWORD dwTickCount;
+	//DWORD dwOutput;
+	//int iModuelNo = (nUnit * 2) + 1;
+
+	//dwOutput = m_dwDOut[nUnit];
+
+	//// UV ON
+	//if (bFlag == true)
+	//{
+	//	dwOutput |= DIO_OUT_UV_ON;
+	//}
+	//// UV OFF
+	//else
+	//{
+	//	dwOutput &= ~DIO_OUT_UV_ON;
+	//}
+
+	//this->WriteDOut(iModuelNo, dwOutput);
+
+	//if (bWait == true)
+	//{
+	//	dwTickCount = GetTickCount();
+	//	while (1)
+	//	{
+	//		if (bFlag == true)
+	//		{
+	//			if (m_dwDIn[nUnit] & DIO_IN_UV_ON)
+	//			{
+	//				break;
+	//			}
+	//		}
+	//		else
+	//		{
+	//			if (!(m_dwDIn[nUnit] & DIO_IN_UV_ON))
+	//			{
+	//				break;
+	//			}
+	//		}
+	//		// UV ON 시간이 좀 걸림..
+	//		if ((GetTickCount() - dwTickCount) > 5000/*MAX_WAIT_TIME*/)
+	//		{
+	//			return false;
+	//		}
+
+	//		Sleep(10);
+	//	}
+	//}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+//	UV 조명 On/Off 감지
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::UVOnCheck(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+
+	//static DWORD dwTickCount;
+
+	//// UV ON
+	//if (bFlag == true)
+	//{
+	//	if (m_dwDIn[nUnit] & DIO_IN_UV_ON)
+	//	{
+	//		return true;
+	//	}
+	//	else
+	//	{
+	//		return false;
+	//	}
+	//}
+	//else
+	//{
+	//	if (!(m_dwDIn[nUnit] & DIO_IN_UV_ON))
+	//	{
+	//		return true;
+	//	}
+	//	else
+	//	{
+	//		return false;
+	//	}
+	//}
+
+	//if (bWait == true)
+	//{
+	//	dwTickCount = GetTickCount();
+
+	//	while (1)
+	//	{
+	//		if (bFlag == true)
+	//		{
+	//			if (m_dwDIn[nUnit] & DIO_IN_UV_ON)
+	//			{
+	//				break;
+	//			}
+	//		}
+	//		else
+	//		{
+	//			if (!(m_dwDIn[nUnit] & DIO_IN_UV_ON))
+	//			{
+	//				break;
+	//			}
+	//		}
+
+	//		if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+	//		{
+	//			return false;
+	//		}
+
+	//		Sleep(10);
+	//	}
+	//}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+//	UV SHUTTER OPEN/CLOSE
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::UVShutter(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+
+	//static DWORD dwTickCount;
+	//DWORD dwOutput;
+	//int iModuelNo = (nUnit * 2) + 1;
+
+	//dwOutput = m_dwDOut[nUnit];
+
+	//// SHUTTER OPEN
+	//if (bFlag == true)
+	//{
+	//	dwOutput |= DIO_OUT_UV_SHUTTER;
+	//}
+	//// SHUTTER CLOSE
+	//else
+	//{
+	//	dwOutput &= ~DIO_OUT_UV_SHUTTER;
+	//}
+
+	//this->WriteDOut(iModuelNo, dwOutput);
+
+	//if (bWait == true)
+	//{
+	//	dwTickCount = GetTickCount();
+	//	while (1)
+	//	{
+	//		if (bFlag == true)
+	//		{
+	//			if (m_dwDIn[nUnit] & DIO_IN_UV_SHUTTER_OPEN)
+	//			{
+	//				break;
+	//			}
+	//		}
+	//		else
+	//		{
+	//			if (!(m_dwDIn[nUnit] & DIO_IN_UV_SHUTTER_CLOSE))
+	//			{
+	//				break;
+	//			}
+	//		}
+
+	//		if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+	//		{
+	//			return false;
+	//		}
+
+	//		Sleep(10);
+	//	}
+	//}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+//	UV SHUTTER 감지
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::UVShutterCheck(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+
+	//static DWORD dwTickCount;
+
+	//// OPEN
+	//if (bFlag == true)
+	//{
+	//	if (m_dwDIn[nUnit] & DIO_IN_UV_SHUTTER_OPEN)
+	//	{
+	//		return true;
+	//	}
+	//	else
+	//	{
+	//		return false;
+	//	}
+	//}
+	//// CLOSE
+	//else
+	//{
+	//	if (m_dwDIn[nUnit] & DIO_IN_DARK_PUSHER_DOWN)
+	//	{
+	//		return true;
+	//	}
+	//	else
+	//	{
+	//		return false;
+	//	}
+	//}
+
+	//if (bWait == true)
+	//{
+
+	//	dwTickCount = GetTickCount();
+
+	//	while (1)
+	//	{
+	//		if (bFlag == true)
+	//		{
+	//			if (m_dwDIn[nUnit] & DIO_IN_UV_SHUTTER_OPEN)
+	//			{
+	//				break;
+	//			}
+	//		}
+	//		else
+	//		{
+	//			if (m_dwDIn[nUnit] & DIO_IN_UV_SHUTTER_CLOSE)
+	//			{
+	//				break;
+	//			}
+	//		}
+
+	//		if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+	//		{
+	//			return false;
+	//		}
+
+	//		Sleep(10);
+	//	}
+	//}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+//	UV ERROR 감지
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::UVErrorCheck(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return false;
+#endif
+
+	/*static DWORD dwTickCount;
+
+	if (bFlag == true)
+	{
+		if (m_dwDIn[nUnit] & DIO_IN_UV_ERROR)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if (!(m_dwDIn[nUnit] & DIO_IN_UV_ERROR))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	if (bWait == true)
+	{
+		dwTickCount = GetTickCount();
+
+		while (1)
+		{
+			if (bFlag == true)
+			{
+				if (m_dwDIn[nUnit] & DIO_IN_UV_ERROR)
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (!(m_dwDIn[nUnit] & DIO_IN_UV_ERROR))
+				{
+					break;
+				}
+			}
+
+			if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+			{
+				return false;
+			}
+
+			Sleep(10);
+		}
+	}*/
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+//	UV READY 상태 감지
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::UVReadyCheck(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+
+	/*static DWORD dwTickCount;
+
+	if (bFlag == true)
+	{
+		if (m_dwDIn[nUnit] & DIO_IN_UV_READY)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if (!(m_dwDIn[nUnit] & DIO_IN_UV_READY))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	if (bWait == true)
+	{
+		dwTickCount = GetTickCount();
+
+		while (1)
+		{
+			if (bFlag == true)
+			{
+				if (m_dwDIn[nUnit] & DIO_IN_UV_READY)
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (!(m_dwDIn[nUnit] & DIO_IN_UV_READY))
+				{
+					break;
+				}
+			}
+
+			if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+			{
+				return false;
+			}
+
+			Sleep(10);
+		}
+	}*/
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+//	UV 조리개 MAX/MIN 감지
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::UVApertureCheck(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+
+	/*static DWORD dwTickCount;
+
+	if (bFlag == true)
+	{
+		if (m_dwDIn[nUnit] & DIO_IN_UV_APERTURE)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if (!(m_dwDIn[nUnit] & DIO_IN_UV_APERTURE))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	if (bWait == true)
+	{
+		dwTickCount = GetTickCount();
+
+		while (1)
+		{
+			if (bFlag == true)
+			{
+				if (m_dwDIn[nUnit] & DIO_IN_UV_APERTURE)
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (!(m_dwDIn[nUnit] & DIO_IN_UV_APERTURE))
+				{
+					break;
+				}
+			}
+
+			if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+			{
+				return false;
+			}
+
+			Sleep(10);
+		}
+	}*/
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//
+//	UV 사용시간 
+//
+//-----------------------------------------------------------------------------
+bool CDioControl::UVUseTimeCheck(int nUnit, bool bFlag, bool bWait)
+{
+#ifndef ON_LINE_DIO
+	return true;
+#endif
+
+	/*static DWORD dwTickCount;
+
+	if (bFlag == true)
+	{
+		if (m_dwDIn[nUnit] & DIO_IN_UV_USE_TIME)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if (!(m_dwDIn[nUnit] & DIO_IN_UV_USE_TIME))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	if (bWait == true)
+	{
+		dwTickCount = GetTickCount();
+
+		while (1)
+		{
+			if (bFlag == true)
+			{
+				if (m_dwDIn[nUnit] & DIO_IN_UV_USE_TIME)
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (!(m_dwDIn[nUnit] & DIO_IN_UV_USE_TIME))
+				{
+					break;
+				}
+			}
+
+			if ((GetTickCount() - dwTickCount) > MAX_WAIT_TIME)
+			{
+				return false;
+			}
+
+			Sleep(10);
+		}
+	}*/
+	return true;
+}

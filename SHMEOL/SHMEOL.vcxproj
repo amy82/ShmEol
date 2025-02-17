@@ -1,0 +1,528 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4BF45E16-8566-489F-813E-C827CCF64801}</ProjectGuid>
+    <RootNamespace>AutoTeslaInsp</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <Keyword>MFCProj</Keyword>
+    <ProjectName>SHMEOL</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <UseOfMfc>Dynamic</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(IncludePath);C:\Program Files\Matrox Imaging\Mil\Include;C:\opencv346\install\include\opencv;C:\opencv346\install\include\opencv2;C:\opencv346\install\include;$(ProjectDir)\Library\Inspection\Include;C:\Program Files\Matrox Imaging\MIL\DLL;C:\Program Files (x86)\EzSoftware UC\AXL(Library)\Library\64Bit</IncludePath>
+    <LibraryPath>$(ProjectDir)\Library\lib64;C:\Program Files\Matrox Imaging\Mil\LIB;$(NETFXKitsDir)Lib\um\x64;C:\opencv346\install\x64\vc14\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(IncludePath);C:\Program Files\Matrox Imaging\Mil\Include;C:\opencv346\install\include\opencv;C:\opencv346\install\include\opencv2;C:\opencv346\install\include;.\Library\Inspection\Include;C:\Program Files\Matrox Imaging\MIL\DLL;C:\Program Files (x86)\EzSoftware UC\AXL(Library)\Library\64Bit</IncludePath>
+    <LibraryPath>$(ProjectDir)\Library\lib64;C:\Program Files\Matrox Imaging\Mil\LIB;C:\opencv346\install\x64\vc14\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <StackReserveSize>10485760</StackReserveSize>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0412</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;_AFXDLL</PreprocessorDefinitions>
+      <SDLCheck>
+      </SDLCheck>
+      <AdditionalOptions>-Zm155 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\Library\Inspection\Include\LibACMISBlemish;$(ProjectDir)\Library\InspectionK\Include\LibACMISCertification;$(ProjectDir)\Library\Inspection\Include\LibACMISCodec;$(ProjectDir)\Library\Inspection\Include\LibACMISCommon;$(ProjectDir)\Library\Inspection\Include\LibACMISDefect;$(ProjectDir)\Library\Inspection\Include\LibACMISEtc;$(ProjectDir)\Library\Inspection\Include\LibACMISImage;$(ProjectDir)\Library\Inspection\Include\LibACMISNoise;$(ProjectDir)\Library\InspectionK\Include\LibACMISOpticalCenter;$(ProjectDir)\Library\InspectionK\Include\LibACMISParallelInspection;$(ProjectDir)\Library\InspectionK\Include\LibACMISResolution;$(ProjectDir)\Library\InspectionK\Include\LibACMISShading;$(ProjectDir)\Library\InspectionK\Include\LibACMISSoftISP;$(ProjectDir)\Library\InspectionK\Include\LibACMISSoftISPBasic;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>mil.lib;milim.lib;milblob.lib;milmod.lib;milpat.lib;opencv_core346d.lib;opencv_highgui346d.lib;opencv_imgproc346d.lib;opencv_calib3d346d.lib;opencv_flann346d.lib;opencv_features2d346d.lib;opencv_imgcodecs346d.lib;LibACMISBlemish.lib;LibACMISCertification.lib;LibACMISCodec.lib;LibACMISDefect.lib;LibACMISEtc.lib;LibACMISImage.lib;LibACMISNoise.lib;LibACMISOpticalCenter.lib;LibACMISParallelInspection.lib;LibACMISResolution.lib;LibACMISShading.lib;LibACMISSoftISP.lib;LibACMISSoftISPBasic.lib;EECvtColor.lib;GrabberDLL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <StackReserveSize>10485760</StackReserveSize>
+      <DelayLoadDLLs>
+      </DelayLoadDLLs>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0412</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0412</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_WINDOWS;NDEBUG;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)\Library\Inspection\Include\LibACMISBlemish;$(ProjectDir)\Library\Inspection\Include\LibACMISCertification;$(ProjectDir)\Library\Inspection\Include\LibACMISCodec;$(ProjectDir)\Library\Inspection\Include\LibACMISCommon;$(ProjectDir)\Library\Inspection\Include\LibACMISDefect;$(ProjectDir)\Library\Inspection\Include\LibACMISEtc;$(ProjectDir)\Library\Inspection\Include\LibACMISImage;$(ProjectDir)\Library\Inspection\Include\LibACMISNoise;$(ProjectDir)\Library\Inspection\Include\LibACMISOpticalCenter;$(ProjectDir)\Library\Inspection\Include\LibACMISParallelInspection;$(ProjectDir)\Library\Inspection\Include\LibACMISResolution;$(ProjectDir)\Library\Inspection\Include\LibACMISShading;$(ProjectDir)\Library\Inspection\Include\LibACMISSoftISP;$(ProjectDir)\Library\Inspection\Include\LibACMISSoftISPBasic;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>mil.lib;milim.lib;milblob.lib;milmod.lib;milpat.lib;opencv_core346.lib;opencv_highgui346.lib;opencv_imgproc346.lib;opencv_calib3d346.lib;opencv_flann346.lib;opencv_features2d346.lib;opencv_imgcodecs346.lib;LibACMISBlemish.lib;LibACMISCertification.lib;LibACMISCodec.lib;LibACMISDefect.lib;LibACMISEtc.lib;LibACMISImage.lib;LibACMISNoise.lib;LibACMISOpticalCenter.lib;LibACMISParallelInspection.lib;LibACMISResolution.lib;LibACMISShading.lib;LibACMISSoftISP.lib;LibACMISSoftISPBasic.lib;EECvtColor.lib;GrabberDLL.lib</AdditionalDependencies>
+      <LargeAddressAware>true</LargeAddressAware>
+      <StackReserveSize>10485760</StackReserveSize>
+    </Link>
+    <Midl>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0412</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ActiveAlignThread.h" />
+    <ClInclude Include="AgentConnSocket.h" />
+    <ClInclude Include="AgentListenSocket.h" />
+    <ClInclude Include="AlarmDlg.h" />
+    <ClInclude Include="Algorithm\INSP\algo_base.h" />
+    <ClInclude Include="Algorithm\INSP\LibAtomResolution\Include\export.h" />
+    <ClInclude Include="Algorithm\INSP\LibAtomSoftISP\Include\export.h" />
+    <ClInclude Include="Algorithm\INSP\LibAtomSoftISP\Include\ImageProcessing.h" />
+    <ClInclude Include="Algorithm\INSP\LibAtomSoftISP\Include\SoftISP.h" />
+    <ClInclude Include="Algorithm\INSP\PcsUtil.h" />
+    <ClInclude Include="Algorithm\INSP\TeslaCalibrationCommon.h" />
+    <ClInclude Include="Algorithm\INSP\XGraphic\xDataTypes.h" />
+    <ClInclude Include="Algorithm\LGIT\LibACMISSoftISP\CDemosaic_RGGB.h" />
+    <ClInclude Include="Algorithm\SFR\BlobLabeling.h" />
+    <ClInclude Include="Algorithm\SFR\Inspection_Alg.h" />
+    <ClInclude Include="Algorithm\SFR\SFR.h" />
+    <ClInclude Include="Aps_Insp.h" />
+    <ClInclude Include="AutoInsp.h" />
+    <ClInclude Include="AutoInspDlg.h" />
+    <ClInclude Include="AxlMotorSet.h" />
+    <ClInclude Include="AXTDefine.h" />
+    <ClInclude Include="CcdBlemishSpecDlg.h" />
+    <ClInclude Include="CcdChartSpecDlg.h" />
+    <ClInclude Include="CcdColorReproductionSpecDlg.h" />
+    <ClInclude Include="CcdColorShadingSpecDlg.h" />
+    <ClInclude Include="CcdColorUniformitySpecDlg.h" />
+    <ClInclude Include="CcdCvtColorThread.h" />
+    <ClInclude Include="CcdDefectSpecDlg.h" />
+    <ClInclude Include="CcdDlg.h" />
+    <ClInclude Include="CcdFpnSpecDlg.h" />
+    <ClInclude Include="CcdGrabThread.h" />
+    <ClInclude Include="CcdIrFilterSpecDlg.h" />
+    <ClInclude Include="CcdMarkViewDlg.h" />
+    <ClInclude Include="CcdMaskViewDlg.h" />
+    <ClInclude Include="CcdMesSpecDlg.h" />
+    <ClInclude Include="CcdRiOcSpecDlg.h" />
+    <ClInclude Include="CcdRISpecDlg.h" />
+    <ClInclude Include="CcdRIThresholdSpecDlg.h" />
+    <ClInclude Include="CcdSaturationSpecDlg.h" />
+    <ClInclude Include="CcdSfrSpecDlg.h" />
+    <ClInclude Include="CcdSnrColorSensSpecDlg.h" />
+    <ClInclude Include="CcdTemperatureSpecDlg.h" />
+    <ClInclude Include="CeepromData.h" />
+    <ClInclude Include="ClockThread.h" />
+    <ClInclude Include="CMSMESSocket.h" />
+    <ClInclude Include="ConfigDlg.h" />
+    <ClInclude Include="CustomThread.h" />
+    <ClInclude Include="Data.h" />
+    <ClInclude Include="DioControl.h" />
+    <ClInclude Include="DioDefine.h" />
+    <ClInclude Include="DioDlg.h" />
+    <ClInclude Include="EEPROMTest.h" />
+    <ClInclude Include="EpoxySet.h" />
+    <ClInclude Include="FileThread.h" />
+    <ClInclude Include="GlobalDeclare.h" />
+    <ClInclude Include="GlobalDefine.h" />
+    <ClInclude Include="Grabber\LAON\BoardControl.h" />
+    <ClInclude Include="Grabber\LAON\ConvertColor.h" />
+    <ClInclude Include="Grabber\LAON\EECvtColorEx.h" />
+    <ClInclude Include="Grabber\LAON\LPMC500DLLEx.h" />
+    <ClInclude Include="Grabber\LAON\MIU.h" />
+    <ClInclude Include="Grabber\LAON\PixelFormat.h" />
+    <ClInclude Include="InspConnSocket.h" />
+    <ClInclude Include="InterLockDlg.h" />
+    <ClInclude Include="KeyBoardDlg.h" />
+    <ClInclude Include="KeyPadDlg.h" />
+    <ClInclude Include="LaonGrabberWrapper.h" />
+    <ClInclude Include="LensAxisThread.h" />
+    <ClInclude Include="LensProcess.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISBlemish\ACMISBlemishDef.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISBlemish\ACMISImageBlemish.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISBlemish\ACMISImageStain.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISBlemish\export.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISCertification\ACMISCertification.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISCertification\ACMISCertificationDef.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISCertification\export.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISCodec\LibACMISCodecCommon.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISCommon\ACMISCommon.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISCommon\CSVParser.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISCommon\DataTypes.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISCommon\InspectionErrorCode.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISDefect\ACMISDefectDef.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISDefect\ACMISImageDarkTest.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISDefect\export.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISEtc\ACMISEtcAlgorithm.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISEtc\ACMISEtcDef.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISEtc\export.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISImage\ACMISImageDef.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISImage\ACMISMechanicalOpticalCenter.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISImage\ACMISRotateUsingFiducialMark.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISImage\export.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISNoise\ACMISSignalNoiseRatio.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISNoise\ACMISSignalNoiseRatioDef.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISNoise\export.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISOpticalCenter\ACMISImageOpticalCenter.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISOpticalCenter\ACMISOpticalCenterDef.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISOpticalCenter\export.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISParallelInspection\ACMISParallelInspection.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISParallelInspection\ACMISParallelInspectionDef.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISParallelInspection\export.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISResolution\ACMISFiducialMark.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISResolution\ACMISResolutionDef.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISResolution\ACMISResolutionEIAJ.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISResolution\ACMISResolutionSFR.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISResolution\export.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISShading\ACMISShadingAlgorithm.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISShading\ACMISShadingDef.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISShading\export.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISPBasic\CDemosaic.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISPBasic\CDemosaic_AHD.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISPBasic\CDemosaic_BL33.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISPBasic\CDemosaic_RCCB.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISPBasic\CDemosaic_RGGB.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISPBasic\CDemosaic_VNG.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISPBasic\DataLog.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISPBasic\DemosaicBasic.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISPBasic\export.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISPBasic\ImageProcessing.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISPBasic\RawImageProcessing.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISPBasic\SoftISPBasic.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISP\CDemosaic_BLLC.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISP\CDemosaic_GBTF.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISP\CDemosaic_Residual.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISP\CDemosaic_RGBIR_P2.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISP\DemosaicAdvanced.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISP\DetectObject.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISP\export.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISP\ImageFileProcessing.h" />
+    <ClInclude Include="Library\Inspection\Include\LibACMISSoftISP\SoftISP.h" />
+    <ClInclude Include="Library\Inspection\Include\Resolution\AtomResolutinDef.h" />
+    <ClInclude Include="Library\Inspection\Include\Resolution\AtomResolutionSFR.h" />
+    <ClInclude Include="Library\Inspection\Include\Resolution\export.h" />
+    <ClInclude Include="Library\Inspection\Include\SoftISP\CDemosaic.h" />
+    <ClInclude Include="Library\Inspection\Include\SoftISP\export.h" />
+    <ClInclude Include="Library\Inspection\Include\SoftISP\ImageProcessing.h" />
+    <ClInclude Include="Library\Inspection\Include\SoftISP\RawImageProcessing.h" />
+    <ClInclude Include="Library\Inspection\Include\SoftISP\SoftISP.h" />
+    <ClInclude Include="Library\Inspection\Include\XGraphic\xDataTypes.h" />
+    <ClInclude Include="LightDlg.h" />
+    <ClInclude Include="LogThread.h" />
+    <ClInclude Include="Log\Log.h" />
+    <ClInclude Include="ManualDlg.h" />
+    <ClInclude Include="Memo.h" />
+    <ClInclude Include="MesConnSocket.h" />
+    <ClInclude Include="MessageAskDlg.h" />
+    <ClInclude Include="MessageModalDlg.h" />
+    <ClInclude Include="MessagePopupDlg.h" />
+    <ClInclude Include="ModelFinder.h" />
+    <ClInclude Include="ModelSelectDlg.h" />
+    <ClInclude Include="MonitorThread.h" />
+    <ClInclude Include="PcbProcess.h" />
+    <ClInclude Include="ProductNGDlg.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="SerialThread.h" />
+    <ClInclude Include="SocketApi.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="TeachingDlg.h" />
+    <ClInclude Include="UpdateHistoryDlg.h" />
+    <ClInclude Include="UserPath.h" />
+    <ClInclude Include="Utility\BaseThread\BaseThread.h" />
+    <ClInclude Include="Utility\ButtonEx\ButtonEx.h" />
+    <ClInclude Include="Utility\Device\Light\LightControl.h" />
+    <ClInclude Include="Utility\Device\Light\OCControl.h" />
+    <ClInclude Include="Utility\ExButton\exbutton.h" />
+    <ClInclude Include="Utility\GraphCtrl\dib256.h" />
+    <ClInclude Include="Utility\GraphCtrl\dibpal.h" />
+    <ClInclude Include="Utility\GraphCtrl\Graph2DExtendWnd.h" />
+    <ClInclude Include="Utility\GraphCtrl\Graph2DWnd.h" />
+    <ClInclude Include="Utility\GraphCtrl\Graph2D_Data.h" />
+    <ClInclude Include="Utility\GraphCtrl\Graph2D_Resource.h" />
+    <ClInclude Include="Utility\GraphCtrl\Graph2D_Struct.h" />
+    <ClInclude Include="Utility\GridCtrl\CellRange.h" />
+    <ClInclude Include="Utility\GridCtrl\GridCell.h" />
+    <ClInclude Include="Utility\GridCtrl\GridCellBase.h" />
+    <ClInclude Include="Utility\GridCtrl\GridCellCheck.h" />
+    <ClInclude Include="Utility\GridCtrl\GridCellCombo.h" />
+    <ClInclude Include="Utility\GridCtrl\GridCtrl.h" />
+    <ClInclude Include="Utility\GridCtrl\GridDropTarget.h" />
+    <ClInclude Include="Utility\GridCtrl\InPlaceEdit.h" />
+    <ClInclude Include="Utility\GridCtrl\MemDC.h" />
+    <ClInclude Include="Utility\GridCtrl\TitleTip.h" />
+    <ClInclude Include="Utility\HeaderCtrlEx\HeaderCtrlEx.h" />
+    <ClInclude Include="Utility\HeaderCtrlEx\MemDC_Header.h" />
+    <ClInclude Include="Utility\Label\Label.h" />
+    <ClInclude Include="Utility\Queue\Queue.h" />
+    <ClInclude Include="Utility\RS232C\Handler_RS232C.h" />
+    <ClInclude Include="Utility\Serial\Serial.h" />
+    <ClInclude Include="Utility\SliderCtrlEx\SliderCtrlEx.h" />
+    <ClInclude Include="uxmodule\uxbutton\ButtonCT.h" />
+    <ClInclude Include="visa.h" />
+    <ClInclude Include="Vision.h" />
+    <ClInclude Include="VisionGrabThread.h" />
+    <ClInclude Include="VisionStatic.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ActiveAlignThread.cpp" />
+    <ClCompile Include="AgentConnSocket.cpp" />
+    <ClCompile Include="AgentListenSocket.cpp" />
+    <ClCompile Include="AlarmDlg.cpp" />
+    <ClCompile Include="Algorithm\INSP\algo_base.cpp" />
+    <ClCompile Include="Algorithm\INSP\PcsUtil.cpp" />
+    <ClCompile Include="Algorithm\SFR\BlobLabeling.cpp" />
+    <ClCompile Include="Algorithm\SFR\Inspection_Alg.cpp" />
+    <ClCompile Include="Algorithm\SFR\SFR.cpp" />
+    <ClCompile Include="Aps_Insp.cpp" />
+    <ClCompile Include="AutoInsp.cpp" />
+    <ClCompile Include="AutoInspDlg.cpp" />
+    <ClCompile Include="AxlMotorSet.cpp" />
+    <ClCompile Include="CcdBlemishSpecDlg.cpp" />
+    <ClCompile Include="CcdChartSpecDlg.cpp" />
+    <ClCompile Include="CcdColorReproductionSpecDlg.cpp" />
+    <ClCompile Include="CcdColorShadingSpecDlg.cpp" />
+    <ClCompile Include="CcdColorUniformitySpecDlg.cpp" />
+    <ClCompile Include="CcdCvtColorThread.cpp" />
+    <ClCompile Include="CcdDefectSpecDlg.cpp" />
+    <ClCompile Include="CcdDlg.cpp" />
+    <ClCompile Include="CcdFpnSpecDlg.cpp" />
+    <ClCompile Include="CcdGrabThread.cpp" />
+    <ClCompile Include="CcdIrFilterSpecDlg.cpp" />
+    <ClCompile Include="CcdMarkViewDlg.cpp" />
+    <ClCompile Include="CcdMaskViewDlg.cpp" />
+    <ClCompile Include="CcdMesSpecDlg.cpp" />
+    <ClCompile Include="CcdRiOcSpecDlg.cpp" />
+    <ClCompile Include="CcdRISpecDlg.cpp" />
+    <ClCompile Include="CcdRIThresholdSpecDlg.cpp" />
+    <ClCompile Include="CcdSaturationSpecDlg.cpp" />
+    <ClCompile Include="CcdSfrSpecDlg.cpp" />
+    <ClCompile Include="CcdSnrColorSensSpecDlg.cpp" />
+    <ClCompile Include="CcdTemperatureSpecDlg.cpp" />
+    <ClCompile Include="CeepromData.cpp" />
+    <ClCompile Include="ClockThread.cpp" />
+    <ClCompile Include="CMSMESSocket.cpp" />
+    <ClCompile Include="ConfigDlg.cpp" />
+    <ClCompile Include="CustomThread.cpp" />
+    <ClCompile Include="Data.cpp" />
+    <ClCompile Include="DioControl.cpp" />
+    <ClCompile Include="DioDlg.cpp" />
+    <ClCompile Include="EEPROMTest.cpp" />
+    <ClCompile Include="EpoxySet.cpp" />
+    <ClCompile Include="FileThread.cpp" />
+    <ClCompile Include="GlobalDeclare.cpp" />
+    <ClCompile Include="Grabber\LAON\ConvertColor.cpp" />
+    <ClCompile Include="InspConnSocket.cpp" />
+    <ClCompile Include="InterLockDlg.cpp" />
+    <ClCompile Include="KeyBoardDlg.cpp" />
+    <ClCompile Include="KeyPadDlg.cpp" />
+    <ClCompile Include="LaonGrabberWrapper.cpp" />
+    <ClCompile Include="LensAxisThread.cpp" />
+    <ClCompile Include="LensProcess.cpp" />
+    <ClCompile Include="LightDlg.cpp" />
+    <ClCompile Include="LogThread.cpp" />
+    <ClCompile Include="Log\Log.cpp" />
+    <ClCompile Include="ManualDlg.cpp" />
+    <ClCompile Include="MesConnSocket.cpp" />
+    <ClCompile Include="MessageAskDlg.cpp" />
+    <ClCompile Include="MessageModalDlg.cpp" />
+    <ClCompile Include="MessagePopupDlg.cpp" />
+    <ClCompile Include="ModelFinder.cpp" />
+    <ClCompile Include="ModelSelectDlg.cpp" />
+    <ClCompile Include="MonitorThread.cpp" />
+    <ClCompile Include="PcbProcess.cpp" />
+    <ClCompile Include="ProductNGDlg.cpp" />
+    <ClCompile Include="SerialThread.cpp" />
+    <ClCompile Include="SocketApi.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="TeachingDlg.cpp" />
+    <ClCompile Include="UpdateHistoryDlg.cpp" />
+    <ClCompile Include="Utility\BaseThread\BaseThread.cpp" />
+    <ClCompile Include="Utility\ButtonEx\ButtonEx.cpp" />
+    <ClCompile Include="Utility\Device\Light\LightControl.cpp" />
+    <ClCompile Include="Utility\Device\Light\OCControl.cpp" />
+    <ClCompile Include="Utility\ExButton\ExButton.cpp" />
+    <ClCompile Include="Utility\GraphCtrl\dib256.cpp" />
+    <ClCompile Include="Utility\GraphCtrl\dibpal.cpp" />
+    <ClCompile Include="Utility\GraphCtrl\Graph2DExtendWnd.cpp" />
+    <ClCompile Include="Utility\GraphCtrl\Graph2DWnd.cpp" />
+    <ClCompile Include="Utility\GraphCtrl\Graph2D_Data.cpp" />
+    <ClCompile Include="Utility\GraphCtrl\Graph2D_Resource.cpp" />
+    <ClCompile Include="Utility\GridCtrl\GridCell.cpp" />
+    <ClCompile Include="Utility\GridCtrl\GridCellBase.cpp" />
+    <ClCompile Include="Utility\GridCtrl\GridCellCheck.cpp" />
+    <ClCompile Include="Utility\GridCtrl\GridCellCombo.cpp" />
+    <ClCompile Include="Utility\GridCtrl\GridCtrl.cpp" />
+    <ClCompile Include="Utility\GridCtrl\GridDropTarget.cpp" />
+    <ClCompile Include="Utility\GridCtrl\InPlaceEdit.cpp" />
+    <ClCompile Include="Utility\GridCtrl\TitleTip.cpp" />
+    <ClCompile Include="Utility\HeaderCtrlEx\HeaderCtrlEx.cpp" />
+    <ClCompile Include="Utility\Label\Label.cpp" />
+    <ClCompile Include="Utility\RS232C\Handler_RS232C.cpp" />
+    <ClCompile Include="Utility\Serial\Serial.cpp" />
+    <ClCompile Include="Utility\SliderCtrlEx\SliderCtrlEx.cpp" />
+    <ClCompile Include="uxmodule\uxbutton\ButtonCT.cpp" />
+    <ClCompile Include="Vision.cpp" />
+    <ClCompile Include="VisionGrabThread.cpp" />
+    <ClCompile Include="VisionStatic.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="SHMEOL.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\SHMEOL.rc2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\SHMEOL.ico" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
