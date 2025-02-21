@@ -4704,7 +4704,9 @@ int CPcbProcess::AutoEOLFinalSFR(int nStep)
 
 
 		g_ShowCloseMsgPopup(_T("INFO"), _T("[AUTO] Firmware 검사 진행중입니다."), true);
+
 		g_clPriInsp[m_nUnit].func_Insp_FirmwareVerify(true);
+
 		g_ShowCloseMsgPopup(_T("INFO"), _T("[AUTO] Firmware 검사 진행중입니다."), false);
 
 

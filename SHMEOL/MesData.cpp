@@ -1287,7 +1287,7 @@ bool CMesCommunication::g_FinalEolLog(int nUnit)
 	{
 
 		_ftprintf_s(fp, _T("'%04d-%02d-%02d %02d:%02d:%02d,"), stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
-		_ftprintf_s(fp, _T("%s, %s,"), m_szModel, VER_STR);
+		_ftprintf_s(fp, _T("%s, %s,"), ModelList.m_szCurrentModel, VER_STR);//ModelList.m_szCurrentModel , m_szModel
 		_ftprintf_s(fp, _T("%s,%s,"), g_clTaskWork[nUnit].m_szChipID, g_clMesCommunication[nUnit].m_sMesI2cSensorID);
 
 		g_clMesCommunication[nUnit].vMesApdData.push_back(g_clTaskWork[nUnit].m_szChipID);

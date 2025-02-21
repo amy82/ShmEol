@@ -29,7 +29,8 @@
 
 //YMEAN_N_MAX_RECURSIVE_COUNT  레시피 이름 수정 YMEAN_MAX_RECURSIVE_COUNT
 //====================================================================================================
-#define				VER_STR										_T("250217_1")			//ModelList.m_szCurrentModel 를 ChangedMaterialInfo - ProductID 에 추가
+#define				VER_STR										_T("250221_1")				//home, 이미지 저장 기간 확인필요
+//#define				VER_STR										_T("250217_1")			//ModelList.m_szCurrentModel 를 ChangedMaterialInfo - ProductID 에 추가
 // #define				VER_STR										_T("250117_1")			//데이터 수정중..vLotIdFail 까지 완료
 //#define				VER_STR										_T("250116_1")
 //EQUIPMENT_OPERATION_MODE_CHANGED_REPORT 추가

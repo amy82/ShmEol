@@ -113,7 +113,7 @@ void CModelList::ModelListLoad()
 	int i = 0;
 
 	m_clModelList.RemoveAll();
-	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\ModelList.ini"), BASE_SECSGEM_PATH);// BASE_DATA_PATH);
+	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\ModelList.ini"), BASE_SECSGEM_PATH);		// BASE_DATA_PATH);
 
 	m_nTotalCount = GetPrivateProfileInt(_T("ModelList"), _T("Total"), 0, szPath);
 	m_nCurrentNo = GetPrivateProfileInt(_T("ModelList"), _T("ModelNo"), 0, szPath);
@@ -138,6 +138,12 @@ void CModelList::ModelListLoad()
 	else 
 	{
 		_tcscpy_s(m_szCurrentModel, SIZE_OF_100BYTE, _T("00000000001"));
+		clModelInfo.m_nNo = 1;
+		m_nCurrentNo = 1;
+		_tcscpy_s(clModelInfo.m_szName, SIZE_OF_100BYTE, m_szCurrentModel);	// TODO: 모델 없을 경우 하나 추가하기
+		m_clModelList.Add(clModelInfo);
+
+		ModelListSave();
 	}
 }
 
