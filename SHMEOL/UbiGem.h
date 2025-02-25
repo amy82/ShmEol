@@ -57,6 +57,7 @@ private:
 
 	CEdit m_edtAbs;
 public:
+	bool UbiGemInit;
 	void InitCtrl();
 	void initUbiGEMSet();
 	int UbisamUgcLoad();
@@ -65,7 +66,7 @@ public:
 	void cTTimeOutSendFn(LPCTSTR strMexp, LPCTSTR strEdId);
 	void AlarmClearSendFn();
 
-
+	bool bConnected();
 	void OnMnuInitilaize();	//Initialize
 	void OnMnuStart();		//Start
 	void OnMnuStop();		//Stop

@@ -109,7 +109,15 @@ CMesCommunication::CMesCommunication()
 	m_nMesCnt = 0;			// 차수
 	m_nMesFinalResult = 0;	// 합부 선언부분
 	m_dMesCurrent = 0.0;
-	//
+	m_sendData = _T("");
+	m_getData = _T("");
+	m_sMesfuseID = _T("");
+	m_sMesI2C = _T("");
+	m_sBlackSpot = _T("");
+	m_sStain = _T("");
+	m_sDefect = _T("");
+	m_sNoise = _T("");
+
 	for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
 	{
 		m_dMesMTF[i] = 0.0;			//MTF 검사 항목
@@ -287,14 +295,14 @@ CMesCommunication::CMesCommunication()
 	IdleSetTimeInterval = 5;	//min
 	m_dLotProcessingState = 1;
 	m_dProcessState[0] = 1;	//INIT, IDLE, SETUP, READY,EXECUTING,PAUSE
-	m_dProcessState[1] = 1;
+	m_dProcessState[1] = 2;
 	m_bLgit_Pause_req = false;
 
 	m_dEqupControlState[0] = eEquipmentOffline;
 	m_dEqupControlState[1] = eEquipmentOffline;
 
 	m_dEqupOperationMode[0] = 9;	//1 = Full-Auto Mode, 9=Manual Mode
-	m_dEqupOperationMode[1] = 0;
+	m_dEqupOperationMode[1] = 2;
 
 	
 

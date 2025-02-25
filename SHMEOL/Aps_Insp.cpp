@@ -5490,33 +5490,6 @@ bool CAps_Insp::func_Insp_LightTest(int mLightIndex, bool bAutoMode)
 		m_clPtBrightPos[0].x = nWidth / 2;
 		m_clPtBrightPos[0].y = nHeight / 2;
 
-//#if (____MACHINE_NAME == MODEL_FRONT_100)
-//		//ÀÌ¹°±¤¿ø  LT
-//		m_clPtBrightPos[0].x = 420;
-//		m_clPtBrightPos[0].y = 230;
-//		//ÀÌ¹°±¤¿ø LB
-//		m_clPtBrightPos[1].x = 420;
-//		m_clPtBrightPos[1].y = 820;
-//		//ÀÌ¹°±¤¿ø RB
-//		m_clPtBrightPos[2].x = 1530;
-//		m_clPtBrightPos[2].y = 820;
-//		//ÀÌ¹°±¤¿ø RT
-//		m_clPtBrightPos[3].x = 1530;
-//		m_clPtBrightPos[3].y = 230;
-//#else
-//		//ÀÌ¹°±¤¿ø  LT
-//		m_clPtBrightPos[0].x = 420;
-//		m_clPtBrightPos[0].y = 230;
-//		//ÀÌ¹°±¤¿ø LB
-//		m_clPtBrightPos[1].x = 420;
-//		m_clPtBrightPos[1].y = 820;
-//		//ÀÌ¹°±¤¿ø RB
-//		m_clPtBrightPos[2].x = 1530;
-//		m_clPtBrightPos[2].y = 820;
-//		//ÀÌ¹°±¤¿ø RT
-//		m_clPtBrightPos[3].x = 1530;
-//		m_clPtBrightPos[3].y = 230;
-//#endif
 	}
 	int pos = 0;
 	int mBrightValue = 0;

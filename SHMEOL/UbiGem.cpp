@@ -32,19 +32,24 @@ CUbiGem::CUbiGem(CWnd* pParent /*=NULL*/)
 	srand((unsigned int)(time(NULL)));
 	m_nUnit = 0;
 	opCallType = 0;
-	strSendCeId.Empty();
+	strSendCeId = _T("");
+	m_strUgcFileName = _T("");
 	initChk = true;
+	m_iAck = 0;
 	uCtTimeOutData = 2;			//init
+	UbiGemInit = true;
 }
 
 CUbiGem::~CUbiGem()
 {
+	OnMnuStop();
 	if (m_pWrapper != nullptr)
 	{
+		m_pWrapper->Terminate();
 		delete m_pWrapper;
 		m_pWrapper = nullptr;
 	}
-
+	
 	_CrtSetBreakAlloc(1633);
 }
 
@@ -302,14 +307,18 @@ void CUbiGem::OnReceivedUnknownMessage(UbiGEMWrapper::Structure::SECSMessage* pM
 // Host에서 S1F13(Establish Communication)이 수신될 때 발생하는 이벤트입니다.
 int CUbiGem::OnReceivedEstablishCommunicationsRequest(LPCTSTR strMdln, LPCTSTR strSofRev)
 {
-	CString strLog;
+	UbiGEMWrapper::Structure::GEMResult gemResult = m_pWrapper->EstablishCommunication();		//250113 우선 빼고 진행
+	UbisamAddLog(_T("EstablishCommunication"), gemResult);
+
+	Sleep(10);
+
+	CString strLog = _T("");
 	//Auto Reply
 	strLog.Format(_T("OnReceivedEstablishCommunicationsRequest : [MDLN=%s,SOFTREV=%s]"), strMdln, strSofRev);
 
 	UbisamAddLog(strLog);
 
-	//UbiGEMWrapper::Structure::GEMResult gemResult = m_pWrapper->EstablishCommunication();		//250113 우선 빼고 진행
-	//UbisamAddLog(_T("EstablishCommunication 1-13"), gemResult);
+	
 	return m_iAck;
 }
 
@@ -626,6 +635,13 @@ void CUbiGem::OnReceivedEnhancedRemoteCommand(UbiGEMWrapper::Structure::Enhanced
 			}
 			else
 			{
+				if (RcIndex == eLGIT_PP_SELECT)
+				{
+					if (g_clMesCommunication[m_nUnit].m_sRecipeId != g_clMesCommunication[m_nUnit].m_sMesPPID)		//eLGIT_PP_SELECT
+					{
+						pResult->HostCommandAck = 4;
+					}
+				}
 				if (pResult != nullptr && m_iAck != 0)
 				{
 					pResult->AddParameterResult(pEcpInfo->Name, m_iAck);
@@ -886,6 +902,7 @@ void CUbiGem::OnReceivedEnhancedRemoteCommand(UbiGEMWrapper::Structure::Enhanced
 	if (RcIndex == eLGIT_LOT_ID_FAIL)	
 	{
 		g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start = 1;
+		g_clDioControl.SetBuzzer(true, BUZZER_ALARM);
 		//CTTimeout Kill
 		//KillTimer(WM_CT_TIMEOUT_TIMER);	//LGIT_LOT_ID_FAIL
 		//////팝업 추가
@@ -924,6 +941,7 @@ void CUbiGem::OnReceivedEnhancedRemoteCommand(UbiGEMWrapper::Structure::Enhanced
 	if (RcIndex == eLGIT_PP_UPLOAD_FAIL)
 	{
 		g_clTaskWork[m_nUnit].bRecv_S2F49_PP_UpLoad_Confirm = 1;		//LGIT_PP_UPLOAD_FAIL
+		g_clDioControl.SetBuzzer(true, BUZZER_ALARM);
 		//CTTimeout Kill
 		//KillTimer(WM_CT_TIMEOUT_TIMER);	//eLGIT_PP_UPLOAD_FAIL
 		//팝업
@@ -960,7 +978,7 @@ void CUbiGem::OnReceivedEnhancedRemoteCommand(UbiGEMWrapper::Structure::Enhanced
 		//CTTimeout Kill
 		//KillTimer(WM_CT_TIMEOUT_TIMER);		//eLGIT_MATERIAL_ID_CONFIRM
 		g_clMesCommunication[m_nUnit].secsGemSave();
-		//EventReportSendFn(MATERIAL_CHANGE_COMPLETED_REPORT_10714); //SEND S6F11
+		EventReportSendFn(MATERIAL_CHANGE_COMPLETED_REPORT_10714); //SEND S6F11
 	}
 	if (RcIndex == eLGIT_MATERIAL_ID_FAIL)
 	{
@@ -968,7 +986,7 @@ void CUbiGem::OnReceivedEnhancedRemoteCommand(UbiGEMWrapper::Structure::Enhanced
 		//KillTimer(WM_CT_TIMEOUT_TIMER);		//eLGIT_MATERIAL_ID_FAIL
 		//팝업
 		strValue.Format(_T("[LGIT_MATERIAL_ID_FAIL]\nCode :%s\n%s"), strErrCode, strErrText);
-
+		g_clDioControl.SetBuzzer(true, BUZZER_ALARM);
 		g_pCarAABonderDlg->m_clMessageLot.setMode(RcIndex);
 
 		g_pCarAABonderDlg->m_clMessageLot.setLotID(_T("MATERIAL ID"), g_clReportData.rMaterial_Id_Fail.MaterialId);
@@ -1682,13 +1700,11 @@ void CUbiGem::OnReceivedFmtPPSend(unsigned int systemBytes, UbiGEMWrapper::Struc
 			//S7F27 보내 Process Program Verification Send
 			//ProcessProgramStateChangedReport Send
 			//RequestFmtPPVerificationSend
+			UbiGEMWrapper::Structure::FmtPPVerificationCollection* pFmtPPVerificationCollection;
+			pFmtPPVerificationCollection = m_pWrapper->CreateFmtPPVerificationCollection(fmtPPCollection->PPID);
 
 			if (g_clMesCommunication[m_nUnit].vPPRecipeSpecEquip.size() < 1)	//없을 때만 보냄
 			{
-
-				UbiGEMWrapper::Structure::FmtPPVerificationCollection* pFmtPPVerificationCollection;
-				pFmtPPVerificationCollection = m_pWrapper->CreateFmtPPVerificationCollection(fmtPPCollection->PPID);
-
 				//적용 실패
 				CString strValue;
 				//
@@ -1707,13 +1723,13 @@ void CUbiGem::OnReceivedFmtPPSend(unsigned int systemBytes, UbiGEMWrapper::Struc
 
 
 				//
+			}
 				UbiGEMWrapper::Structure::GEMResult gemResult = m_pWrapper->RequestFmtPPVerificationSend(pFmtPPVerificationCollection);	// SEND S7F27 (
 				UbisamAddLog(_T("RequestFmtPPVerificationSend"), gemResult);
 
 				AddLog(_T("RequestFmtPPVerificationSend"), 0, 0);
 
 				m_pWrapper->DeleteFmtPPVerificationCollection(pFmtPPVerificationCollection);
-			}
 
 			
 		}
@@ -2093,7 +2109,7 @@ void CUbiGem::OnReceivedFmtPPRequest(unsigned int systemBytes, LPCTSTR ppid)
 void CUbiGem::OnReceivedDeletePPSend(unsigned int systemBytes, UbiGEMWrapper::Structure::List<LPCTSTR>* ppids)
 {
 	CString strLog;
-
+	CString delPPid = _T("");
 	if (ppids != nullptr)
 	{
 		strLog.AppendFormat(_T("OnReceivedDeletePPSend : [Count=%d]"), ppids->GetCount());
@@ -2102,7 +2118,7 @@ void CUbiGem::OnReceivedDeletePPSend(unsigned int systemBytes, UbiGEMWrapper::St
 		{
 			// ppid에 해당하는 Recipe(Process Program) 파일 삭제 진행
 			strLog.AppendFormat(_T("\r\n%s "), ppids->At(i));
-
+			delPPid.Format(_T("%s") , ppids->At(i));
 			ModelList.xmlRecipeDelete(ppids->At(i));		//RECIPE XML FILE DELETE
 		}
 	}
@@ -2129,7 +2145,7 @@ void CUbiGem::OnReceivedDeletePPSend(unsigned int systemBytes, UbiGEMWrapper::St
 		g_clMesCommunication[m_nUnit].m_dPPChangeArr[1] = eHost;		//1 = Host, 2 = Operator
 
 
-		EventReportSendFn(PROCESS_PROGRAM_STATE_CHANGED_REPORT_10601);	//Delete xxxxx
+		EventReportSendFn(PROCESS_PROGRAM_STATE_CHANGED_REPORT_10601, delPPid);	//Delete xxxxx
 	}
 }
 // S7F19(Current EPPD Request)가 수신될 경우 발생하는 이벤트입니다.
@@ -2273,13 +2289,13 @@ void CUbiGem::OnEquipmentProcessState(unsigned char equipmentProcessState)
 // DLL 내부에서 데이터의 타입에 따라 변환합니다.
 void CUbiGem::OnVariableUpdateRequest(UbiGEMWrapper::Structure::GEMVariableUpdateType updateType, UbiGEMWrapper::Structure::List<LPCTSTR>* vids)
 {
-	CString strLog;
+	CString strLog = _T("");
 
 	strLog.Format(_T("OnVariableUpdateRequest : [Count=%d]"), vids->GetCount());
 	UbisamAddLog(strLog);
 
-	CString strCEID = strSendCeId;// GetGUIString(&m_cboCe);
-	CString strData;
+	CString strCEID = _T("");
+	strCEID.Format(_T("%s"), strSendCeId);
 	int i = 0;
 	int j = 0;
 	int nVid = 0;
@@ -2346,6 +2362,27 @@ void CUbiGem::OnVariableUpdateRequest(UbiGEMWrapper::Structure::GEMVariableUpdat
 				dataValue = m_pWrapper->CreateVariable(vid, UbiGEMWrapper::Structure::GEMSECSFormat_U1, _T("ControlStateChangeOrder"));
 				dataValue->SetValue((uint8_t)g_clMesCommunication[m_nUnit].m_dControlStateChangeOrder);// 2);
 				m_pWrapper->SetVariable(dataValue);
+			}
+			if(vid == _T("10014"))
+			{
+				UbiGEMWrapper::Structure::VariableInfo* dataMainList = m_pWrapper->CreateVariable(vid, UbiGEMWrapper::Structure::GEMSECSFormat_L, _T("CurrentPPIDInfo"));
+				UbiGEMWrapper::Structure::VariableInfo* dataValue;
+
+				
+				dataValue = m_pWrapper->CreateVariable(_T(""), UbiGEMWrapper::Structure::GEMSECSFormat_A, _T("EquipmentID"));
+				dataValue->SetValue(g_clMesCommunication[m_nUnit].m_sEquipmentID);
+				dataMainList->AddChildVariableInfo(dataValue);
+				dataValue = m_pWrapper->CreateVariable(_T(""), UbiGEMWrapper::Structure::GEMSECSFormat_A, _T("EquipmentName"));
+				dataValue->SetValue(g_clMesCommunication[m_nUnit].m_sEquipmentName);
+				dataMainList->AddChildVariableInfo(dataValue);
+				dataValue = m_pWrapper->CreateVariable(_T(""), UbiGEMWrapper::Structure::GEMSECSFormat_A, _T("CurrentPPID"));
+				dataValue->SetValue(g_clMesCommunication[m_nUnit].m_sMesPPID);
+				dataMainList->AddChildVariableInfo(dataValue);
+				dataValue = m_pWrapper->CreateVariable(_T(""), UbiGEMWrapper::Structure::GEMSECSFormat_A, _T("CurrentPPIDVersion"));
+				dataValue->SetValue(g_clMesCommunication[m_nUnit].m_sMesRecipeRevision);
+				dataMainList->AddChildVariableInfo(dataValue);
+
+				m_pWrapper->SetVariable(dataMainList);
 			}
 			if (vid == _T("10024"))	//LotInfo
 			{
@@ -2561,7 +2598,6 @@ void CUbiGem::OnVariableUpdateRequest(UbiGEMWrapper::Structure::GEMVariableUpdat
 
 	}
 	strCEID.Empty();
-	strData.Empty();
 	strLog.Empty();
 }
 
@@ -2804,11 +2840,14 @@ void CUbiGem::ProcessProgramParsing(bool withoutValue, UbiGEMWrapper::Structure:
 #endif
 	}
 }
-
+bool CUbiGem::bConnected()
+{
+	return m_pWrapper->GetConnected();
+}
 void CUbiGem::UpdateDialogTitle()
 {
-	CString strControlState;
-	CString strTitle;
+	CString strControlState = _T("");
+	CString strTitle = _T("");
 	strTitle = _T("UbiGEM) UGC FILE PATH : ");//strTitle = _T("UbiGEM Sample : ");
 
 	if (m_pWrapper != nullptr)
@@ -2816,7 +2855,7 @@ void CUbiGem::UpdateDialogTitle()
 		
 		if (m_pWrapper->GetConnected() == true)		//GEM Driver의 통신 연결 상태를 가져온다.
 		{
-			
+			UbiGemInit = false;
 			
 			g_clMesCommunication[m_nUnit].m_dEqupControlState[0] = g_clMesCommunication[m_nUnit].m_dEqupControlState[1];
 			//
@@ -2851,7 +2890,10 @@ void CUbiGem::UpdateDialogTitle()
 		}
 		else
 		{
+			
+			g_clMesCommunication[m_nUnit].m_dEqupControlState[1] = eEquipmentOffline;
 			strControlState.Append(_T("Disconnected"));
+
 			g_pCarAABonderDlg->m_clMainDlg.setControlState(-1);
 			g_pCarAABonderDlg->m_clMainDlg.setCommunicationState(3);
 		}
@@ -3088,7 +3130,7 @@ CString CUbiGem::SECSValueAsString(UbiGEMWrapper::Structure::GEMSECSFormat forma
 }
 CString CUbiGem::ConvertDriverResult(UbiGEMWrapper::Structure::GEMResult gemResult)
 {
-	CString strResult;
+	CString strResult = _T("");
 
 	switch (gemResult)
 	{
@@ -3246,7 +3288,7 @@ void CUbiGem::UbisamAddLog(CString strLog, UbiGEMWrapper::Structure::GEMResult g
 int CUbiGem::UbisamUgcLoad()
 {
 	char szTemp[MAX_PATH];
-	CString uiFile = "";
+	CString uiFile = _T("");
 	uiFile.Format(_T("%s\\UIConfig\\UIConfig.ini"), BASE_UBISAM_PATH);
 	DWORD result = GetPrivateProfileString(_T("UIConfig"), _T("UbiSamSetFile"), _T("Default.ini"), szTemp, MAX_PATH, uiFile);
 	uiFile.Empty();
@@ -3770,11 +3812,8 @@ void CUbiGem::ReportFn(CString strCENumber, CString param)
 {
 	int i = 0; 
 	int j = 0;
-
-	
-
-
-	strSendCeId = strCENumber;
+	//strSendCeId = strCENumber;
+	strSendCeId.Format(_T("%s"), strCENumber);
 	if (strCENumber == OFFLINE_CHANGED_REPORT_10102)	// _T("10102"))	//Offline Changed Report
 	{
 		//여긴만 보내면 HOST에서 반응 X
@@ -3898,6 +3937,10 @@ void CUbiGem::ReportFn(CString strCENumber, CString param)
 		10022	10022	AlarmSetList Ln-(U4)
 
 		*/
+		if (g_clMesCommunication[m_nUnit].m_dProcessState[0] == g_clMesCommunication[m_nUnit].m_dProcessState[1])
+		{
+			return;
+		}
 		UbiGEMWrapper::Structure::VariableInfo* dataMainList;
 		UbiGEMWrapper::Structure::VariableInfo* dataValue;
 
@@ -4349,11 +4392,13 @@ void CUbiGem::ReportFn(CString strCENumber, CString param)
 		dataMainList->AddChildVariableInfo(dataValue);
 		dataValue = m_pWrapper->CreateVariable(_T(""), UbiGEMWrapper::Structure::GEMSECSFormat_A, _T("ExchangeReason"));
 		dataValue->SetValue(_T(""));
+		dataMainList->AddChildVariableInfo(dataValue);
+
 		dataValue = m_pWrapper->CreateVariable(_T(""), UbiGEMWrapper::Structure::GEMSECSFormat_A, _T("ProductID"));		//250217 추가
 		dataValue->SetValue(ModelList.m_szCurrentModel);
-
-
 		dataMainList->AddChildVariableInfo(dataValue);
+
+		
 
 		m_pWrapper->SetVariable(dataMainList);
 
