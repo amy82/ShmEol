@@ -46,7 +46,6 @@ public:
 public:
 	int GetDoorState();
 	bool SetTowerLamp(int nType, bool bOn);
-	bool SetBuzzer(int nType);
 	bool DoorUnLock(int index, bool flag);
 	bool GetDoorUnLockState();
 public:

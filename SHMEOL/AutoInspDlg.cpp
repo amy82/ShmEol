@@ -461,18 +461,7 @@ void CAutoInspDlg::OnTimer(UINT_PTR nIDEvent)
 		//spec
 		//1.lot완공 후 다음 Bcr Scan 시점까지의 IdleReasonTimerInterval보다 긴경우
 		//2.일시정지 후 IdleReasonTimerInterval보다 긴경우
-		CTime cTime = CTime::GetCurrentTime();
-		CString strData;
-		strData.Format(_T("%02d%02d%02d%02d%02d%02d"),
-			cTime.GetYear(),
-			cTime.GetMonth(),
-			cTime.GetDay(),
-			cTime.GetHour(),
-			cTime.GetMinute(),
-			cTime.GetSecond());
-
-
-		_stprintf_s(g_clTaskWork[0].m_szIdleStartTime, SIZE_OF_100BYTE, _T("%s"), strData);		//timer  팝업 뜨는 시간인지 idle 로 바뀐 시간인지 확인필요
+		
 
 		m_clIdlePopupDlg.ShowWindow(SW_SHOW);			//WM_IDLE_REASON_TIMER
 		EnableWindow(FALSE);
@@ -1569,17 +1558,6 @@ void CAutoInspDlg::InitCtrl()
 	_stprintf_s(szData, SIZE_OF_100BYTE, _T("EOL"));
 #endif
 
-
-//
-//
-//
-//#if (____MACHINE_NAME ==  MODEL_FOV_80)
-//	strtemp.Format("Rivian %s 3M %s", szData, VER_STR);
-//#elif (____MACHINE_NAME ==  MODEL_FOV_120)
-//	strtemp.Format("Rivian %s 8M %s", szData, VER_STR);
-//#else 
-//	strtemp.Format("Rivian %s MINI %s", szData, VER_STR);
-//#endif
 
 
 #if (____MACHINE_NAME == MODEL_FRONT_100)
@@ -3300,6 +3278,8 @@ void CAutoInspDlg::ShowBarcode(int nUnit)
 
     m_clColorStaticBcrVal[nUnit].SetWindowText(g_clTaskWork[nUnit].m_szChipID);
 	m_clColorStaticBcrVal[nUnit].Invalidate();
+
+	m_clMainDlg.m_edtAbortLot.SetWindowTextA(g_clTaskWork[nUnit].m_szChipID);
 }
 
 //-----------------------------------------------------------------------------
@@ -3875,11 +3855,11 @@ bool CAutoInspDlg::StartAutoProcess(int nUnit)
 	g_clDioControl.SetTowerLamp(LAMP_GREEN, true);
 
 	g_clMandoInspLog[nUnit].m_bInspRes = true;
+
 	m_clUbiGemDlg.AlarmClearSendFn();
+	AddLog(_T("[INFO] Alarm Clear"), 0, 0);
 	g_clTaskWork[nUnit].m_nAutoFlag = MODE_AUTO;
 
-    //Alarm Clear
-	m_clUbiGemDlg.AlarmClearSendFn();
 
 	if (m_clActiveAlignThread[nUnit].StartThread() == false)
 	{
@@ -3914,7 +3894,7 @@ bool CAutoInspDlg::StartAutoProcess(int nUnit)
 	
 
 	g_clMesCommunication[nUnit].m_dEqupOperationMode[0] = 1;	//1 = Full-Auto Mode, 9 = Manual Mode
-	g_clMesCommunication[nUnit].m_dEqupOperationMode[1] = 0;
+	g_clMesCommunication[nUnit].m_dEqupOperationMode[1] = 2;
 	m_clUbiGemDlg.EventReportSendFn(EQUIPMENT_OPERATION_MODE_CHANGED_REPORT);
 
 	sData.Empty();
@@ -4001,11 +3981,11 @@ bool CAutoInspDlg::StopAutoProcess(int nUnit)
 	g_clDioControl.SetTowerLamp(LAMP_RED, true);
 	g_clMotorSet.StopAxisAll(nUnit);
 
-
+	g_clDioControl.SetBuzzer(false);
 	g_clTaskWork[nUnit].m_nAutoFlag = MODE_STOP;
 
 	g_clMesCommunication[nUnit].m_dEqupOperationMode[0] = 9;	//1 = Full-Auto Mode, 9 = Manual Mode
-	g_clMesCommunication[nUnit].m_dEqupOperationMode[1] = 0;
+	g_clMesCommunication[nUnit].m_dEqupOperationMode[1] = 2;
 	m_clUbiGemDlg.EventReportSendFn(EQUIPMENT_OPERATION_MODE_CHANGED_REPORT);
 
 	AddLog(_T("[STOP] 자동 운전 정지"), 0, nUnit);
@@ -5716,6 +5696,8 @@ void CAutoInspDlg::OnBnClickedButtonMainStartingPoint1()
 
 
 	m_clUbiGemDlg.AlarmClearSendFn();
+	AddLog(_T("[INFO] Alarm Clear"), 0, 0);
+
     this->StartHomeProcess(UNIT_AA1);
 }
 
@@ -5746,6 +5728,8 @@ void CAutoInspDlg::OnBnClickedButtonMainAutoReady1()
 		}
 	}
 	m_clUbiGemDlg.AlarmClearSendFn();
+	AddLog(_T("[INFO] Alarm Clear"), 0, 0);
+
 	this->StartAutoReadyProcess(UNIT_AA1);
     
 }
@@ -5789,6 +5773,8 @@ void CAutoInspDlg::OnBnClickedButtonMainAutoRun1()
 
 	if (LgitLicenseCheck() == false)
 	{
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[INFO] LGIT License 인식 실패"));
+		AddLog(szLog, 1, 0, true);
 		return;
 	}
     this->StartAutoProcess(UNIT_AA1);
@@ -5857,23 +5843,6 @@ void CAutoInspDlg::OnBnClickedButtonMainComplEmission1()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainAutoStop1()
 {
-	//g_clPriInsp[UNIT_AA1].func_EEprom_CheckSum_Check(true);
-	//return;
-
-    CString sMsg = _T("");
-
-#ifdef ON_LINE_SOCKET
-	//sMsg.Format(_T("#AA%d@PCB&ESC$"), (UNIT_AA1 + 1));		//Auto Stop
-	//this->SendDataToAAMain(UNIT_AA1, sMsg);
-	//Sleep(100);
- //   sMsg.Format(_T("#AA%d@ALARM&CLR$"), (UNIT_AA1 + 1));
- //   this->SendDataToAAMain(UNIT_AA1, sMsg);
-	//Sleep(100);
- //   sMsg.Format(_T("#AA%d@ULD&ESC$"), (UNIT_AA1 + 1));
- //   this->SendDataToAAMain(UNIT_AA1, sMsg); 
-	//sMsg.Empty();
-#endif
-
 
     this->StopAutoProcess(UNIT_AA1);
 }
@@ -5885,24 +5854,6 @@ void CAutoInspDlg::OnBnClickedButtonMainAutoStop1()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainAutoPause1()
 {
-    CString sMsg = _T("");
-
-#ifdef ON_LINE_SOCKET
-	sMsg.Format(_T("#AA%d@PCB&ESC$"), (UNIT_AA1 + g_clSysData.m_nUnitNo + g_clSysData.m_nSysNo + 1));		//Auto Pause
-	this->SendDataToAAMain(UNIT_AA1, sMsg);
-	Sleep(100);
-	sMsg.Format(_T("#AA%d@LENS&ESC$"), (UNIT_AA1 + g_clSysData.m_nUnitNo + g_clSysData.m_nSysNo + 1));		//Auto Stop
-	this->SendDataToAAMain(UNIT_AA1, sMsg);
-	Sleep(100);
-    sMsg.Format(_T("#AA%d@ALARM&CLR$"), (UNIT_AA1 + g_clSysData.m_nUnitNo + g_clSysData.m_nSysNo + 1));
-    this->SendDataToAAMain(UNIT_AA1, sMsg);
-	Sleep(100);
-   
-    sMsg.Format(_T("#AA%d@ULD&ESC$"), (UNIT_AA1 + g_clSysData.m_nUnitNo + g_clSysData.m_nSysNo + 1));
-    this->SendDataToAAMain(UNIT_AA1, sMsg);
-
-#endif
-
 
 	this->PauseAutoProcess(UNIT_AA1);
 }
@@ -6451,7 +6402,7 @@ void CAutoInspDlg::OnStnClickedStaticMainVersion1()
 	//m_clButtonExArea[0].state = 0;// 11;
 	//m_clButtonExArea[0].Invalidate();
 
-	
+	//g_clDioControl.SetBuzzer(true, BUZZER_ALARM);
 
  
 	
@@ -6476,7 +6427,7 @@ void CAutoInspDlg::OnStnClickedStaticMainVersion1()
 	//g_pCarAABonderDlg->m_clMessageLot.ShowWindow(SW_SHOW);		//test
 
 	//g_clMesCommunication[0].m_dEqupOperationMode[0] = 1;	//1 = Full-Auto Mode, 9 = Manual Mode
-	//g_clMesCommunication[0].m_dEqupOperationMode[1] = 0;
+	//g_clMesCommunication[0].m_dEqupOperationMode[1] = 2;
 	//m_clUbiGemDlg.EventReportSendFn(EQUIPMENT_OPERATION_MODE_CHANGED_REPORT);
 	SetTimer(WM_IDLE_REASON_TIMER, 1000, NULL);		//30000 Step
 
@@ -6631,6 +6582,7 @@ void CAutoInspDlg::OnStnClickedStaticMainBcrVal2()
 void CAutoInspDlg::FinishService()
 {
 	int i = 0;
+	g_pCarAABonderDlg->m_clUbiGemDlg.UbiGemInit = true;
 	g_clLaonGrabberWrapper[UNIT_AA1].CloseDevice();
 	
 	TopChartControl[UNIT_AA1].dpctrlLedVolume(LIGHT_CHART_CH_1, 0);

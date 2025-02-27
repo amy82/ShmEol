@@ -7,7 +7,7 @@
 #define __GLOBALDEFINE_H__
 
 
-#define         NORINDA_MODE
+//#define         NORINDA_MODE
 //
 //
 //
@@ -21,7 +21,7 @@
 #define  MODEL_OHC_150						32000			//SHM150  FRONT = 100
 //
 //
-#define ____MACHINE_NAME					MODEL_OHC_150
+#define ____MACHINE_NAME					MODEL_FRONT_100
 
 //versionList
 //oqa 좌측이 0번ch in , 우측이 1번 out신호
@@ -29,7 +29,11 @@
 
 //YMEAN_N_MAX_RECURSIVE_COUNT  레시피 이름 수정 YMEAN_MAX_RECURSIVE_COUNT
 //====================================================================================================
-#define				VER_STR										_T("250222_1")				//hp mes 1
+#define				VER_STR										_T("250226_1")				//MES TEST 완료후 적용
+//#define				VER_STR										_T("250225_1")					//EstablishCommunication 추가
+//#define				VER_STR										_T("250224_2")				////cstring = cstring 대입 사용 금지
+//#define				VER_STR										_T("250224_1")			//OQA 와 동일하게 수정
+//#define				VER_STR										_T("250222_1")				//hp mes 1
 //#define				VER_STR										_T("250221_1")				//home, 이미지 저장 기간 확인필요
 //#define				VER_STR										_T("250217_1")			//ModelList.m_szCurrentModel 를 ChangedMaterialInfo - ProductID 에 추가
 // #define				VER_STR										_T("250117_1")			//데이터 수정중..vLotIdFail 까지 완료

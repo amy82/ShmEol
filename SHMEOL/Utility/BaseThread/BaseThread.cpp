@@ -127,7 +127,8 @@ UINT CBaseThread::ThreadFunc(void* pParam)
 	pThread->m_hThread = NULL;
 	pThread->m_bWorking = false;
 
-	//TRACE(_T("\n ThreadFunc Exit Type: %s\n"), typeid(*pThread).name());
+	TRACE(_T("\n ThreadFunc Exit Type: %s\n"), typeid(*pThread).name());
+
 	::AfxEndThread(0, TRUE);
 	//AfxEndThread πÿ¿∏∑Œ Ω««‡ æ»µ 
 	return TRUE;

@@ -239,6 +239,7 @@ void CIdlePopupDlg::OnBnClickedOk()
 
 
 	_stprintf_s(g_clTaskWork[m_nUnit].m_szIdleEndTime, SIZE_OF_100BYTE, _T("%s"), strData);
+	_stprintf_s(g_clTaskWork[m_nUnit].m_szIdleStartTime, SIZE_OF_100BYTE, _T("%s"), strData);
 
 	//Idle End Time
 	reportData.AppendFormat(_T("%s,"), g_clTaskWork[m_nUnit].m_szIdleEndTime);// _T("2024/12/29 15:20:10"));
