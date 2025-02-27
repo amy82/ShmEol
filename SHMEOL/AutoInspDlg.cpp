@@ -7438,7 +7438,7 @@ void CAutoInspDlg::OnBnClickedButtonMainMes1()
 		AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA2);
 		return;
 	}
-	m_clUbiGemDlg.ShowWindow(SW_SHOW);
+	//m_clUbiGemDlg.ShowWindow(SW_SHOW);
 
 	/*if (m_bMesConnect == true)
 	{
