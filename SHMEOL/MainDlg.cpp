@@ -1169,6 +1169,18 @@ void CMainDlg::OnBnClickedButtonMainModelLoad()
 
 	ModelList.m_nCurrentNo = ModelCurCol;
 
+	CString sData = _T("");
+	TCHAR szLog[SIZE_OF_1K];
+	sData = m_clGridModel.GetItemText(ModelCurCol, 1);
+
+	if (SHM_OHC_150_MODEL != sData && SHM_FRONT_100_MODEL != sData)
+	{
+		//설정된 100/150 모델명이 아닙니다.
+
+		_stprintf_s(szLog, SIZE_OF_1K, _T("설정된 [%s / %s] 모델명이 아닙니다."), SHM_FRONT_100_MODEL, SHM_OHC_150_MODEL);
+		AddLog(szLog, 1, 0);
+		return;
+	}
 
 	ModelList.ModelListSave();
 	ModelList.ModelListLoad();
@@ -1177,9 +1189,20 @@ void CMainDlg::OnBnClickedButtonMainModelLoad()
 
 
 	//strLog.Format(_T("[MODEL] %s/%d - Load 완료") , modelList.curModelName , ModelCurCol);
-	TCHAR szLog[SIZE_OF_1K];
+	
 	_stprintf_s(szLog, SIZE_OF_1K, _T("[MODEL] CURRENT MODEL :(%s)"), ModelList.m_szCurrentModel);
 	AddLog(szLog, 0, 0);
+	
+
+
+	if (SHM_OHC_150_MODEL == ModelList.m_szCurrentModel)
+	{
+
+	}
+	else
+	{
+
+	}
 }
 
 
