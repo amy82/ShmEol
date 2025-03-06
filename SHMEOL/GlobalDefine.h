@@ -7,7 +7,7 @@
 #define __GLOBALDEFINE_H__
 
 
-//#define         NORINDA_MODE
+#define         NORINDA_MODE
 //
 //
 //
@@ -21,6 +21,10 @@
 #define  MODEL_OHC_150						32000			//SHM150  FRONT = 100
 //
 //
+#define SHM_FRONT_100_MODEL					_T("ACD02C002X.KM0X")
+#define SHM_OHC_150_MODEL					_T("ACD02C001X.KM0X")
+
+
 #define ____MACHINE_NAME					MODEL_FRONT_100
 
 //versionList
