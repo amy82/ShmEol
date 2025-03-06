@@ -26,6 +26,8 @@ void CModelSelectDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_BUTTON_MODERATE_MODEL, m_ColorbuttonModelModerate);
 	DDX_Control(pDX, IDC_BUTTON_NARROW_MODEL, m_ColorbuttonModelNarrow);
+
+
 }
 
 
@@ -85,7 +87,7 @@ void CModelSelectDlg::SetUnit(int nUnit)
 
 void CModelSelectDlg::ShowCurrentModel()
 {
-	if (g_clModelType.m_nModelIndex == MODERATE_MODEL)
+	/*if (g_clModelType.m_nModelIndex == MODERATE_MODEL)
 	{
 		m_ColorbuttonModelNarrow.state = 0;
 		m_ColorbuttonModelModerate.state = 1;
@@ -100,7 +102,7 @@ void CModelSelectDlg::ShowCurrentModel()
 
 		m_ColorbuttonModelNarrow.Invalidate();
 		m_ColorbuttonModelModerate.Invalidate();
-	}
+	}*/
 	
 }
 
@@ -145,50 +147,50 @@ void CModelSelectDlg::OnBnClickedButtonModelSelectLoad()
 		AddLog(_T("[INFO] 일시 정지 중 사용 불가"), 1, m_nUnit);
 		return;
 	}
-	CString strModelName = _T("");
-	int i;
+	//CString strModelName = _T("");
+	//int i;
 
 	//g_clAdo.Disconnect();
 
-	if (m_ColorbuttonModelModerate.state == 1)
-	{
-		g_clModelType.m_nModelIndex = MODERATE_MODEL;
+	//if (m_ColorbuttonModelModerate.state == 1)
+	//{
+	//	//g_clModelType.m_nModelIndex = MODERATE_MODEL;
 
-		strModelName = _T("MODERATE");
-		_tcscpy_s(g_clSysData.m_szModelName, SIZE_OF_100BYTE, (TCHAR*)(LPCTSTR)strModelName);
-		g_clModelType.mTSave();
+	//	strModelName = _T("MODERATE");
+	//	_tcscpy_s(g_clSysData.m_szModelName, SIZE_OF_100BYTE, (TCHAR*)(LPCTSTR)strModelName);
+	//	g_clModelType.mTSave();
 
-		// MODEL TYPE LOAD
-		g_clModelType.mTLoad();
+	//	// MODEL TYPE LOAD
+	//	g_clModelType.mTLoad();
 
-		for (i = 0; i < MAX_UNIT_COUNT; i++)
-		{
-			g_clModelData[i].Load(g_clSysData.m_szModelName);
-			//g_clModelData[i].EpoxyDataLoad(g_clSysData.m_szModelName);
-			g_clMarkData[i].LoadData(g_clSysData.m_szModelName);
-			g_clModelData[i].PatternLoad(g_clSysData.m_szModelName);        //패턴 이미지 로드
-			g_clModelData[i].AcmisDataLoad(g_clSysData.m_szModelName);
-			
-			
-		}
-	}
-	else
-	{
-		g_clModelType.m_nModelIndex = NARROW_MODEL;
-		strModelName = _T("NARROW");
-		_tcscpy_s(g_clSysData.m_szModelName, SIZE_OF_100BYTE, (TCHAR*)(LPCTSTR)strModelName);
-		g_clModelType.mTSave();
+	//	for (i = 0; i < MAX_UNIT_COUNT; i++)
+	//	{
+	//		g_clModelData[i].Load(g_clSysData.m_szModelName);
+	//		//g_clModelData[i].EpoxyDataLoad(g_clSysData.m_szModelName);
+	//		g_clMarkData[i].LoadData(g_clSysData.m_szModelName);
+	//		g_clModelData[i].PatternLoad(g_clSysData.m_szModelName);        //패턴 이미지 로드
+	//		g_clModelData[i].AcmisDataLoad(g_clSysData.m_szModelName);
+	//		
+	//		
+	//	}
+	//}
+	//else
+	//{
+	//	//g_clModelType.m_nModelIndex = NARROW_MODEL;
+	//	strModelName = _T("NARROW");
+	//	_tcscpy_s(g_clSysData.m_szModelName, SIZE_OF_100BYTE, (TCHAR*)(LPCTSTR)strModelName);
+	//	g_clModelType.mTSave();
 
-		// MODEL TYPE LOAD
-		g_clModelType.mTLoad();
+	//	// MODEL TYPE LOAD
+	//	g_clModelType.mTLoad();
 
-		for (i = 0; i < MAX_UNIT_COUNT; i++)
-		{
-			g_clModelData[i].Load(g_clSysData.m_szModelName);
-			//g_clModelData[i].EpoxyDataLoad(g_clSysData.m_szModelName);
-			g_clMarkData[i].LoadData(g_clSysData.m_szModelName);
-			g_clModelData[i].PatternLoad(g_clSysData.m_szModelName);        //패턴 이미지 로드
-			g_clModelData[i].AcmisDataLoad(g_clSysData.m_szModelName);
-		}
-	}
+	//	for (i = 0; i < MAX_UNIT_COUNT; i++)
+	//	{
+	//		g_clModelData[i].Load(g_clSysData.m_szModelName);
+	//		//g_clModelData[i].EpoxyDataLoad(g_clSysData.m_szModelName);
+	//		g_clMarkData[i].LoadData(g_clSysData.m_szModelName);
+	//		g_clModelData[i].PatternLoad(g_clSysData.m_szModelName);        //패턴 이미지 로드
+	//		g_clModelData[i].AcmisDataLoad(g_clSysData.m_szModelName);
+	//	}
+	//}
 }

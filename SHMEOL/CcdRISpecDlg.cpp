@@ -106,7 +106,7 @@ BOOL CCcdRISpecDlg::OnInitDialog()
 
 	// 그리드 초기화
 
-	this->InitRI4GridCtrl();
+	//this->InitRI4GridCtrl();
 	this->CenterWindow();
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
@@ -284,68 +284,68 @@ void CCcdRISpecDlg::InitCtrl()
 
 void CCcdRISpecDlg::InitRI4GridCtrl()
 {
-	TCHAR* pszCol[] = { _T("RI"), _T("Spec") };
-
-	CRect rect;
-	int i, j;
-	int DLG = IDC_STATIC_CCD_RI_SPEC_GRID_SPEC;//IDC_STATIC_CCD_RI4_SPEC_GRID_SPEC
-
-	CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
-	int SpecRow = g_Ricount + 1;
-	int SpecCol = 2;//옆
-	int margin = 4;
-	int gridHeight = 25;
-	int gridWidth1 = 200;
-	int gridWidth2 = 90;
-
-	int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
-	//
-	pWnd->GetWindowRect(rect);
-	ScreenToClient(rect);
-
-	rect.right = totalWidth + margin;
-	rect.bottom = (gridHeight*SpecRow) + margin;
-	pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
-
-
-	GetDlgItem(DLG)->GetWindowRect(rect);
-	ScreenToClient(rect);
-	m_clGridRISpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
-
-	m_clGridRISpec.SetTextBkColor(RGB_COLOR_WHITE);
-	m_clGridRISpec.SetFixedBkColor(GRID_COLOR_TITLE);
-	m_clGridRISpec.SetFixedTextColor(RGB_COLOR_WHITE);
-	m_clGridRISpec.SetReference_Setting();
-	m_clGridRISpec.EnableSelection(FALSE);
-	m_clGridRISpec.SetRowCount(SpecRow);
-	m_clGridRISpec.SetColumnCount(SpecCol);
-	m_clGridRISpec.SetFixedRowCount(1);
-	m_clGridRISpec.SetFixedColumnCount(1);
-
-	for (i = 0; i < SpecRow; i++)
-	{
-		m_clGridRISpec.SetRowHeight(i, gridHeight);
-		m_clGridRISpec.SetItemText(i + 1, 0, RI_SPEC_NAME[i]);
-
-		for (j = 0; j < SpecCol; j++)
-		{
-			if (i == 0)
-			{
-				if (j == 0)
-				{
-					m_clGridRISpec.SetColumnWidth(j, gridWidth1);
-				}
-				else
-				{
-					m_clGridRISpec.SetColumnWidth(j, gridWidth2);
-				}
-
-				m_clGridRISpec.SetItemText(i, j, pszCol[j]);
-			}
-
-			m_clGridRISpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-		}
-	}
+//	TCHAR* pszCol[] = { _T("RI"), _T("Spec") };
+//
+//	CRect rect;
+//	int i, j;
+//	int DLG = IDC_STATIC_CCD_RI_SPEC_GRID_SPEC;//IDC_STATIC_CCD_RI4_SPEC_GRID_SPEC
+//
+//	CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
+//	int SpecRow = g_Ricount + 1;
+//	int SpecCol = 2;//옆
+//	int margin = 4;
+//	int gridHeight = 25;
+//	int gridWidth1 = 200;
+//	int gridWidth2 = 90;
+//
+//	int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
+//	//
+//	pWnd->GetWindowRect(rect);
+//	ScreenToClient(rect);
+//
+//	rect.right = totalWidth + margin;
+//	rect.bottom = (gridHeight*SpecRow) + margin;
+//	pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
+//
+//
+//	GetDlgItem(DLG)->GetWindowRect(rect);
+//	ScreenToClient(rect);
+//	m_clGridRISpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
+//
+//	m_clGridRISpec.SetTextBkColor(RGB_COLOR_WHITE);
+//	m_clGridRISpec.SetFixedBkColor(GRID_COLOR_TITLE);
+//	m_clGridRISpec.SetFixedTextColor(RGB_COLOR_WHITE);
+//	m_clGridRISpec.SetReference_Setting();
+//	m_clGridRISpec.EnableSelection(FALSE);
+//	m_clGridRISpec.SetRowCount(SpecRow);
+//	m_clGridRISpec.SetColumnCount(SpecCol);
+//	m_clGridRISpec.SetFixedRowCount(1);
+//	m_clGridRISpec.SetFixedColumnCount(1);
+//
+//	for (i = 0; i < SpecRow; i++)
+//	{
+//		m_clGridRISpec.SetRowHeight(i, gridHeight);
+////		m_clGridRISpec.SetItemText(i + 1, 0, RI_SPEC_NAME[i]);
+//
+//		for (j = 0; j < SpecCol; j++)
+//		{
+//			if (i == 0)
+//			{
+//				if (j == 0)
+//				{
+//					m_clGridRISpec.SetColumnWidth(j, gridWidth1);
+//				}
+//				else
+//				{
+//					m_clGridRISpec.SetColumnWidth(j, gridWidth2);
+//				}
+//
+//				m_clGridRISpec.SetItemText(i, j, pszCol[j]);
+//			}
+//
+//			m_clGridRISpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+//		}
+//	}
 }
 //-----------------------------------------------------------------------------
 //
@@ -383,11 +383,11 @@ void CCcdRISpecDlg::ShowRI4Spec()
 	TCHAR szData[SIZE_OF_100BYTE];
 	CButton* pButton;
 	int i = 0;
-	for (i = 0; i < g_Ricount; i++)
+	/*for (i = 0; i < g_Ricount; i++)
 	{
 		m_clGridRISpec.SetItemText(i + 1, 1, g_clModelData[m_nUnit].m_RISpec[i], 3);
 	}
-	m_clGridRISpec.Invalidate();
+	m_clGridRISpec.Invalidate();*/
 
 
 	pButton = (CButton*)GetDlgItem(IDC_CHECK_CCD_RI_8BITUSE);
@@ -418,12 +418,12 @@ void CCcdRISpecDlg::GetRI4Spec()
 	int i;
 	int _x = 0;
 	int _y = 0;
-	int riTotal = g_Ricount;
-	for (i = 0; i < riTotal; i++)
+	//int riTotal = g_Ricount;
+	/*for (i = 0; i < riTotal; i++)
 	{
 		sData = m_clGridRISpec.GetItemText(i + 1, 1);
 		g_clModelData[m_nUnit].m_RISpec[i] = _ttof((TCHAR*)(LPCTSTR)sData);
-	}
+	}*/
 
 	GetDlgItem(IDC_STATIC_CCD_RI_BLACKLEVEL_VAL)->GetWindowText(sData);
 	g_clModelData[m_nUnit].m_dRiBlackLevel = _ttoi((TCHAR*)(LPCTSTR)sData);
@@ -620,7 +620,7 @@ void CCcdRISpecDlg::OnBnClickedButtonCcdSfrSpecClose()
 //-----------------------------------------------------------------------------
 void CCcdRISpecDlg::OnNMDblClickedRiSpec(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	NM_GRIDVIEW* pNMGridView = (NM_GRIDVIEW*)pNMHDR;
+	/*NM_GRIDVIEW* pNMGridView = (NM_GRIDVIEW*)pNMHDR;
 	CString sData = _T("");
 	int nRow, nCol;
 
@@ -643,7 +643,7 @@ void CCcdRISpecDlg::OnNMDblClickedRiSpec(NMHDR* pNMHDR, LRESULT* pResult)
 
 			delete pDlg;
 		}
-	}
+	}*/
 }
 
 //-----------------------------------------------------------------------------

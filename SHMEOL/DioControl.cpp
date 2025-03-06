@@ -2605,61 +2605,6 @@ bool CDioControl::SetTowerLamp(int nType, bool bOn)
 
 //-----------------------------------------------------------------------------
 //
-//
-//
-//-----------------------------------------------------------------------------
-bool CDioControl::SetBuzzer(int nType)
-{
-#ifndef ON_LINE_DIO
-	return true;
-#endif
-
-	DWORD dwState = 0;
-	int nModuleNo = 1;
-	int mOutIndex = 0;
-	int mOffset = 1;
-	////dwState = m_dwDOut[0];
-	dwState = m_dByteDOutArr[0][mOffset];
-	switch (nType)
-	{
-		// BUZZER OFF
-	case 0:
-		dwState &= ~(DIO_OUT_BUZZER_1 | DIO_OUT_BUZZER_2 | DIO_OUT_BUZZER_3 | DIO_OUT_BUZZER_4);
-		break;
-		// BUZZER 1
-	case 1:
-		dwState |= DIO_OUT_BUZZER_1;
-		dwState &= ~(DIO_OUT_BUZZER_2 | DIO_OUT_BUZZER_3 | DIO_OUT_BUZZER_4);
-		break;
-		// BUZZER 2
-	case 2:
-		dwState |= DIO_OUT_BUZZER_2;
-		dwState &= ~(DIO_OUT_BUZZER_1 | DIO_OUT_BUZZER_3 | DIO_OUT_BUZZER_4);
-		break;
-		// BUZZER 3
-	case 3:
-		dwState |= DIO_OUT_BUZZER_3;
-		dwState &= ~(DIO_OUT_BUZZER_1 | DIO_OUT_BUZZER_2 | DIO_OUT_BUZZER_4);
-		break;
-		// BUZZER 4
-	case 4:
-		dwState |= DIO_OUT_BUZZER_4;
-		dwState &= ~(DIO_OUT_BUZZER_1 | DIO_OUT_BUZZER_2 | DIO_OUT_BUZZER_3);
-		break;
-	}
-
-	/*if(this->WriteDOut(nModuleNo, dwState) == false)
-		return false;*/
-	if (this->ByteWriteDOut(nModuleNo, mOffset, dwState) == false)
-	{
-		return false;
-	}
-	return true;
-}
-
-
-//-----------------------------------------------------------------------------
-//
 //	DOOR UNLOCK µø¿€
 //
 //-----------------------------------------------------------------------------

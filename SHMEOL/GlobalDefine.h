@@ -21,27 +21,50 @@
 #define  MODEL_OHC_150						32000			//SHM150  FRONT = 100
 //
 //
-#define ____MACHINE_NAME					MODEL_FRONT_100		//MODEL_IP150
+#define ____MACHINE_NAME					MODEL_FRONT_100
 
 //versionList
 //oqa 좌측이 0번ch in , 우측이 1번 out신호
+//ProcessProgramParsing
+
+//YMEAN_N_MAX_RECURSIVE_COUNT  레시피 이름 수정 YMEAN_MAX_RECURSIVE_COUNT
 //====================================================================================================
-#define				VER_STR										_T("241220_1")			//raw 눈띄울때, 기다리는 시간 40초로 변경
-//#define				VER_STR										_T("241217_1")
-//#define				VER_STR										_T("241217_1")				//펌웨어 검사중 팝업추가, m_bFirmwareStop
+#define				VER_STR										_T("250226_1")				//MES TEST 완료후 적용
+//#define				VER_STR										_T("250225_1")					//EstablishCommunication 추가
+//#define				VER_STR										_T("250224_2")				////cstring = cstring 대입 사용 금지
+//#define				VER_STR										_T("250224_1")			//OQA 와 동일하게 수정
+//#define				VER_STR										_T("250222_1")				//hp mes 1
+//#define				VER_STR										_T("250221_1")				//home, 이미지 저장 기간 확인필요
+//#define				VER_STR										_T("250217_1")			//ModelList.m_szCurrentModel 를 ChangedMaterialInfo - ProductID 에 추가
+// #define				VER_STR										_T("250117_1")			//데이터 수정중..vLotIdFail 까지 완료
+//#define				VER_STR										_T("250116_1")
+//EQUIPMENT_OPERATION_MODE_CHANGED_REPORT 추가
+//terminal Popup 수정
+//#define				VER_STR										_T("250114_1")
+//#define				VER_STR										_T("250112_1")			//idle ok , lg pause ok , defect code ok , alarm?
+//#define				VER_STR										_T("250111_2")			//스펙 적용 208개 완료
+//#define				VER_STR										_T("250111_1")			//양불만 적용완료
+//#define				VER_STR										_T("250110_1")
+//case 30500:
+//mapKeyRtn 적용
+//#define				VER_STR										_T("250109_1")				//vMesApdData 적용 완료
 
-//#define				VER_STR										_T("241214_1")			//z축 홈잡는 속도 줄임
-//#define				VER_STR										_T("241213_1")					//IsCertified 라이센서 확인추가 , 이물검사 실패시 리턴
+//#define				VER_STR										_T("250104_1")			//RECIPE XML파일로 변경	
+//#define				VER_STR										_T("250102_1")			//acmis 스펙 정리
+//#define				VER_STR										_T("241229_1")		//idle보고 완료
 
-//#define				VER_STR										_T("241125_1")					//원점 동작시 제품 감지될 때만 흡착 확인 1, 1, 1, 3
-//#define				VER_STR										_T("241112_1")						//TCHAR m_szBinaryFile[SIZE_OF_1K];  파일명보다 길어서 개수 수정
-//#define				VER_STR										_T("241112_1")					//f/w verify 수정 , ri roi 수정 배포[FILE VER:1.2.2.1]
+//#define				VER_STR										_T("241221_1")		//vMesModelList 모델 추가중
+//#define				VER_STR										_T("241212_1")				//ubisam 추가중...
 
-//#define				VER_STR										_T("241107_1")				//LGIT_GRABBER_20240715_01_v2.2.3 변경 펌웨어 확인 , f/w verify 추가중 , ri roi 수정(유동명)
-// #define				VER_STR										_T("241030_1")				//jxl, raw 옵션 저장안돼서 다시 공유
-//#define				VER_STR										_T("241030_1")				//모터 이동할때마다 흡착확인(auto, manual), 공유함
-//#define				VER_STR										_T("241029_1")				//jxl 다시 디코드 확인 , ENC_JXL_SetEncEffort 안에 ui추가
-//#define			VER_STR										_T("241028_1")			//ri , fov , color 검사 fail시 변수 초기화 0 , 모터 이동시 흡착확인 , 레이저 측정값 못 얻으면 알람
+//#define				VER_STR										_T("241125_1")			//원점 동작시 제품 감지될 때만 흡착 확인 1, 1, 1, 3
+//#define				VER_STR										_T("241112_1")			//TCHAR m_szBinaryFile[SIZE_OF_1K];  파일명보다 길어서 개수 수정
+//#define				VER_STR										_T("241112_1")			//f/w verify 수정 , ri roi 수정 배포[FILE VER:1.2.2.1]
+
+//#define				VER_STR										_T("241107_1")			//LGIT_GRABBER_20240715_01_v2.2.3 변경 펌웨어 확인 , f/w verify 추가중 , ri roi 수정(유동명)
+// #define				VER_STR										_T("241030_1")			//jxl, raw 옵션 저장안돼서 다시 공유
+//#define				VER_STR										_T("241030_1")			//모터 이동할때마다 흡착확인(auto, manual), 공유함
+//#define				VER_STR										_T("241029_1")			//jxl 다시 디코드 확인 , ENC_JXL_SetEncEffort 안에 ui추가
+//#define			VER_STR										_T("241028_1")				//ri , fov , color 검사 fail시 변수 초기화 0 , 모터 이동시 흡착확인 , 레이저 측정값 못 얻으면 알람
 
 
 //#define			VER_STR										_T("241024_1")				//[20241016]Distribute_V2.7.3.7_VS2015  dll 다시 적용
@@ -49,8 +72,8 @@
 //#define			VER_STR										_T("241016_1")				//[20241016]Distribute_V2.7.3.5_VS2015 다시 적용, [20241016]Distribute_V2.7.3.6_VS2015
 
 
-//#define			VER_STR										_T("240909_1")			//dll 변경 [20240902]Distribute_V2.7.1.2_VS2015
-//#define			VER_STR										_T("240826_1")					//g_clPriInsp[m_nUnit].func_Insp_Version_Read();//AUTO   스텝제외돼서 다시 추가
+//#define			VER_STR										_T("240909_1")				//dll 변경 [20240902]Distribute_V2.7.1.2_VS2015
+//#define			VER_STR										_T("240826_1")				//g_clPriInsp[m_nUnit].func_Insp_Version_Read();//AUTO   스텝제외돼서 다시 추가
 //#define			VER_STR										_T("240820_1")
 //#define			VER_STR										_T("240819_1")
 //#define			VER_STR										_T("240813_1")				//[20240716]Distribute_V2.6.9.10_VS2015  dll변경 , 원찾는 코드 변경, g_MilFindCirclePos 원형마크 찾기 변경
@@ -121,9 +144,9 @@
 	//#define ON_LINE_LASER
 	//#define ON_LINE_DIO
 	//#define ON_LINE_LIGHT
-	#define ON_LINE_CAM
-	#define ON_LINE_MIL
-	#define ON_LINE_GRABBER
+	//#define ON_LINE_CAM
+	//#define ON_LINE_MIL
+	//#define ON_LINE_GRABBER
 	
 #else
 	#ifdef ON_LINE_MODE
@@ -195,10 +218,12 @@
 	#define	MIU_DIR						_T("D:\\EVMS\\SHM_EOL_OHC_150\\Initialize")
 	#define	FW_DIR						_T("D:\\EVMS\\SHM_EOL_OHC_150\\Firmware")
 	
+	
 #endif
 #endif
-
-
+#define	BASE_SECSGEM_PATH			_T("D:\\EVMS\\SecsGem")
+#define	BASE_UBISAM_PATH			_T("D:\\EVMS\\SecsGem\\ugc")
+#define	BASE_RECIPE_PATH			_T("D:\\EVMS\\SecsGem\\Recipe")
 #define	MES_SPEC_DIR				_T("C:\\BMS_MES\\spec")
 #define ROOT_PATH					_T("D:\\EVMS")
 #define BASE_COMMON_PATH			_T("D:\\EVMS\\Common")
@@ -206,6 +231,9 @@
 #define BASE_LOG_TEMP_PATH			_T("D:\\EVMS\\Log\\finalTemp")
 #define BASE_INSP_PATH				_T("D:\\EVMS\\Log\\Inspection")
 #define BASE_IMAGE_PATH				_T("D:\\EVMS\\Log\\Image")
+
+
+
 
 #define	BASE_DUMP_DIR				_T("D:\\EVMS\\Log\\DumpFile")
 
@@ -220,97 +248,13 @@ const int N_RAW_SIZE = 3110400;
 const int N_YUV_SIZE = 4147200;
 
 
+const int g_LotApdInfoCount = 98;//// 96;
+const int g_LotInfoListCount = 14;// 9;
 
-#if 1
-static string MesSpecList[MES_VERIFY_SPEC_COUNT] =
-{
-	"[Current] Current(mA)",
-	"[Voltage] Voltage1 (V)",
-	"[Nor Flash Memory] ISP Version Check",
-	"[Nor Flash Memory] ISP Model Check",
-	"[SFR] 0.0F",
-	"[SFR] 0.4F LT",
-	"[SFR] 0.4F LB",
-	"[SFR] 0.4F RB",
-	"[SFR] 0.4F RT",
-	"[SFR] 0.7F LT",
-	"[SFR] 0.7F LB",
-	"[SFR] 0.7F RB",
-	"[SFR] 0.7F RT",
-	"[SFR] 0.4F DIFF",
-	"[SFR] 0.7F DIFF",
-	"[OC] Optical Center X",
-	"[OC] Optical Center Y",
-	"[Rotate] Rotate",
-	"[FoV] HFoV",
-	"[FoV] VFoV",
-	"[ColorReproduction] Red",
-	"[ColorReproduction] Blue",
-	"[ColorReproduction] Green",
-	"[ColorReproduction] Black",
-	"[Saturation] TOP_Chart_Bright_LT",
-	"[Saturation] TOP_Chart_Bright_LB",
-	"[Saturation] TOP_Chart_Bright_RB",
-	"[Saturation] TOP_Chart_Bright_RT",
-	"[Saturation] Side_Chart_Bright_LT",
-	"[Saturation] Side_Chart_Bright_LB",
-	"[Saturation] Side_Chart_Bright_RT",
-	"[Saturation] Side_Chart_Bright_RB",
-	"[Saturation] TOP_Chart_Bright_Avg",
-	"[Saturation] OC_Bright_Center",
-	"[RI] OC_LT_Ratio",
-	"[RI] OC_LB_Ratio",
-	"[RI] OC_RB_Ratio",
-	"[RI] OC_RT_Ratio",
-	"[RI] OC_Min_Ratio",
-	"[Blemish] LCB",
-	"[Blemish] Ymean",
-	"[Blemish] FDF",
-	"[Sensor Voltage] AVDD",
-	"[Sensor Voltage] OVDD",
-	"[Sensor Voltage] DVDD"
-};
-#else
-#define		MES_VERIFY_SPEC_COUNT		69
-static string strArr[MES_VERIFY_SPEC_COUNT] = {
-	"Current",														//0
-	"[SFR] 0.0F ROI 1",						"[SFR] 0.0F ROI 2",					//2
-	"[SFR] 0.0F ROI 3",						"[SFR] 0.0F ROI 4",					//4
-	"[SFR] 0.4F ROI 1",						"[SFR] 0.4F ROI 2",					//6
-	"[SFR] 0.4F ROI 3",						"[SFR] 0.4F ROI 4",					//8
-	"[SFR] 0.4F ROI 5",						"[SFR] 0.4F ROI 6",					//10
-	"[SFR] 0.4F ROI 7",						"[SFR] 0.4F ROI 8",					//12
-	"[SFR] 0.7F ROI 1",						"[SFR] 0.7F ROI 2",					//14
-	"[SFR] 0.7F ROI 3",						"[SFR] 0.7F ROI 4",					//16
-	"[SFR] 0.7F ROI 5",						"[SFR] 0.7F ROI 6",					//18
-	"[SFR] 0.7F ROI 7",						"[SFR] 0.7F ROI 8",					//20
-	"[SFR] 0.4F DIFF",						"[SFR] 0.7F DIFF",					//22
-	"[OC] Delta X",							"[OC] Delta Y",						//24
-	"[Rotation] Rotation",					"[FoV] HFoV",						//26
-	"[FoV] VFoV",							"[Blemish] FDF",					
-	"[Blemish] LCB",						"[Blemish] Ymean",					//28
-	"[RI] Center Intensity",				"[RI] RI ROI 1",					//30
-	"[RI] RI ROI 2",						"[RI] RI ROI 3",					//32
-	"[RI] RI ROI 4",						"[RI] RI Diff",						//34
-	"[RI] RI Min Diff",
-	"[ColorReproduction] ROI 1",			"[ColorReproduction] ROI 2",		//36
-	"[ColorReproduction] ROI 3",			"[ColorReproduction] ROI 4",		//38
-	"Voltage",								"[LIGHT]SFR1",
-	"[LIGHT]SFR2",							"[LIGHT]SFR3",
-	"[LIGHT]SFR4",							"[LIGHT]SFR5",
-	"[LIGHT]SFR6",							"[LIGHT]SFR7",
-	"[LIGHT]SFR8",							"[LIGHT]SFR9",
-	"[LIGHT]OC",							"[Saturation] TOP_Chart_Bright_LT",	
-	"[Saturation] TOP_Chart_Bright_LB",		"[Saturation] TOP_Chart_Bright_RB",
-	"[Saturation] TOP_Chart_Bright_RT",		"[Saturation] Side_Chart_Bright_LT",
-	"[Saturation] Side_Chart_Bright_LB",	"[Saturation] Side_Chart_Bright_RT",
-	"[Saturation] Side_Chart_Bright_RB",	"[Saturation] TOP_Chart_Bright_Avg",
-	"[RI] OC_LT_Ratio",						"[RI] OC_LB_Ratio",
-	"[RI] OC_RB_Ratio",						"[RI] OC_RT_Ratio",
-	"[RI] OC_Min_Ratio",					"[Nor Flash Memory] ISP Version Check",
-	"[Nor Flash Memory] ISP Model Check"
-};
-#endif
+const int g_MaxModelCount = 10;
+const int g_MaxRecipeCount = 10;
+const int g_MaxIdelCount = 5;
+
 enum MODE_TYPE	{ MODE_STOP = 0, MODE_READY, MODE_AUTO, MODE_PAUSE, MODE_ERR };	//!! 모드 상태 변수 0=정지상태, 1=운전준비상태, 2=자동운전상태, 3=일시정지상태
 enum LIGHT_DATA_INDEX { 
 	LIGHT_DATA_TOP_CHART_1 = 0, LIGHT_DATA_OC_WHITE1, LIGHT_DATA_ALIGN_SENSOR, LIGHT_DATA_ALIGN_HOLDER, LIGHT_DATA_ALIGN_LENS,
@@ -407,28 +351,55 @@ enum LEN_SOCKET_IF					{ LEN_SUPPLY_REQ, LEN_SUPPLY_ACK, LEN_CHK_REQ, LEN_CHK_AC
 enum ULD_SOCKET_IF					{ ULD_ITF_CHK, ULD_BLW_REQ, ULD_CLR_ACK, ULD_ESC_ACK, ULE_ITF_CHK, ULE_BLW_REQ, ULE_CLR_ACK, ULD_VAC_REQ, ULE_ESC_ACK, MAX_ULD_IF_COUNT};
 
 
-enum
-{
-	eMES_CHECK_ONLINE = 0,
-	eMES_ALARM,
-	eMES_ALARM_RESET,			//추가
-	eMES_TRACK_IN,
-	eMES_TRACK_OUT,
+enum eCURRENT_CONTROL_STATE { eEquipmentOffline = 1, eAttemprtOnline, eHostOffline, eOnlineLocal, eOnlineRemote };
+
+enum ePROCESS_STATE_INFO { eINIT = 1, eIDLE, eSETUP, eREADY, eEXECUTING, ePAUSE};
+
+enum eLOT_PROCESSING_STATE { eScan = 1, eReady, eWait, eProcessing, eCompleted};
+
+enum ePP_CHANGE_ORDER_TYPE { eHost = 1, eOperator = 2 };
+enum ePP_CHANGE_STATE { eCreated = 1, eEdited, eDeleted, eUploadListChanged };
+
+enum eHOST_COMMAND { 
+	eLGIT_CTRLSTATE_CHG_REQ = 0, 
+	eLGIT_OP_CALL, 
+	eLGIT_SETCODE_OFFLINE_REASON, 
+	eLGIT_SETCODE_IDLE_REASON, 
+	eLGIT_SETCODE_MATERIAL_EXCHANGE,
+	eLGIT_SETCODE_MODEL_LIST,			//5
+	eLGIT_PP_SELECT,
+	eLGIT_LOT_ID_FAIL,
+	eLGIT_PP_UPLOAD_CONFIRM,
+	eLGIT_PP_UPLOAD_FAIL,
+	eLGIT_LOT_START,
+	eLGIT_MATERIAL_ID_CONFIRM,
+	eLGIT_MATERIAL_ID_FAIL,
+	eLGIT_PAUSE
 };
 
+#define OFFLINE_CHANGED_REPORT_10102					_T("10102")
+#define EQUIPMENT_OPERATION_MODE_CHANGED_REPORT			_T("10301")
+#define PROCESS_STATE_CHANGED_REPORT_10401				_T("10401")
+#define	IDLE_REASON_REPORT_10402						_T("10402")
+#define	PROCESS_PROGRAM_STATE_CHANGED_REPORT_10601		_T("10601")
+//
+#define	OBJECT_ID_REPORT_10701							_T("10701")
 
-typedef enum _AlarmList {
-	eMES_ALARM_TrackIn_Fail = 1,
-	eMES_ALARM_TEMP2,
-	eMES_ALARM_TEMP3,
-	eMES_ALARM_TEMP4,
-	eMES_ALARM_TEMP5,
-	eMES_ALARM_TEMP6,
-	//7
-	//8
-	//9
-	//10
-} AlarmList;
+#define	PP_SELECTED_REPORT_10702						_T("10702")
+#define	PP_UPLOAD_COMPLETED_REPORT_10703				_T("10703")
+#define	LOT_PROCESSING_STARTED_REPORT_10704				_T("10704")
+#define	LOT_PROCESSING_COMPLETED_REPORT_10710			_T("10710")
+#define	LOT_APD_REPORT_10711							_T("10711")	//검사 결과값
+//
+#define ABORTED_REPORT_10712							_T("10712")
+#define MATERIAL_ID_REPORT_10713						_T("10713")
+#define MATERIAL_CHANGE_COMPLETED_REPORT_10714			_T("10714")
+#define	OP_RECOGNIZED_OP_CALL_REPORT_10801				_T("10801")
+#define	OP_RECOGNIZED_TERMINAL_REPORT_10901				_T("10901")
+
+
+#define	T3_TIMEOUT_REPORT_11001							_T("11001")
+#define	CT_TIMEOUT_REPORT_11002							_T("11002")
 
 
 
@@ -443,233 +414,232 @@ static TCHAR* MARK_ALIGN_NAME[1] =
 };
 static TCHAR* OC_LIGHT_NAME[2] = { _T("5000K"), _T("6500K") };
 
-const int g_Defectcount = 29;
-static TCHAR* DEFECT_SPEC_NAME[g_Defectcount] =
-{		_T("AnThresholdTypeDarkInDark"),		_T("AnThresholdTypeDarkInBright"),				
-		_T("AnThresholdTypeBrightInDark"),		_T("AnThresholdTypeBrightInBright"),		
-		_T("AnThresholdTypeLineDefect"),		_T("AnAlgorithmTypeLineDefect"),	
-		_T("AdDefectThresholdDarkInDark"),		_T("AdDefectThresholdDarkInBright"),
-		_T("AdDefectThresholdBrightInDark"),	_T("AdDefectThresholdBrightInBright"),	
-		_T("AdDefectThresholdRowInDark"),		_T("AdDefectThresholdRowInBright"),			
-		_T("AdDefectThresholdColumnInDark"),	_T("AdDefectThresholdColumnInBright"),
-		_T("AnMaxDarkDefectInDarkNum"),			_T("AnMaxDarkDefectInBrightNum"),		
-		_T("AnMaxBrightDefectInDarkNum"),		_T("AnMaxBrightDefectInBrightNum"),		
-		_T("AnMaxDarkClusterInDarkNum"),		_T("AnMaxDarkClusterInBrightNum"),
-		_T("AnMaxBrightClusterInDarkNum"),		_T("AnMaxBrightClusterInBrightNum"),	
-		_T("AnMaxRowDefectNumInDark"),			_T("AnMaxRowDefectNumInBright"),		
-		_T("AnMaxColumnDefectNumInDark"),		_T("AnMaxColumnDefectNumInBright"),	
-	_T("AnEnableChannel"),
-	_T("AnDefectInCluster"),				
-	_T("ADefectInClusterChannel")
-};
+static TCHAR* RECIPE_LIST_NAME[2] = { _T("RECIPE_FRONT_100"), _T("RECIPE_OHC_150") };
 
-const int g_Occount = 4;
-static TCHAR* OC_SPEC_NAME[g_Occount] =
+
+
+
+const int g_RecipeParamCount = 208;//207;
+static TCHAR* RECIPE_PARAM_NAME[g_RecipeParamCount] =
 { 
-    _T("AnFiducialMarkNum"), _T("AnFiducialMarkType"),
-	_T("AdMin"),			_T("AdMax")
+	_T("CURRENT_MIN"),	//0
+	_T("CURRENT_MAX"),
+	_T("VOLTAGE_MIN"),
+	_T("VOLTAGE_MAX"),
+	_T("ISP_VERSION"),
+	_T("ISP_MODEL"),		//5
+	_T("SFR_0F_MIN"),		//6 sfr
+	_T("SFR_4F_LT_MIN"),
+	_T("SFR_4F_RT_MIN"),
+	_T("SFR_4F_LB_MIN"),
+	_T("SFR_4F_RB_MIN"),
+	_T("SFR_7F_LT_MIN"),
+	_T("SFR_7F_RT_MIN"),
+	_T("SFR_7F_LB_MIN"),
+	_T("SFR_7F_RB_MIN"),
+	_T("SFR_4F_DIFF_MIN"),	//15 diff
+	_T("SFR_4F_DIFF_MAX"),
+	_T("SFR_7F_DIFF_MIN"),
+	_T("SFR_7F_DIFF_MAX"),
+	_T("OC_X_MIN"),			//19 oc
+	_T("OC_X_MAX"),
+	_T("OC_Y_MIN"),
+	_T("OC_Y_MAX"),
+	_T("ROTATION_MIN"),		//23
+	_T("ROTATION_MAX"),
+	_T("HFOV_MIN"),			//25
+	_T("HFOV_MAX"),
+	_T("VFOV_MIN"),
+	_T("VFOV_MAX"),
+	_T("COLORREPRODUCTION_RED_MAX"),	//29
+	_T("COLORREPRODUCTION_BLUE_MAX"),
+	_T("COLORREPRODUCTION_GREEN_MAX"),
+	_T("COLORREPRODUCTION_BLACK_MAX"),
+
+	_T("SATURATION_TOP_CHART_LT_MIN"),		//33
+	_T("SATURATION_TOP_CHART_LT_MAX"),
+	_T("SATURATION_TOP_CHART_LB_MIN"),
+	_T("SATURATION_TOP_CHART_LB_MAX"),
+	_T("SATURATION_TOP_CHART_RB_MIN"),
+	_T("SATURATION_TOP_CHART_RB_MAX"),
+	_T("SATURATION_TOP_CHART_RT_MIN"),
+	_T("SATURATION_TOP_CHART_RT_MAX"),
+	_T("SATURATION_SIDE_CHART_LT_MIN"),	//41
+	_T("SATURATION_SIDE_CHART_LT_MAX"),
+	_T("SATURATION_SIDE_CHART_LB_MIN"),	
+	_T("SATURATION_SIDE_CHART_LB_MAX"),
+	_T("SATURATION_SIDE_CHART_RT_MIN"),
+	_T("SATURATION_SIDE_CHART_RT_MAX"),		//46
+	_T("SATURATION_SIDE_CHART_RB_MIN"),
+	_T("SATURATION_SIDE_CHART_RB_MAX"),
+	_T("SATURATION_TOP_CHART_AVG_MIN"),		//49
+	_T("SATURATION_TOP_CHART_AVG_MAX"),
+	_T("SATURATION_OC_MIN"),		//51
+	_T("SATURATION_OC_MAX"),
+	_T("RI_LT_RATIO_MIN"),				//53 34
+	_T("RI_LT_RATIO_MAX"),
+	_T("RI_LB_RATIO_MIN"),
+	_T("RI_LB_RATIO_MAX"),
+	_T("RI_RB_RATIO_MIN"),
+	_T("RI_RB_RATIO_MAX"),
+	_T("RI_RT_RATIO_MIN"),
+	_T("RI_RT_RATIO_MAX"),
+	_T("RI_MIN_RATIO_MIN"),			//ri min 61 42
+	_T("BLEMISH_FDF_MAX"),	//62
+	_T("BLEMISH_LCB_MAX"),
+	_T("BLEMISH_YMEAN_MAX"),
+
+	_T("SENSOR_VOLTAGE_AVDD_MIN"),	//65
+	_T("SENSOR_VOLTAGE_AVDD_MAX"),
+	_T("SENSOR_VOLTAGE_OVDD_MIN"),
+	_T("SENSOR_VOLTAGE_OVDD_MAX"),
+	_T("SENSOR_VOLTAGE_DVDD_MIN"),
+	_T("SENSOR_VOLTAGE_DVDD_MAX"),
+	_T("CR_THRESHOLD_1"),			//71
+	_T("CR_THRESHOLD_2"),
+	_T("CR_THRESHOLD_3"),
+	_T("CR_THRESHOLD_4"),
+	_T("CR_COLOR_LAB_1_L"),			//cr 75
+	_T("CR_COLOR_LAB_1_A"),
+	_T("CR_COLOR_LAB_1_B"),
+	_T("CR_COLOR_LAB_2_L"),
+	_T("CR_COLOR_LAB_2_A"),
+	_T("CR_COLOR_LAB_2_B"),	//80
+	_T("CR_COLOR_LAB_3_L"),
+	_T("CR_COLOR_LAB_3_A"),
+	_T("CR_COLOR_LAB_3_B"),
+	_T("CR_COLOR_LAB_4_L"),
+	_T("CR_COLOR_LAB_4_A"),
+	_T("CR_COLOR_LAB_4_B"),//86
+	_T("CR_ROI_1_LEFT"),	//87
+	_T("CR_ROI_1_TOP"),
+	_T("CR_ROI_1_RIGHT"),
+	_T("CR_ROI_1_BOTTOM"),	//90
+	_T("CR_ROI_2_LEFT"),
+	_T("CR_ROI_2_TOP"),
+	_T("CR_ROI_2_RIGHT"),
+	_T("CR_ROI_2_BOTTOM"),
+	_T("CR_ROI_3_LEFT"),
+	_T("CR_ROI_3_TOP"),
+	_T("CR_ROI_3_RIGHT"),
+	_T("CR_ROI_3_BOTTOM"),
+	_T("CR_ROI_4_LEFT"),
+	_T("CR_ROI_4_TOP"),	//100
+	_T("CR_ROI_4_RIGHT"),
+	_T("CR_ROI_4_BOTTOM"),
+
+	_T("RI_CORNER_MIN"),	//103
+	_T("RI_CORNER_MAX"),
+	_T("RI_MIN_MIN"),
+	_T("RI_MIN_MAX"),	//106
+	_T("RI_CENTER_INTENSITY"),
+	_T("RI_NORMALIZE_INDEX"),		//108
+	_T("RI_CENTER_INTENSITY_MIN"),	//x
+	_T("RI_CENTER_INTENSITY_MAX"),	//x
+	_T("RI_RATIO_MIN"),	//x
+	_T("RI_RATIO_MAX"),	//x
+	_T("RI_DIFFERENCE_MIN"),	//x
+	_T("RI_DIFFERENCE_MAX"),	//x
+
+	_T("LCB_CENTER_THRESHOLD"),	//115
+	_T("LCB_EDGE_THRESHOLD"),
+	_T("LCB_CORNER_THRESHOLD"),
+	_T("LCB_MAX_SINGLE_DEFECT_NUM"),//118
+	_T("LCB_MIN_DEFECT_WIDTH_HEIGHT"),
+	_T("LCB_CENTER_MAX_R"),//120
+	_T("LCB_CENTER_MAX_GR"),
+	_T("LCB_CENTER_MAX_GB"),
+	_T("LCB_CENTER_MAX_B"),
+	_T("LCB_EDGE_MAX_R"),
+	_T("LCB_EDGE_MAX_GR"),
+	_T("LCB_EDGE_MAX_GB"),
+	_T("LCB_EDGE_MAX_B"),
+	_T("LCB_CORNER_MAX_R"),
+	_T("LCB_CORNER_MAX_GR"),
+	_T("LCB_CORNER_MAX_GB"),	//130
+	_T("LCB_CORNER_MAX_B"),
+	_T("LCB_ENABLE_CIRCLE"),	//132
+	_T("LCB_POS_OFFSET_X"),	//133
+	_T("LCB_POS_OFFSET_Y"),
+	_T("LCB_RADIUS_RATIO_X"),
+	_T("LCB_RADIUS_RATIO_Y"),
+	_T("LCB_THRESHOLD_RATIO"),
+	_T("LCB_ROI_RANGE"),
+	_T("LCB_USED_FIXED_CIRCLE"),
+	_T("LCB_ENABLE_MULTI_CIRCLE"),	//140
+	_T("LCB_ZONE_SIZE_RATIO_1"),
+	_T("LCB_ZONE_SIZE_RATIO_2"),
+	_T("LCB_ZONE_SIZE_RATIO_3"),
+	_T("LCB_THRESHOLD_1"),
+	_T("LCB_THRESHOLD_2"),
+	_T("LCB_THRESHOLD_3"),
+	_T("LCB_BLOB_SIZE_1"),
+	_T("LCB_BLOB_SIZE_2"),
+	_T("LCB_BLOB_SIZE_3"),	//149
+
+	_T("YMEAN_EDGE_SIZE"),		//150
+	_T("YMEAN_CENTER_THRESHOLD"),
+	_T("YMEAN_EDGE_THRESHOLD"),
+	_T("YMEAN_CORNER_THRESHOLD"),
+	_T("YMEAN_DEFEC_BLOCK_SIZE"),
+	_T("YMEAN_LSC_BLOCK_SIZE"),	//155
+	_T("YMEAN_CALC_TYPE"),
+	_T("YMEAN_MAX_RECURSIVE_COUNT"),
+	_T("YMEAN_MAX_DEFECT_SIZE"),
+	_T("YMEAN_PIXEL_SIZE"),
+	_T("YMEAN_ENABLE_CIRCLE"),	//160
+	_T("YMEAN_POS_OFFSET_X"),
+	_T("YMEAN_POS_OFFSET_Y"),
+	_T("YMEAN_RADIUS_RATIO_X"),
+	_T("YMEAN_RADIUS_RATIO_Y"),
+	_T("YMEAN_THRESHOLD_RATIO"),	//165
+	_T("YMEAN_ROI_RANGE"),
+	_T("YMEAN_USED_FIXED_CIRCLE"),	//167
+	_T("YMEAN_ENABLE_MULTI_CIRCLE"),
+	_T("YMEAN_ZONE_SIZE_RATIO_1"),	//169
+	_T("YMEAN_ZONE_SIZE_RATIO_2"),
+	_T("YMEAN_ZONE_SIZE_RATIO_3"),
+	_T("YMEAN_THRESHOLD_1"),
+	_T("YMEAN_THRESHOLD_2"),
+	_T("YMEAN_THRESHOLD_3"),
+	_T("YMEAN_BLOB_SIZE_1"),
+	_T("YMEAN_BLOB_SIZE_2"),
+	_T("YMEAN_BLOB_SIZE_3"),	//177
+
+	_T("FDF_CENTER_THRESHOLD"),		//178
+	_T("FDF_EDGE_THRESHOLD"),	
+	_T("FDF_CORNER_THRESHOLD"),	//180
+	_T("FDF_MEDIAN_FILTER_WIDTH"),
+	_T("FDF_MEDIAN_FILTER_HEIGHT"),
+	_T("FDF_WIDTH_SCALE_RATIO"),
+	_T("FDF_HEIGHT_SCALE_RATIO"),
+	_T("FDF_MIN_DEFECT_WIDTH_HEIGHT"),
+	_T("FDF_WINDOW_SIZE"),
+	_T("FDF_EDGE_SIZE"),
+	_T("FDF_ENABLE_CHANNEL"),
+	_T("FDF_MAX_SINGLE_DEFECT_NUM"),
+	_T("FDF_ENABLE_CIRCLE"),	//190
+	_T("FDF_POS_OFFSET_X"),
+	_T("FDF_POS_OFFSET_Y"),
+	_T("FDF_RADIUS_RATIO_X"),
+	_T("FDF_RADIUS_RATIO_Y"),
+	_T("FDF_THRESHOLD_RATIO"),	//195
+	_T("FDF_ROI_RANGE"),
+	_T("FDF_USED_FIXED_CIRCLE"),
+	_T("FDF_ENABLE_MULTI_CIRCLE"),	//198
+	_T("FDF_ZONE_SIZE_RATIO_1"),
+	_T("FDF_ZONE_SIZE_RATIO_2"),	//200
+	_T("FDF_ZONE_SIZE_RATIO_3"),
+	_T("FDF_THRESHOLD_1"),
+	_T("FDF_THRESHOLD_2"),
+	_T("FDF_THRESHOLD_3"),
+	_T("FDF_BLOB_SIZE_1"),
+	_T("FDF_BLOB_SIZE_2"),
+	_T("FDF_BLOB_SIZE_3"),		//207
 };
 
-static TCHAR* ROTATE_SPEC_NAME[2] =
-{
-	_T("AdMin"),			_T("AdMax")
-};
-static TCHAR* TILTX_SPEC_NAME[2] =
-{
-	_T("AdMin"),			_T("AdMax")
-};
-static TCHAR* TILTY_SPEC_NAME[2] =
-{
-	_T("AdMin"),			_T("AdMax")
-};
-//
-const int g_ColorSenscount = 14;//8;
-static TCHAR* COLOR_SENS_SPEC_NAME[g_ColorSenscount] =
-{ 
-		_T("AdSpecDevMinR"),	_T("AdSpecDevMaxR"),
-		_T("AdSpecDevMinGr"),	_T("AdSpecDevMaxGr"),
-		_T("AdSpecDevMinGb"),	_T("AdSpecDevMaxGb"),
-		_T("AdSpecDevMinB"),	_T("AdSpecDevMaxB"),
-		_T("AdSpecDevMinRG"),	_T("AdSpecDevMaxRG"),
-		_T("AdSpecDevMinBG"),	_T("AdSpecDevMaxBG"),
-		_T("AdSpecDevMinGrGb"),	_T("AdSpecDevMaxGrGb")
-};
-//
-const int g_Snrcount = 2;
-static TCHAR* SNR_SPEC_NAME[g_Snrcount] =
-{ 
-	_T("AdSNRThreshold"),_T("AdDRThreshold")
-};
-//
-const int g_Fpncount = 63;
-const int g_FpnStart5000k = 15;
-const int g_FpnStartDark = 39;
-static TCHAR* FPN_SPEC_NAME[g_Fpncount] =		//SNR, ROW , COLUMN NOISE
-{
-	_T("AnSnrThreshold"),			
-	_T("AnRowThreshold"),
-	_T("AnColumnThreshold"),
-	_T("AnSnrRoiL"),	_T("AnSnrRoiT"),	_T("AnSnrRoiR"),	_T("AnSnrRoiB"),
-	_T("AnRowRoiL"),	_T("AnRowRoiT"),	_T("AnRowRoiR"),	_T("AnRowRoiB"),
-	_T("AnColumnRoiL"),	_T("AnColumnRoiT"), _T("AnColumnRoiR"), _T("AnColumnRoiB"),
-	//15 = SnrRMin, 5000k
-	_T("SnrRMin"), _T("SnrRMax"),_T("SnrGrMin"), _T("SnrGrMax"),_T("SnrGbMin"), _T("SnrGbMax"),_T("SnrBMin"), _T("SnrBMax"),
-	_T("CFpnRMin"), _T("CFpnRMax"),_T("CFpnGrMin"), _T("CFpnGrMax"),_T("CFpnGbMin"), _T("CFpnGbMax"),_T("CFpnBMin"), _T("CFpnBMax"),
-	_T("RFpnRMin"), _T("RFpnRMax"),_T("RFpnGrMin"), _T("RFpnGrMax"),_T("RFpnGbMin"), _T("RFpnGbMax"),_T("RFpnBMin"), _T("RFpnBMax"),
-	//39 = SnrRMin2, Dark
-	_T("SnrRMin2"), _T("SnrRMax2"),_T("SnrGrMin2"), _T("SnrGrMax2"),_T("SnrGbMin2"), _T("SnrGbMax2"),_T("SnrBMin2"), _T("SnrBMax2"),
-	_T("CFpnRMin2"), _T("CFpnRMax2"),_T("CFpnGrMin2"), _T("CFpnGrMax2"),_T("CFpnGbMin2"), _T("CFpnGbMax2"),_T("CFpnBMin2"), _T("CFpnBMax2"),
-	_T("RFpnRMin2"), _T("RFpnRMax2"),_T("RFpnGrMi2n"), _T("RFpnGrMax2"),_T("RFpnGbMin2"), _T("RFpnGbMax2"),_T("RFpnBMin2"), _T("RFpnBMax2")
-};
-
-const int g_ColorUniformitycount = 14;
-static TCHAR* COLOR_UNIFORMITY_SPEC_NAME[g_ColorUniformitycount] =
-{ 
-		_T("AnGridSizeX"),			_T("AnGridSizeY"),		
-		_T("AnColorSpaceType"),		_T("AnMaxDiffType"),
-		_T("AspecMaxDiffRG"),		_T("AspecMaxDiffBG"),	
-		_T("AspecMaxDiffRB"),		_T("AspecMaxDiffGrGb"), 
-		_T("AspecMinDiffRG"),		_T("AspecMinDiffBG"),	
-		_T("AspecMinDiffRB"),		_T("AspecMinDiffGrGb"), 
-		_T("AspecMinSum"),			_T("AspecMaxSum")
-};                                                         
-//
-const int g_ColorShadingcount = 8;
-static TCHAR* COLOR_SHADING_SPEC_NAME[g_ColorShadingcount] =
-{
-	_T("AdSpecMinR"), _T("AdSpecMinGr"), _T("AdSpecMinGb"),_T("AdSpecMinB"),
-	_T("AdSpecMinRG"), _T("AdSpecMinBG"), 
-	_T("AdSpecMaxRG"),_T("AdSpecMaxBG")
-};
-const int g_Ricount = 12;
-static TCHAR* RI_SPEC_NAME[g_Ricount] =
-{	
-	_T("AdSpecRIcornerMin"),					_T("AdSpecRIcornerMax"),
-	_T("AnSpecRIminMin"),						_T("AnSpecRIminMax"),
-	_T("AnCenterIntensity"),					_T("AnRINormalizeIndex"),
-	_T("AnSpecRICenterIntensityMIN"),			_T("AnSpecRICenterIntensityMAX"),
-	_T("AnSpecRIRatioMIN"),						_T("AnSpecRIRatioMAX"),
-	_T("AnSpecDifferenceMIN"),					_T("AnSpecDifferenceMAX")
-};
-
-const int g_Blemishcount = 21;
-static TCHAR* STAIN_BLEMISH_SPEC_NAME[g_Blemishcount] = //21개
-{ 
-    _T("AnBlockWidth"),			_T("AnBlockHeight"),		_T("AnClusterSize"),
-    _T("AnDefectInCluster"),	_T("AdDefectRatio"),		_T("AnMaxSingleDefectNum"),
-    _T("AbEnableCircle"),		_T("AnPosOffsetX"),			_T("AnPosOffsetY"),
-    _T("AdRadiusRatioX"),		_T("AdRadiusRatioY"),		_T("AdThresholdRatio"),
-    _T("AdROIRange"),			_T("AnUsedFixedCircle"),	_T("AbEnableMultiCircle"),
-    _T("AdZoneSizeRatio1"),		_T("AdZoneSizeRatio2"),		_T("AdZoneSizeRatio3"),
-    _T("AdThreshold1"),			_T("AdThreshold2"),			_T("AdThreshold3")
-};
-
-const int g_StainLcbcount = 35;
-static TCHAR* STAIN_LCB_SPEC_NAME[g_StainLcbcount] =	//35개
-{
-    _T("AdCenterThreshold"),		_T("AdEdgeThreshold"),		_T("AdCornerThreshold"),		
-	_T("AnMaxSingleDefectNum"),
-    _T("AnMinDefectWidthHeigh"),	
-	_T("AnCenterMaxR"),				_T("AnCenterMaxGR"),			_T("AnCenterMaxGB"),	_T("AnCenterMaxB"),				
-	_T("AnEdgeMaxR"),				_T("AnEdgeMaxGR"),				_T("AnEdgeMaxGB"),			_T("AnEdgeMaxB"),				
-	_T("AnCornerMaxR"),			_T("AnCornerMaxGR"),			_T("AnCornerMaxGB"),		_T("AnCornerMaxB"),				
-	_T("AbEnableCircle"),		_T("AnPosOffsetX"),				_T("AnPosOffsetY"),			
-	_T("AdRadiusRatioX"),			_T("AdRadiusRatioY"),		_T("AdThresholdRatio"),			_T("AdROIRange"),				
-	_T("AnUsedFixedCircle"),		_T("AbEnableMultiCircle"),		
-	_T("AdZoneSizeRatio1"),		_T("AdZoneSizeRatio2"),		_T("AdZoneSizeRatio3"),			
-	_T("AdThreshold1"),				_T("AdThreshold2"),			_T("AdThreshold3"),
-	_T("AnBlobSize1"),				_T("AnBlobSize2"),			_T("AnBlobSize3")
-};
-
-const int g_StainYmeancount = 28;
-static TCHAR* STAIN_YMEAN_SPEC_NAME[g_StainYmeancount] =		//25개
-{
-    _T("AdEdgeSize"),				_T("AdCenterThreshold"),		_T("AdEdgeThreshold"),		
-	_T("AdCornerThreshold"),		_T("AnDefecBlockSize"),			_T("AnLscBlockSize"),		
-	_T("AnCalcType"),				_T("AnnMaxRecursiveCount"),     _T("AdMaxDefectSize"),		
-	_T("AdPixelSize"),
-	_T("AbEnableCircle"),
-	_T("AnPosOffsetX"),				_T("AnPosOffsetY"),				
-	_T("AdRadiusRatioX"),			_T("AdRadiusRatioY"),			
-	_T("AdThresholdRatio"),			_T("AdROIRange"),				
-	_T("AnUsedFixedCircle"),		_T("AbEnableMultiCircle"),		
-	_T("AdZoneSizeRatio1"),			_T("AdZoneSizeRatio2"),			_T("AdZoneSizeRatio3"),			
-	_T("AdThreshold1"),				_T("AdThreshold2"),				_T("AdThreshold3"),
-	_T("AnBlobSize1"),				_T("AnBlobSize2"),			_T("AnBlobSize3")
-};
-
-const int g_StainFdfcount = 30;
-static TCHAR* STAIN_FDF_SPEC_NAME[g_StainFdfcount] =		//30개
-{
-	_T("AdCenterThreshold"),		_T("AdEdgeThreshold"),		_T("AdCornerThreshold"),
-	_T("AnMedianFilterWidth"),		_T("AnMedianFilterHeight"),
-	_T("AnWidthScaleRatio"),		_T("AnHeightScaleRatio"),
-	_T("AnMinDefectWidthHeight"),	_T("AnWindowSize"),
-	_T("AnEdgeSize"),				_T("AbEnableChannel"),
-	_T("AnMaxSingleDefectNum"),	
-	_T("AbEnableCircle"),
-	_T("AnPosOffsetX"),				_T("AnPosOffsetY"),
-	_T("AdRadiusRatioX"),			_T("AdRadiusRatioY"),
-	_T("AdThresholdRatio"),			_T("AdROIRange"),
-	_T("AnUsedFixedCircle"),		
-	_T("AbEnableMultiCircle"),
-	_T("AdZoneSizeRatio1"),			_T("AdZoneSizeRatio2"),			_T("AdZoneSizeRatio3"),
-	_T("AdThreshold1"),				_T("AdThreshold2"),				_T("AdThreshold3"),
-	_T("AnBlobSize1"),				_T("AnBlobSize2"),			_T("AnBlobSize3")
-};
-
-const int g_Iccount = 6;
-static TCHAR* IC_SPEC_NAME[g_Iccount] =
-{
-	_T("AnOpticalCenterSpecX"),		_T("AnOpticalCenterSpecY"),
-	_T("AdPixelPitch"),				_T("AdThresholdRatio"),
-	_T("AnOCBlocSize"),				_T("AnEdgeTopMargin")
-};
 
 
-const int g_Ircount = 13;// 7;
-static TCHAR* IRFILTER_SPEC_NAME[g_Ircount] =
-{
-	_T("AdMinThreshold"),	_T("AdMaxThreshold"),   _T("AdRoiThreshold"),		
-	_T("AnRoiLeft"),	_T("AnRoiTop"), 
-	_T("AnRoiRight"), _T("AnRoiBottom"),
-	_T("AdFullBrightAvgMin"),_T("AdFullBrightAvgMax"),
-	_T("AdRoiBrightAvgMin"),_T("AdRoiBrightAvgMax"),
-	_T("AdRoiBrightVarMin"),_T("AdRoiBrightVarMax")
-};
-
-
-const int g_Chartcount = 2;
-static TCHAR* CHART_PCB_TYPE[g_Chartcount] =
-{
-	_T("LEFT"), _T("RIGHT")
-};
-const int g_Currentcount = 2;
-static TCHAR* CURRENT_SPEC_NAME[g_Currentcount] =
-{ 
-	_T("AdMin_Spec"),		_T("AdMax_Spec") 
-};
-
-const int g_7fAvriationcount = 2;
-static TCHAR* SFR_7VARIATION_SPEC_NAME[g_7fAvriationcount] =
-{
-	_T("AdMin_Spec"),		_T("AdMax_Spec")
-};
-
-static TCHAR* COLOR_REPRODUCTION_SPEC_NAME[32] =
-{
-	_T("AdThreshold1"),	_T("AdThreshold2"),   _T("AdThreshold3"), _T("AdThreshold4"),
-	_T("AdColorLab1_L"),_T("AdColorLab1_a"),_T("AdColorLab1_b"),
-	_T("AdColorLab2_L"),_T("AdColorLab2_a"),_T("AdColorLab2_b"),
-	_T("AdColorLab3_L"),_T("AdColorLab3_a"),_T("AdColorLab3_b"),
-	_T("AdColorLab4_L"),_T("AdColorLab4_a"),_T("AdColorLab4_b"),
-	_T("AdRoi1_Left"),_T("AdRoi1_Top"),_T("AdRoi1_Right"),_T("AdRoi1_Bottom"),
-	_T("AdRoi2_Left"),_T("AdRoi2_Top"),_T("AdRoi2_Right"),_T("AdRoi2_Bottom"),
-	_T("AdRoi3_Left"),_T("AdRoi3_Top"),_T("AdRoi3_Right"),_T("AdRoi3_Bottom"),
-	_T("AdRoi4_Left"),_T("AdRoi4_Top"),_T("AdRoi4_Right"),_T("AdRoi4_Bottom")
-};
-
-//
 //-------------------------------------------------------------------------------------------
 #define		MAIN_BG_COLOR            RGB(0,0,0)// RGB(47,60,67)
 #define		TRAY_GOOD_YES            RGB(130,104,141)
@@ -705,6 +675,7 @@ static TCHAR* COLOR_REPRODUCTION_SPEC_NAME[32] =
 #define MAX_CAM_COUNT					1		//Unit 당 카메라 수
 
 #define MAX_POPUP_COUNT					5
+#define MAX_TERMINAL_COUNT				5
 
 #define MAX_MODEL_COUNT					20
 //#define MAX_MARK_COUNT					3		//0 = 홀더 Align , 1 = pcb on Lens Align , 2 = Lens Grip Lens Align
@@ -770,11 +741,11 @@ static TCHAR* COLOR_REPRODUCTION_SPEC_NAME[32] =
 #define MAX_GRAPH_OVERLAP_COUNT			5
 #define MAX_GRAPH_PIXEL_SIZE			8192
 
-#define CAM_SIZE_X				1280//2000//1280
-#define CAM_SIZE_Y				960//1500//960
+#define CAM_SIZE_X				1280
+#define CAM_SIZE_Y				960
 
-#define		SMALL_CAM_SIZE_X	640	//640			//(CAM_SIZE_X/2+20)			// 영상 화면 Display..
-#define		SMALL_CAM_SIZE_Y	480	//470			//(CAM_SIZE_Y/2+15)
+#define		SMALL_CAM_SIZE_X	640				// 영상 화면 Display..
+#define		SMALL_CAM_SIZE_Y	480	
 
 #define		CAM_REDUCE_FACTOR_X		(double)SMALL_CAM_SIZE_X/CAM_SIZE_X
 #define		CAM_REDUCE_FACTOR_Y		(double)SMALL_CAM_SIZE_Y/CAM_SIZE_Y
@@ -887,6 +858,9 @@ static TCHAR* COLOR_REPRODUCTION_SPEC_NAME[32] =
 #define	_SFR_RIGHT_DOWN_INDEX_2_90		25
 
 
+
+#define WM_IDLE_REASON_TIMER				WM_USER + 2001
+#define WM_CT_TIMEOUT_TIMER					WM_USER + 3001
 ///////////////////////////////////////////////////////////////////////////////
 //
 // IMAGE CONVERT
@@ -905,7 +879,7 @@ static TCHAR* COLOR_REPRODUCTION_SPEC_NAME[32] =
 // COLOR DEFINE
 //
 #define RGB_DLG_BG						RGB(40, 39, 35)
-#define RGB_CTRL_BG						RGB(174,54,27)//RGB(55, 73, 93)
+#define RGB_CTRL_BG						RGB(174,54,27)
 
 #define RGB_COLOR_WHITE					RGB(255, 255, 255)
 #define RGB_COLOR_BLACK					RGB(0, 0, 0)
@@ -924,6 +898,9 @@ static TCHAR* COLOR_REPRODUCTION_SPEC_NAME[32] =
 #define	GRID_COLOR_SELECT			    RGB(244, 216, 234)
 #define	GRID_COLOR_DIO_OUT			    RGB(128, 255, 128)
 #define	GRID_COLOR_DIO_IN			    RGB(255, 94, 164)
+
+
+#define	MODEL_GRID_COLOR_SELECT			     RGB(128, 255, 128)
 ///////////////////////////////////////////////////////////////////////////////
 
 class CDMPoint//CDPoint
@@ -1021,5 +998,102 @@ typedef struct STRUC_MARK_POS
 	CDMPoint clDPtMarkCenter;
 	TCHAR szMode[SIZE_OF_100BYTE];
 } STRUC_MARK_POS;
+
+
+
+
+
+
+typedef struct RcmdParameter
+{
+	CString name;                       // CPNAME
+	CString value;                      // CEPVAL
+										//UbiGEMWrapper::Structure::GEMSECSFormat format; // Format 정보
+	std::vector<RcmdParameter> children; // 하위 LIST 저장
+}_RcmdParameter;
+
+typedef struct RcmdCommandGroup
+{
+	std::vector<RcmdParameter> parameters; // 하위 CommandParameter 리스트
+}_RcmdCommandGroup;
+
+
+typedef struct RcmdCtrlStateChgReq
+{
+	CString ConfirmFlag;
+	int ControlState;
+	CString Change_Code;
+	CString Change_Text;
+	CString Result_Code;
+	CString result_text;
+}_RcmdCtrlStateChgReq;
+
+typedef struct RcmdOpCall
+{
+	int CallType;
+	CString OpCall_Code;
+	CString OpCall_Text;
+}_RcmdOpCall;
+
+typedef struct RcmdMaterialIdConfirm
+{
+	CString MaterialId;
+	CString MaterialType;
+	CString MaterialType_Text;
+	int UnitNo;
+	int SlotNo;
+	CString RemainData;
+}_RcmdMaterialIdConfirm;
+
+typedef struct RcmdMaterialIdFail
+{
+	CString MaterialId;
+	CString MaterialType;
+	CString MaterialType_Text;
+	int UnitNo;
+	int SlotNo;
+	CString Code;
+	CString Text;
+
+}_RcmdMaterialIdFail;
+
+typedef struct RcmdLgitPause
+{
+	CString PauseCode;
+	CString PauteText;
+}_RcmdLgitPause;
+
+typedef struct RcmdParam1
+{
+	CString cpName;
+	CString cepVal;
+}_RcmdParam1;
+
+typedef struct RcmdParam2
+{
+	CString cpName;
+	CString cepVal;
+	std::vector<RcmdParam1> rVec;
+}_RcmdParam2;
+
+typedef struct RcmdList_T2
+{
+	std::vector<RcmdParam1> rVec;
+}_RcmdList_T2;
+
+
+typedef struct RcmdList_T2_N
+{
+	std::vector<RcmdParam2> rVec;
+}_RcmdList_T2_N;
+
+typedef struct PP_RECIPE_SPEC
+{
+	std::string PPId;
+	std::string VERSION;
+	std::vector<std::string> parmName;
+	std::unordered_map<std::string, std::string> parmMap;
+	std::unordered_map<std::string, std::string> parmMapChk;
+}_PP_RECIPE_SPEC;
 
 #endif

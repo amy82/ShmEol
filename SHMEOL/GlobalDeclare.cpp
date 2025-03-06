@@ -13,16 +13,19 @@
 CAutoInspDlg* g_pCarAABonderDlg;
 CMessagePopupDlg* g_pMessagePopupDlg[MAX_POPUP_COUNT];
 
+CMessageInput* m_clTeminalMessageDlg[MAX_TERMINAL_COUNT];
 
 CMessagePopupDlg* g_pMessageClosePopupDlg;
 int g_nPopupIndex;
+int g_nTerminalIindex;
 
 CModelList ModelList;
-CModelType g_clModelType;
+//CModelType g_clModelType;
 CSystemData g_clSysData;
 CModelData g_clModelData[2];
 CMarkData g_clMarkData[2];
 CTaskWork g_clTaskWork[2];
+CReportClass g_clReportData;
 //CSFRTeachingData g_clSFRTeacingData;
 
 CVision g_clVision;
@@ -38,9 +41,10 @@ CAps_Insp g_clPriInsp[MAX_UNIT_COUNT];
 
 CMandoSfrSpec g_clMandoSfrSpec[MAX_UNIT_COUNT];
 CMandoInspLog g_clMandoInspLog[MAX_UNIT_COUNT];
+
 CMesCommunication g_clMesCommunication[MAX_UNIT_COUNT];
 //CeepromData			eepromData[MAX_UNIT_COUNT];
-CVerifyData EEpromVerifyData;
+//CVerifyData EEpromVerifyData;
 CInterLockDlg* InterLockDlg;
 
 
@@ -54,7 +58,7 @@ CLightControl		LightRightChartControl[MAX_UNIT_COUNT];		//Right Side Chart
 //CLightControl		WhiteOcLightControl[MAX_UNIT_COUNT];		//이물광원
 //COcControl	OCControl[MAX_UNIT_COUNT * 1];	//oc white
 //COcControl	IRControl[MAX_UNIT_COUNT * 1];	//IR(0,1채널) + ALIGN(2,3채널)
-CCMSMESSocket* g_clCMSMESSocket;
+//CCMSMESSocket* g_clCMSMESSocket;
 
 //CQueue<STRUC_LOG_NODE*> g_clLogQueue;
 bool MesSpecLoadCheck;
@@ -136,7 +140,7 @@ bool MesDataSave(int nUnit)
 	{
 		for (i = 0; i < MES_VERIFY_SPEC_COUNT; i++)
 		{
-			fprintf_s(out, "%d\t%s\t%s\t%s\n", i + 1, MesSpecList[i].c_str(), EEpromVerifyData.vMinData[i], EEpromVerifyData.vMaxData[i]);
+			//fprintf_s(out, "%d\t%s\t%s\t%s\n", i + 1, MesSpecList[i].c_str(), EEpromVerifyData.vMinData[i], EEpromVerifyData.vMaxData[i]);
 		}
 		if (out)	fclose(out);
 	}
@@ -144,6 +148,7 @@ bool MesDataSave(int nUnit)
 }
 void MesDataLoad(int nUnit)
 {
+#if 0
 	TCHAR strReadIni1[SIZE_OF_1K] = { 0 };
 	CString strPathIni = _T("");
 	MesSpecLoadCheck = false;
@@ -279,6 +284,7 @@ void MesDataLoad(int nUnit)
 	mspec.Empty();
 	mMaxspec.Empty();
 	strPathIni.Empty();
+#endif
 }
 
 
@@ -748,13 +754,63 @@ void ResultSavePath(TCHAR* sPath, CString logStr)
 	}
 }
 
+//-----------------------------------------------------------------------------
+//
+//	TERMINAL 팝업창 표시
+//
+//-----------------------------------------------------------------------------
+void g_ShowTerminalPopup(CString sTitle, CString sMsg, int nTid, COLORREF bgColor, int TimeClose, int bBuzzer)
+{
+	int nIndex;
+	int i;
+	int m_nUnit = 0;
+	nIndex = g_nTerminalIindex;
+
+	for (i = 0; i < MAX_TERMINAL_COUNT; i++)
+	{
+		if (m_clTeminalMessageDlg[i] != NULL)
+		{
+			if (m_clTeminalMessageDlg[i]->IsWindowVisible() == FALSE)
+			{
+				g_nTerminalIindex = i;
+				break;
+			}
+		}
+	}
+
+	nIndex = g_nTerminalIindex;
+	if (m_clTeminalMessageDlg[nIndex] != NULL)
+	{
+		if (m_clTeminalMessageDlg[nIndex]->IsWindowVisible() == TRUE)
+		{
+			m_clTeminalMessageDlg[nIndex]->ShowWindow(SW_HIDE);
+		}
+		if (TimeClose > 0)
+		{
+			//m_clTeminalMessageDlg[nIndex]->CloseTime = TimeClose;
+		}
+		//m_clTeminalMessageDlg[nIndex]->SetContents(sTitle, sMsg, MESSAGE_BG_COLOR, nIndex);
+
+
+		g_clMesCommunication[m_nUnit].m_dTerminalId = nTid;
+		m_clTeminalMessageDlg[nIndex]->nPopupId = nIndex;
+		m_clTeminalMessageDlg[nIndex]->editInputReadOnly = true;
+		m_clTeminalMessageDlg[nIndex]->setEditInput(_T("Terminal Services"), nTid, sMsg);
+
+
+		m_clTeminalMessageDlg[nIndex]->ShowWindow(SW_SHOW);
+	}
+
+
+}
+
 
 //-----------------------------------------------------------------------------
 //
 //	팝업창 표시
 //
 //-----------------------------------------------------------------------------
-void g_ShowMsgPopup(CString sTitle, CString sMsg, COLORREF bgColor, int TimeClose)
+void g_ShowMsgPopup(CString sTitle, CString sMsg, COLORREF bgColor, int TimeClose, int bBuzzer)
 {
 	int nIndex;
 	int i;
@@ -783,6 +839,10 @@ void g_ShowMsgPopup(CString sTitle, CString sMsg, COLORREF bgColor, int TimeClos
 		{
 			g_pMessagePopupDlg[nIndex]->CloseTime = TimeClose;
 		}
+		if (bBuzzer == 1)
+		{
+			g_clDioControl.SetBuzzer(true, BUZZER_ALARM);
+		}
 		g_pMessagePopupDlg[nIndex]->SetContents(sTitle, sMsg, MESSAGE_BG_COLOR, nIndex);
 		g_pMessagePopupDlg[nIndex]->ShowWindow(SW_SHOW);
 	}
@@ -809,15 +869,15 @@ void g_ShowCloseMsgPopup(CString sTitle, CString sMsg, bool bShow)
 		
 	}
 }
-//g_pMessageClosePopupDlg
+
 //-----------------------------------------------------------------------------
 //
 //	Modal 창 표시
 //
 //-----------------------------------------------------------------------------
-bool g_ShowMsgModal(CString sTitle, CString sMsg, COLORREF bgColor)
+bool g_ShowMsgModal(CString sTitle, CString sMsg, COLORREF bgColor,CString sYesBtn, CString sNoBtn )
 {
-	CMessageModalDlg* pDlg = new CMessageModalDlg(sTitle, sMsg, bgColor);
+	CMessageModalDlg* pDlg = new CMessageModalDlg(sTitle, sMsg, bgColor, sYesBtn, sNoBtn);
 	if (pDlg != NULL)
 	{
 		if (pDlg->DoModal() == IDYES)
@@ -1012,7 +1072,23 @@ int g_AvrGetSFR(BYTE* ChartRawImage, int mSumCount)
 	}
 	bool bRet = m_pSFRProc->Inspect(ChartRawImage, g_clModelData[nUnit].m_nWidth, g_clModelData[nUnit].m_nHeight,
 		m_stSFRSpec, tDataSpec.eDataFormat, tDataSpec.eOutMode, tDataSpec.eSensorType, tDataSpec.nBlackLevel, bUse8BitOnly, false, tDataSpec.eDemosaicMethod);
+	if (bRet == false)
+	{
+		for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
+		{
+			g_clMesCommunication[nUnit].m_dMesUvAfterMTF[i] = 0.0;
+			g_clMesCommunication[nUnit].m_nMesUvAfterMTFResultUVAfter[i] = 1;
 
+		}
+		for (i = 0; i < MAX_LAST_INSP_COUNT; i++)
+		{
+			g_clMesCommunication[nUnit].m_dMesAreaAvrMTF[i] = 0.0;
+			g_clMesCommunication[nUnit].m_nMesMTFAreaAvrResult[i] = 1;
+
+		}
+		g_clMesCommunication[nUnit].m_nMesFinalResult = 0;
+		return -1;
+	}
 
 	int nSfrRoiIndex[MAX_SFR_INSP_COUNT] =
 	{
@@ -1275,7 +1351,7 @@ int g_GetSFR(BYTE* ChartRawImage, int nUnit, int nMode)
 	//---------------------------------------------------------------------------------------------------
 
 	//
-	_stprintf_s(szLog, SIZE_OF_1K, _T("[SFR] SPEC CHECK!! "));
+	_stprintf_s(szLog, SIZE_OF_1K, _T("[SFR] SPEC CHECK!!"));
 	AddLog(szLog, 0, nUnit);
 	char szTmp[256];
 	
@@ -1422,55 +1498,7 @@ int g_GetSFR(BYTE* ChartRawImage, int nUnit, int nMode)
 
 
 	const int SfrMesIndex = 4;
-#if 0
-	//sfr 양불 판정 평균 
 
-	TCHAR* pszSfrRow[] = {
-		_T("0.0F"),
-		_T("0.4F LT"),
-		_T("0.4F RT"),
-		_T("0.4F LB"),
-		_T("0.4F RB"),
-		//
-		_T("0.7F LT"),
-		_T("0.7F RT"),
-		_T("0.7F LB"),
-		_T("0.7F RB")
-	};
-
-
-	for (i = 0; i < MAX_LAST_INSP_COUNT; i++)
-	{
-		mMinSpec = (_ttof(EEpromVerifyData.vMinData[i + SfrMesIndex]));
-		mMaxSpec = (_ttof(EEpromVerifyData.vMaxData[i + SfrMesIndex]));
-
-
-
-		SfrTemp = g_clMesCommunication[nUnit].m_dMesAreaAvrMTF[i];
-
-		if (SfrTemp < mMinSpec)// || SfrTemp > mMaxSpec)
-		{
-			g_clTaskWork[nUnit].m_bOutputCheck[1] = false;	//MTF
-			g_clMesCommunication[nUnit].m_nMesFinalResult = 0;	//MTF
-			g_clMesCommunication[nUnit].m_nMesMTFAreaAvrResult[i] = 0;
-
-			NGData.Format(_T("SFR[%s] SPEC NG : %lf[%.3lf ~ ]"), pszSfrRow[i], SfrTemp, mMinSpec);
-			_stprintf_s(szLog, SIZE_OF_1K, _T("SFR[%s] SPEC NG : %lf[%.3lf ~ ]"), pszSfrRow[i], SfrTemp, mMinSpec);
-			AddLog(szLog, 0, nUnit);
-			if (g_clMandoInspLog[nUnit].m_nNGCnt < 30)
-			{
-				g_clMandoInspLog[nUnit].m_sDispNG[g_clMandoInspLog[nUnit].m_nNGCnt] += NGData;
-				g_clMandoInspLog[nUnit].m_nNGCnt++;
-			}
-		}
-		else
-		{
-			g_clMesCommunication[nUnit].m_nMesMTFAreaAvrResult[i] = 1;
-			_stprintf_s(szLog, SIZE_OF_1K, _T("SFR[%s] SPEC IN : %lf[%.3lf ~ ]"), pszSfrRow[i], SfrTemp, mMinSpec);
-			AddLog(szLog, 0, nUnit);
-		}
-	}
-#else
 
 	TCHAR* pszSfrRow[] = {
 		_T("0F T V"),	_T("0F B V"),_T("0F L H"),_T("0F R H"),
@@ -1484,14 +1512,18 @@ int g_GetSFR(BYTE* ChartRawImage, int nUnit, int nMode)
 		_T("7F LB H"),_T("7F LB V"),
 		_T("7F RB H"),_T("7F RB V"),
 	};
+
 	int nindex = 0;
 	//sfr 양불 판정 개별 
 	for (i = 0; i < MAX_SFR_INSP_COUNT; i++)
 	{
 		nindex = nSfrRoiIndex[i];
-		mMinSpec = (_ttof(EEpromVerifyData.vMinData[nindex + SfrMesIndex]));
+		//mMinSpec = (_ttof(EEpromVerifyData.vMinData[nindex + SfrMesIndex]));
+
+		//mMinSpec = (_ttof(g_clMesCommunication[nUnit].mapKeyRtn(g_clMesCommunication[nUnit].vPPRecipeSpecEquip[0], pszSfrSpecList[i]));
 		//mMaxSpec = (_ttof(EEpromVerifyData.vMaxData[nindex + SfrMesIndex]));
 
+		mMinSpec = g_clMesCommunication[nUnit].mapKeyRtn(RECIPE_PARAM_NAME[6 + nindex]);
 
 
 		SfrTemp = g_clMesCommunication[nUnit].m_dMesUvAfterMTF[i];
@@ -1500,7 +1532,7 @@ int g_GetSFR(BYTE* ChartRawImage, int nUnit, int nMode)
 		{
 			g_clTaskWork[nUnit].m_bOutputCheck[1] = false;	//MTF
 			g_clMesCommunication[nUnit].m_nMesFinalResult = 0;	//MTF
-			g_clMesCommunication[nUnit].m_nMesMTFAreaAvrResult[i] = 0;
+			g_clMesCommunication[nUnit].m_nMesMTFResult[i] = 0;
 
 			NGData.Format(_T("SFR[%s] SPEC NG : %lf[%.3lf ~ ]"), pszSfrRow[i], SfrTemp, mMinSpec);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("SFR[%s] SPEC NG : %lf[%.3lf ~ ]"), pszSfrRow[i], SfrTemp, mMinSpec);
@@ -1513,105 +1545,43 @@ int g_GetSFR(BYTE* ChartRawImage, int nUnit, int nMode)
 		}
 		else
 		{
-			g_clMesCommunication[nUnit].m_nMesMTFAreaAvrResult[i] = 1;
+			g_clMesCommunication[nUnit].m_nMesMTFResult[i] = 1;
 			_stprintf_s(szLog, SIZE_OF_1K, _T("SFR[%s] SPEC IN : %lf[%.3lf ~ ]"), pszSfrRow[i], SfrTemp, mMinSpec);
 			AddLog(szLog, 0, nUnit);
 		}
 	}
 
 	AddLog(_T("	"), 0, nUnit);
-#endif
-	
 
-#if 0
-	TCHAR* pszAvrRow[] = {
-		_T("0F FIELD"), 
-		_T("05F TR"), _T("05F TR"), _T("05F BL"), _T("05F BR"),
-		_T("07F TR"), _T("07F TR"), _T("07F BL"), _T("07F BR"),
-	};
-	
-	int mSfrAvrIndex[MAX_LAST_INSP_COUNT] = { 0,4,6, 8, 10, 12, 14, 16, 18 };
-	for (i = 0; i < MAX_LAST_INSP_COUNT; i++)
+
+	//_T("0F T V"),	_T("0F B V"),_T("0F L H"),_T("0F R H"),
+	//l,t,r,b
+	//2,0,3,1
+	if (g_clMesCommunication[nUnit].m_nMesMTFResult[2] == 0)
 	{
-		//mMinSpec = 0.0;
-		//mMaxSpec = g_clMandoSfrSpec[nUnit].m_dAASFR_Spec[mSfrAvrIndex[i]][0];
-		mMinSpec = (_ttof(EEpromVerifyData.vMinData[i + SfrMesIndex]));
-		mMaxSpec = (_ttof(EEpromVerifyData.vMaxData[i + SfrMesIndex]));
-
-		SfrTemp = g_clMesCommunication[nUnit].m_dMesAreaAvrMTF[i];
-		if (SfrTemp < mMinSpec || SfrTemp > mMaxSpec)
+		g_clMesCommunication[nUnit].m_dEqpDefectCode.Format(_T("16"));
+	}
+	if (g_clMesCommunication[nUnit].m_nMesMTFResult[0] == 0)
+	{
+		g_clMesCommunication[nUnit].m_dEqpDefectCode.Format(_T("17"));
+	}
+	if (g_clMesCommunication[nUnit].m_nMesMTFResult[3] == 0)
+	{
+		g_clMesCommunication[nUnit].m_dEqpDefectCode.Format(_T("18"));
+	}
+	if (g_clMesCommunication[nUnit].m_nMesMTFResult[1] == 0)
+	{
+		g_clMesCommunication[nUnit].m_dEqpDefectCode.Format(_T("19"));
+	}
+	for (i = 0; i < 8; i++)
+	{
+		if (g_clMesCommunication[nUnit].m_nMesMTFResult[4 + (i * 2)] == 0 || g_clMesCommunication[nUnit].m_nMesMTFResult[4 + (i * 2) + 1] == 0)
 		{
-			sfrRtn = false;
-			g_clMesCommunication[nUnit].m_nMesFinalResult = 0;	//MTF//XX
-			g_clMesCommunication[nUnit].m_nMesMTFAreaAvrResult[i] = 0;
-				
-			NGData.Format(_T("SFR[%s] SPEC NG : %.3lf[%.3lf ~ %.3lf]"), pszAvrRow[i], SfrTemp, mMinSpec, mMaxSpec);
-			_stprintf_s(szLog, SIZE_OF_1K, _T("SFR[%s] SPEC NG : %.3lf[%.3lf ~ %.3lf]"), pszAvrRow[i], SfrTemp, mMinSpec, mMaxSpec);
-			AddLog(szLog, 0, nUnit);
-			if (g_clMandoInspLog[nUnit].m_nNGCnt < 30)
-			{
-				g_clMandoInspLog[nUnit].m_sDispNG[g_clMandoInspLog[nUnit].m_nNGCnt] += NGData;
-				g_clMandoInspLog[nUnit].m_nNGCnt++;
-			}
-		}
-		else
-		{
-			g_clMesCommunication[nUnit].m_nMesMTFAreaAvrResult[i] = 1;
-			_stprintf_s(szLog, SIZE_OF_1K, _T("SFR[%s] SPEC IN : %.3lf[%.3lf ~ %.3lf]"), pszAvrRow[i], SfrTemp, mMinSpec, mMaxSpec);
-			AddLog(szLog, 0, nUnit);
+			g_clMesCommunication[nUnit].m_dEqpDefectCode.Format(_T("%d"), 20 + i);
 		}
 	}
 
-	//
-	mTempMax = g_clMesCommunication[nUnit].m_dMesAreaAvrMTF[5];
-	mTempMin = g_clMesCommunication[nUnit].m_dMesAreaAvrMTF[5];
-	for (i = 0; i < 4; i++)
-	{
-		if (mTempMin > g_clMesCommunication[nUnit].m_dMesAreaAvrMTF[5 + i])
-		{
-			mTempMin = g_clMesCommunication[nUnit].m_dMesAreaAvrMTF[5 + i];
-		}
-		if (mTempMax < g_clMesCommunication[nUnit].m_dMesAreaAvrMTF[5 + i])
-		{
-			mTempMax = g_clMesCommunication[nUnit].m_dMesAreaAvrMTF[5 + i];
-		}
-		mTempAvr += g_clMesCommunication[nUnit].m_dMesAreaAvrMTF[5 + i];
-	}
-	mTempAvr = mTempAvr / 4;
-	g_clMesCommunication[nUnit].m_dMes7FVariation = (mTempMax - mTempMin) / mTempAvr;
 
-
-	//mMinSpec = g_clModelData[nUnit].m_7FVariation[0];
-	//mMaxSpec = g_clModelData[nUnit].m_7FVariation[1];
-
-	mMinSpec = (_ttof(EEpromVerifyData.vMinData[11]));	//07f Variation
-	mMaxSpec = (_ttof(EEpromVerifyData.vMaxData[11]));
-	if (g_clMesCommunication[nUnit].m_dMes7FVariation < mMinSpec || g_clMesCommunication[nUnit].m_dMes7FVariation > mMaxSpec)
-	{
-		sfrRtn = false;
-		g_clMesCommunication[nUnit].m_nMesFinalResult = 0;	//MTF//XX
-		g_clMesCommunication[nUnit].m_dMes7FVariationResult = 0;
-		_stprintf_s(szLog, SIZE_OF_1K, _T("SFR 07F Variation SPEC OUT:%.3lf[%.3lf ~ %.3lf]"), g_clMesCommunication[nUnit].m_dMes7FVariation, mMinSpec, mMaxSpec);
-		AddLog(szLog, 0, nUnit);
-
-		NGData.Format(_T("%s"), szLog);
-
-		if (g_clMandoInspLog[nUnit].m_nNGCnt < 30)
-		{
-			g_clMandoInspLog[nUnit].m_sDispNG[g_clMandoInspLog[nUnit].m_nNGCnt] += NGData;
-			g_clMandoInspLog[nUnit].m_nNGCnt++;
-		}
-	}
-	else
-	{
-		g_clMesCommunication[nUnit].m_dMes7FVariationResult = 1;
-		_stprintf_s(szLog, SIZE_OF_1K, _T("SFR 07F Variation SPEC IN =  %.3lf[%.3lf ~ %.3lf]"), g_clMesCommunication[nUnit].m_dMes7FVariation, mMinSpec, mMaxSpec);
-		AddLog(szLog, 0, nUnit);
-	}
-
-#endif
-    
-    
     //---------------------------------------------------------------------------------------------------
     //---------------------------------------------------------------------------------------------------
     //---------------------------------------------------------------------------------------------------
@@ -1916,8 +1886,8 @@ bool g_FindFovPos(int nUnit, unsigned char* pImage, int nPitch, int nSizeX, int 
 
     int aiHistX[5000];
     int aiHistY[5000];
-	int offsetX = g_clTaskWork[nUnit].m_dOcResultX;
-	int offsetY = g_clTaskWork[nUnit].m_dOcResultY;// *-1;
+	double offsetX = g_clTaskWork[nUnit].m_dOcResultX;
+	double offsetY = g_clTaskWork[nUnit].m_dOcResultY;// *-1;
 	//double dCenterX = nSizeX / 2;
 	//double dCenterY = nSizeY / 2;
 	//int nShiftX = dCenterX - (g_clTaskWork[nUnit].m_clPtCircle[0].x + g_clTaskWork[nUnit].m_clPtCircle[1].x + g_clTaskWork[nUnit].m_clPtCircle[2].x + g_clTaskWork[nUnit].m_clPtCircle[3].x) / 4;
@@ -2290,7 +2260,7 @@ bool g_MilFindCirclePos(int m_nUnit, BYTE* ChartRawImage, CRect* clRectRoi, bool
 	int i = 0;
 	int j = 0;
 
-	BYTE* pFrameY;
+
 	int nImageWidth = g_clModelData[m_nUnit].m_nWidth;			// : Image width;
 	int nImageHeight = g_clModelData[m_nUnit].m_nHeight;		// : Image height
 
@@ -5140,12 +5110,14 @@ void g_CheckEolRotation(int m_nUnit)
 	double Rotation_SpecMax = 0.0;
 	g_clMesCommunication[m_nUnit].m_dMesUvAfterRotate = mRotation_Value;
 
-	Rotation_SpecMin = (_ttof(EEpromVerifyData.vMinData[17]));
-	Rotation_SpecMax = (_ttof(EEpromVerifyData.vMaxData[17]));
-
+	//Rotation_SpecMin = (_ttof(EEpromVerifyData.vMinData[17]));
+	//Rotation_SpecMax = (_ttof(EEpromVerifyData.vMaxData[17]));
+	Rotation_SpecMin = g_clMesCommunication[m_nUnit].mapKeyRtn(RECIPE_PARAM_NAME[23]);
+	Rotation_SpecMax = g_clMesCommunication[m_nUnit].mapKeyRtn(RECIPE_PARAM_NAME[24]);
 
 	if (mRotation_Value < Rotation_SpecMin || mRotation_Value > Rotation_SpecMax)
 	{
+		g_clMesCommunication[m_nUnit].m_dEqpDefectCode.Format(_T("31"));
 		g_clMesCommunication[m_nUnit].m_nMesFinalResult = 0;
 		g_clMesCommunication[m_nUnit].m_dMesRotateUVAfterResult = 0;
 
@@ -5209,12 +5181,17 @@ bool g_GetSfrMinMaxValue(int nUnit, bool bNgDraw)
 	max = *std::max_element(dEdgeAvr_7F, dEdgeAvr_7F + 4);
 	g_clMesCommunication[nUnit].m_dMes7F_Diff = max - min;
 
-	mMinSpec = (_ttof(EEpromVerifyData.vMinData[13]));	//04F DIFF
-	mMaxSpec = (_ttof(EEpromVerifyData.vMaxData[13]));
+	//mMinSpec = (_ttof(EEpromVerifyData.vMinData[13]));	//04F DIFF
+	//mMaxSpec = (_ttof(EEpromVerifyData.vMaxData[13]));
+	mMinSpec = g_clMesCommunication[nUnit].mapKeyRtn(RECIPE_PARAM_NAME[15]);
+	mMaxSpec = g_clMesCommunication[nUnit].mapKeyRtn(RECIPE_PARAM_NAME[16]);
+
+
 	mDiffValue = g_clMesCommunication[nUnit].m_dMes4F_Diff;
 
 	if (mDiffValue < mMinSpec || mDiffValue > mMaxSpec)
 	{
+		g_clMesCommunication[nUnit].m_dEqpDefectCode.Format(_T("28"));
 		_stprintf_s(szLog, SIZE_OF_1K, _T("SFR 04F DIFF SPEC OUT:%.3lf[%.3lf ~ %.3lf]"), mDiffValue, mMinSpec, mMaxSpec);
 		AddLog(szLog, 0, nUnit);
 
@@ -5240,12 +5217,16 @@ bool g_GetSfrMinMaxValue(int nUnit, bool bNgDraw)
 		_stprintf_s(szLog, SIZE_OF_1K, _T("SFR 04F DIFF SPEC IN =  %.3lf[%.3lf ~ %.3lf]"), mDiffValue, mMinSpec, mMaxSpec);
 		AddLog(szLog, 0, nUnit);
 	}
-	mMinSpec = (_ttof(EEpromVerifyData.vMinData[14]));	//07F DIFF
-	mMaxSpec = (_ttof(EEpromVerifyData.vMaxData[14]));
+	//mMinSpec = (_ttof(EEpromVerifyData.vMinData[14]));	//07F DIFF
+	//mMaxSpec = (_ttof(EEpromVerifyData.vMaxData[14]));
+	mMinSpec = g_clMesCommunication[nUnit].mapKeyRtn(RECIPE_PARAM_NAME[17]);
+	mMaxSpec = g_clMesCommunication[nUnit].mapKeyRtn(RECIPE_PARAM_NAME[18]);
+
 	mDiffValue = g_clMesCommunication[nUnit].m_dMes7F_Diff;
 
 	if (mDiffValue < mMinSpec || mDiffValue > mMaxSpec)
 	{
+		g_clMesCommunication[nUnit].m_dEqpDefectCode.Format(_T("29"));
 		_stprintf_s(szLog, SIZE_OF_1K, _T("SFR 07F DIFF SPEC OUT:%.3lf[%.3lf ~ %.3lf]"), mDiffValue, mMinSpec, mMaxSpec);
 		AddLog(szLog, 0, nUnit);
 
@@ -5500,12 +5481,15 @@ void g_CheckEolOc(int nUnit)
 	double OCY_SpecMin = 0.0;
 	double OCY_SpecMax = 0.0;
 
-	OCX_SpecMin = (_ttof(EEpromVerifyData.vMinData[15]));
-	OCX_SpecMax = (_ttof(EEpromVerifyData.vMaxData[15]));
+	//OCX_SpecMin = (_ttof(EEpromVerifyData.vMinData[15]));
+	//OCX_SpecMax = (_ttof(EEpromVerifyData.vMaxData[15]));
+	OCX_SpecMin = g_clMesCommunication[nUnit].mapKeyRtn(RECIPE_PARAM_NAME[19]);
+	OCX_SpecMax = g_clMesCommunication[nUnit].mapKeyRtn(RECIPE_PARAM_NAME[20]);
 
-	OCY_SpecMin = (_ttof(EEpromVerifyData.vMinData[16]));
-	OCY_SpecMax = (_ttof(EEpromVerifyData.vMaxData[16]));
-	
+	//OCY_SpecMin = (_ttof(EEpromVerifyData.vMinData[16]));
+	//OCY_SpecMax = (_ttof(EEpromVerifyData.vMaxData[16]));
+	OCY_SpecMin = g_clMesCommunication[nUnit].mapKeyRtn(RECIPE_PARAM_NAME[21]);
+	OCY_SpecMax = g_clMesCommunication[nUnit].mapKeyRtn(RECIPE_PARAM_NAME[22]);
 	
 	mOcX_Value = g_clMandoInspLog[nUnit].m_UvAfter_OC_DelatX;
 	mOcy_Value = g_clMandoInspLog[nUnit].m_UvAfter_OC_DelatY;
@@ -5514,6 +5498,7 @@ void g_CheckEolOc(int nUnit)
 
 	if (mOcX_Value < OCX_SpecMin || mOcX_Value > OCX_SpecMax)
 	{
+		g_clMesCommunication[nUnit].m_dEqpDefectCode.Format(_T("14"));
 		g_clMesCommunication[nUnit].m_nMesFinalResult = 0;	//OC X
 		
 		_stprintf_s(szLog, SIZE_OF_1K, _T("	[OC]OC X Spec Out %.2lf [%.2lf~%.2lf]"), mOcX_Value, OCX_SpecMin, OCX_SpecMax);
@@ -5538,6 +5523,7 @@ void g_CheckEolOc(int nUnit)
 
 	if (mOcy_Value < OCY_SpecMin || mOcy_Value > OCY_SpecMax)
 	{
+		g_clMesCommunication[nUnit].m_dEqpDefectCode.Format(_T("15"));
 		g_clMesCommunication[nUnit].m_nMesFinalResult = 0;	//OC Y
 		
 		_stprintf_s(szLog, SIZE_OF_1K, _T("	[OC]OC Y Spec Out %.2lf [%.2lf~%.2lf]"), mOcy_Value, OCY_SpecMin, OCY_SpecMax);

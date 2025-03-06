@@ -156,68 +156,68 @@ void CCcdColorShadingSpecDlg::InitCtrl()
 void CCcdColorShadingSpecDlg::InitRI4GridCtrl()
 {
 
-	TCHAR* pszCol[] = { _T("ColorShading"), _T("Spec") };
-
-	CRect rect;
-	int i, j;
-	int DLG = IDC_STATIC_CCD_COLORSHADING_SPEC_GRID_SPEC;//IDC_STATIC_CCD_RI4_SPEC_GRID_SPEC
-
-	CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
-	int SpecRow = g_ColorShadingcount + 1;// sizeof(COLOR_SHADING_SPEC_NAME) / sizeof(COLOR_SHADING_SPEC_NAME[0]) + 1;//아래
-	int SpecCol = 2;//옆
-	int margin = 4;
-	int gridHeight = 25;
-	int gridWidth1 = 200;
-	int gridWidth2 = 90;
-
-	int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
-	//
-	pWnd->GetWindowRect(rect);
-	ScreenToClient(rect);
-
-	rect.right = totalWidth + margin;
-	rect.bottom = (gridHeight*SpecRow) + margin;
-	pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
-
-
-	GetDlgItem(DLG)->GetWindowRect(rect);
-	ScreenToClient(rect);
-	m_clGridColorShadingSpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
-
-	m_clGridColorShadingSpec.SetTextBkColor(RGB_COLOR_WHITE);
-	m_clGridColorShadingSpec.SetFixedBkColor(GRID_COLOR_TITLE);
-	m_clGridColorShadingSpec.SetFixedTextColor(RGB_COLOR_WHITE);
-	m_clGridColorShadingSpec.SetReference_Setting();
-	m_clGridColorShadingSpec.EnableSelection(FALSE);
-	m_clGridColorShadingSpec.SetRowCount(SpecRow);
-	m_clGridColorShadingSpec.SetColumnCount(SpecCol);
-	m_clGridColorShadingSpec.SetFixedRowCount(1);
-	m_clGridColorShadingSpec.SetFixedColumnCount(1);
-
-	for (i = 0; i < SpecRow; i++)
-	{
-		m_clGridColorShadingSpec.SetRowHeight(i, gridHeight);
-		m_clGridColorShadingSpec.SetItemText(i + 1, 0, COLOR_SHADING_SPEC_NAME[i]);
-
-		for (j = 0; j < SpecCol; j++)
-		{
-			if (i == 0)
-			{
-				if (j == 0)
-				{
-					m_clGridColorShadingSpec.SetColumnWidth(j, gridWidth1);
-				}
-				else
-				{
-					m_clGridColorShadingSpec.SetColumnWidth(j, gridWidth2);
-				}
-
-				m_clGridColorShadingSpec.SetItemText(i, j, pszCol[j]);
-			}
-
-			m_clGridColorShadingSpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-		}
-	}
+//	TCHAR* pszCol[] = { _T("ColorShading"), _T("Spec") };
+//
+//	CRect rect;
+//	int i, j;
+//	int DLG = IDC_STATIC_CCD_COLORSHADING_SPEC_GRID_SPEC;//IDC_STATIC_CCD_RI4_SPEC_GRID_SPEC
+//
+//	CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
+//	int SpecRow = g_ColorShadingcount + 1;// sizeof(COLOR_SHADING_SPEC_NAME) / sizeof(COLOR_SHADING_SPEC_NAME[0]) + 1;//아래
+//	int SpecCol = 2;//옆
+//	int margin = 4;
+//	int gridHeight = 25;
+//	int gridWidth1 = 200;
+//	int gridWidth2 = 90;
+//
+//	int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
+//	//
+//	pWnd->GetWindowRect(rect);
+//	ScreenToClient(rect);
+//
+//	rect.right = totalWidth + margin;
+//	rect.bottom = (gridHeight*SpecRow) + margin;
+//	pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
+//
+//
+//	GetDlgItem(DLG)->GetWindowRect(rect);
+//	ScreenToClient(rect);
+//	m_clGridColorShadingSpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
+//
+//	m_clGridColorShadingSpec.SetTextBkColor(RGB_COLOR_WHITE);
+//	m_clGridColorShadingSpec.SetFixedBkColor(GRID_COLOR_TITLE);
+//	m_clGridColorShadingSpec.SetFixedTextColor(RGB_COLOR_WHITE);
+//	m_clGridColorShadingSpec.SetReference_Setting();
+//	m_clGridColorShadingSpec.EnableSelection(FALSE);
+//	m_clGridColorShadingSpec.SetRowCount(SpecRow);
+//	m_clGridColorShadingSpec.SetColumnCount(SpecCol);
+//	m_clGridColorShadingSpec.SetFixedRowCount(1);
+//	m_clGridColorShadingSpec.SetFixedColumnCount(1);
+//
+//	for (i = 0; i < SpecRow; i++)
+//	{
+//		m_clGridColorShadingSpec.SetRowHeight(i, gridHeight);
+////		m_clGridColorShadingSpec.SetItemText(i + 1, 0, COLOR_SHADING_SPEC_NAME[i]);
+//
+//		for (j = 0; j < SpecCol; j++)
+//		{
+//			if (i == 0)
+//			{
+//				if (j == 0)
+//				{
+//					m_clGridColorShadingSpec.SetColumnWidth(j, gridWidth1);
+//				}
+//				else
+//				{
+//					m_clGridColorShadingSpec.SetColumnWidth(j, gridWidth2);
+//				}
+//
+//				m_clGridColorShadingSpec.SetItemText(i, j, pszCol[j]);
+//			}
+//
+//			m_clGridColorShadingSpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+//		}
+//	}
 }
 //-----------------------------------------------------------------------------
 //
@@ -254,11 +254,11 @@ void CCcdColorShadingSpecDlg::ShowRI4Spec()
 {
 	TCHAR szData[SIZE_OF_100BYTE];
 	int i = 0;
-	for (i = 0; i < g_ColorShadingcount; i++)
+	/*for (i = 0; i < g_ColorShadingcount; i++)
 	{
 		m_clGridColorShadingSpec.SetItemText(i + 1, 1, g_clModelData[m_nUnit].m_ColorShadingSpec[i], 3);
-	}
-	m_clGridColorShadingSpec.Invalidate();
+	}*/
+	//m_clGridColorShadingSpec.Invalidate();
 }
 //-----------------------------------------------------------------------------
 //
@@ -268,7 +268,7 @@ void CCcdColorShadingSpecDlg::ShowRI4Spec()
 
 void CCcdColorShadingSpecDlg::GetRI4Spec()
 {
-	CString sData = _T("");
+	/*CString sData = _T("");
 	int i;
 	int _x = 0;
 	int _y = 0;
@@ -277,7 +277,7 @@ void CCcdColorShadingSpecDlg::GetRI4Spec()
 	{
 		sData = m_clGridColorShadingSpec.GetItemText(i + 1, 1);
 		g_clModelData[m_nUnit].m_ColorShadingSpec[i] = _ttof((TCHAR*)(LPCTSTR)sData);
-	}
+	}*/
 }
 //-----------------------------------------------------------------------------
 //

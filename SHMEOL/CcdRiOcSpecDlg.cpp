@@ -288,67 +288,67 @@ void CCcdRiOcSpecDlg::InitOCGridCtrl()
 //-----------------------------------------------------------------------------
 void CCcdRiOcSpecDlg::InitICGridCtrl()
 {
-	TCHAR* pszCol[] = { _T("IC"), _T("Spec") };
+	//TCHAR* pszCol[] = { _T("IC"), _T("Spec") };
 
-	CRect rect;
-	int i, j;
-	int DLG = IDC_STATIC_CCD_IC_SPEC_GRID_SPEC;
+	//CRect rect;
+	//int i, j;
+	//int DLG = IDC_STATIC_CCD_IC_SPEC_GRID_SPEC;
 
-	CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
-	int SpecRow = g_Iccount + 1;// sizeof(IC_SPEC_NAME) / sizeof(IC_SPEC_NAME[0]) + 1;//아래
-	int SpecCol = 2;//옆
-	int margin = 4;
-	int gridHeight = 25;
-	int gridWidth1 = 140;
-	int gridWidth2 = 90;
-	int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
-	//
-	pWnd->GetWindowRect(rect);
-	ScreenToClient(rect);
+	//CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
+	//int SpecRow = g_Iccount + 1;// sizeof(IC_SPEC_NAME) / sizeof(IC_SPEC_NAME[0]) + 1;//아래
+	//int SpecCol = 2;//옆
+	//int margin = 4;
+	//int gridHeight = 25;
+	//int gridWidth1 = 140;
+	//int gridWidth2 = 90;
+	//int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
+	////
+	//pWnd->GetWindowRect(rect);
+	//ScreenToClient(rect);
 
-	rect.right = totalWidth + margin;
-	rect.bottom = (gridHeight*SpecRow) + margin;
-	pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
+	//rect.right = totalWidth + margin;
+	//rect.bottom = (gridHeight*SpecRow) + margin;
+	//pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
 
 
-	GetDlgItem(DLG)->GetWindowRect(rect);
-	ScreenToClient(rect);
-	m_clGridICSpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
+	//GetDlgItem(DLG)->GetWindowRect(rect);
+	//ScreenToClient(rect);
+	//m_clGridICSpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
 
-	m_clGridICSpec.SetTextBkColor(RGB_COLOR_WHITE);
-	m_clGridICSpec.SetFixedBkColor(GRID_COLOR_TITLE);
-	m_clGridICSpec.SetFixedTextColor(RGB_COLOR_WHITE);
-	m_clGridICSpec.SetReference_Setting();
-	m_clGridICSpec.EnableSelection(FALSE);
-	m_clGridICSpec.SetRowCount(SpecRow);
-	m_clGridICSpec.SetColumnCount(SpecCol);
-	m_clGridICSpec.SetFixedRowCount(1);
-	m_clGridICSpec.SetFixedColumnCount(1);
+	//m_clGridICSpec.SetTextBkColor(RGB_COLOR_WHITE);
+	//m_clGridICSpec.SetFixedBkColor(GRID_COLOR_TITLE);
+	//m_clGridICSpec.SetFixedTextColor(RGB_COLOR_WHITE);
+	//m_clGridICSpec.SetReference_Setting();
+	//m_clGridICSpec.EnableSelection(FALSE);
+	//m_clGridICSpec.SetRowCount(SpecRow);
+	//m_clGridICSpec.SetColumnCount(SpecCol);
+	//m_clGridICSpec.SetFixedRowCount(1);
+	//m_clGridICSpec.SetFixedColumnCount(1);
 
-	for (i = 0; i < SpecRow; i++)
-	{
-		m_clGridICSpec.SetRowHeight(i, gridHeight);
-		m_clGridICSpec.SetItemText(i + 1, 0, IC_SPEC_NAME[i]);
+	//for (i = 0; i < SpecRow; i++)
+	//{
+	//	m_clGridICSpec.SetRowHeight(i, gridHeight);
+	//	//m_clGridICSpec.SetItemText(i + 1, 0, IC_SPEC_NAME[i]);
 
-		for (j = 0; j < SpecCol; j++)
-		{
-			if (i == 0)
-			{
-				if (j == 0)
-				{
-					m_clGridICSpec.SetColumnWidth(j, gridWidth1);
-				}
-				else
-				{
-					m_clGridICSpec.SetColumnWidth(j, gridWidth2);
-				}
+	//	for (j = 0; j < SpecCol; j++)
+	//	{
+	//		if (i == 0)
+	//		{
+	//			if (j == 0)
+	//			{
+	//				m_clGridICSpec.SetColumnWidth(j, gridWidth1);
+	//			}
+	//			else
+	//			{
+	//				m_clGridICSpec.SetColumnWidth(j, gridWidth2);
+	//			}
 
-				m_clGridICSpec.SetItemText(i, j, pszCol[j]);
-			}
+	//			m_clGridICSpec.SetItemText(i, j, pszCol[j]);
+	//		}
 
-			m_clGridICSpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-		}
-	}
+	//		m_clGridICSpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	//	}
+	//}
 }
 
 //-----------------------------------------------------------------------------
@@ -388,21 +388,21 @@ void CCcdRiOcSpecDlg::ShowOcSpec()
 	TCHAR szData[SIZE_OF_100BYTE];
 	int i;
 
-	_stprintf_s(szData, SIZE_OF_100BYTE, _T("%.02lf"), g_clModelData[m_nUnit].m_dOCSpecLimit[0]);
+	/*_stprintf_s(szData, SIZE_OF_100BYTE, _T("%.02lf"), g_clModelData[m_nUnit].m_dOCSpecLimit[0]);
 	m_clColorStaticOcLimitMinVal.SetWindowText(szData);
 
 	_stprintf_s(szData, SIZE_OF_100BYTE, _T("%.02lf"), g_clModelData[m_nUnit].m_dOCSpecLimit[1]);
-	m_clColorStaticOcLimitMaxVal.SetWindowText(szData);
+	m_clColorStaticOcLimitMaxVal.SetWindowText(szData);*/
 
 	//rotate
-	_stprintf_s(szData, SIZE_OF_100BYTE, _T("%.02lf"), g_clModelData[m_nUnit].m_dRotateSpecLimit[0]);
+	/*_stprintf_s(szData, SIZE_OF_100BYTE, _T("%.02lf"), g_clModelData[m_nUnit].m_dRotateSpecLimit[0]);
 	m_clColorStaticRotateLimitMinVal.SetWindowText(szData);
 
 	_stprintf_s(szData, SIZE_OF_100BYTE, _T("%.02lf"), g_clModelData[m_nUnit].m_dRotateSpecLimit[1]);
-	m_clColorStaticRotateLimitMaxVal.SetWindowText(szData);
+	m_clColorStaticRotateLimitMaxVal.SetWindowText(szData);*/
 
 	//tilt
-	_stprintf_s(szData, SIZE_OF_100BYTE, _T("%.02lf"), g_clModelData[m_nUnit].m_dTiltxSpecLimit[0]);
+	/*_stprintf_s(szData, SIZE_OF_100BYTE, _T("%.02lf"), g_clModelData[m_nUnit].m_dTiltxSpecLimit[0]);
 	m_clColorStaticTiltxLimitMinVal.SetWindowText(szData);
 
 	_stprintf_s(szData, SIZE_OF_100BYTE, _T("%.02lf"), g_clModelData[m_nUnit].m_dTiltxSpecLimit[1]);
@@ -412,7 +412,7 @@ void CCcdRiOcSpecDlg::ShowOcSpec()
 	m_clColorStaticTiltyLimitMinVal.SetWindowText(szData);
 
 	_stprintf_s(szData, SIZE_OF_100BYTE, _T("%.02lf"), g_clModelData[m_nUnit].m_dTiltySpecLimit[1]);
-	m_clColorStaticTiltyLimitMaxVal.SetWindowText(szData);
+	m_clColorStaticTiltyLimitMaxVal.SetWindowText(szData);*/
 	
 }
 
@@ -474,20 +474,20 @@ void CCcdRiOcSpecDlg::GetOcSpec()
 	int i;
 
 	//ok
-	GetDlgItem(IDC_STATIC_OC_MIN_VAL)->GetWindowText(sData);
+	/*GetDlgItem(IDC_STATIC_OC_MIN_VAL)->GetWindowText(sData);
 	g_clModelData[m_nUnit].m_dOCSpecLimit[0] = _ttof((TCHAR*)(LPCTSTR)sData);
 
 	GetDlgItem(IDC_STATIC_OC_MAX_VAL)->GetWindowText(sData);
-	g_clModelData[m_nUnit].m_dOCSpecLimit[1] = _ttof((TCHAR*)(LPCTSTR)sData);
+	g_clModelData[m_nUnit].m_dOCSpecLimit[1] = _ttof((TCHAR*)(LPCTSTR)sData);*/
 	
 	//rotate
-	GetDlgItem(IDC_STATIC_ROTATE_MIN_VAL)->GetWindowText(sData);
+	/*GetDlgItem(IDC_STATIC_ROTATE_MIN_VAL)->GetWindowText(sData);
 	g_clModelData[m_nUnit].m_dRotateSpecLimit[0] = _ttof((TCHAR*)(LPCTSTR)sData);
 
 	GetDlgItem(IDC_STATIC_ROTATE_MAX_VAL)->GetWindowText(sData);
-	g_clModelData[m_nUnit].m_dRotateSpecLimit[1] = _ttof((TCHAR*)(LPCTSTR)sData);
+	g_clModelData[m_nUnit].m_dRotateSpecLimit[1] = _ttof((TCHAR*)(LPCTSTR)sData);*/
 	//tilt
-	GetDlgItem(IDC_STATIC_TILTX_MIN_VAL)->GetWindowText(sData);
+	/*GetDlgItem(IDC_STATIC_TILTX_MIN_VAL)->GetWindowText(sData);
 	g_clModelData[m_nUnit].m_dTiltxSpecLimit[0] = _ttof((TCHAR*)(LPCTSTR)sData);
 
 	GetDlgItem(IDC_STATIC_TILTX_MAX_VAL)->GetWindowText(sData);
@@ -497,7 +497,7 @@ void CCcdRiOcSpecDlg::GetOcSpec()
 	g_clModelData[m_nUnit].m_dTiltySpecLimit[0] = _ttof((TCHAR*)(LPCTSTR)sData);
 
 	GetDlgItem(IDC_STATIC_TILTY_MAX_VAL)->GetWindowText(sData);
-	g_clModelData[m_nUnit].m_dTiltySpecLimit[1] = _ttof((TCHAR*)(LPCTSTR)sData);
+	g_clModelData[m_nUnit].m_dTiltySpecLimit[1] = _ttof((TCHAR*)(LPCTSTR)sData);*/
 
 	sData.Empty();
 }

@@ -87,7 +87,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(IncludePath);C:\Program Files\Matrox Imaging\Mil\Include;C:\opencv346\install\include\opencv;C:\opencv346\install\include\opencv2;C:\opencv346\install\include;.\Library\Inspection\Include;C:\Program Files\Matrox Imaging\MIL\DLL;C:\Program Files (x86)\EzSoftware UC\AXL(Library)\Library\64Bit</IncludePath>
+    <IncludePath>$(IncludePath);C:\Program Files\Matrox Imaging\Mil\Include;C:\opencv346\install\include\opencv;C:\opencv346\install\include\opencv2;C:\opencv346\install\include;.\Library\Inspection\Include;C:\Program Files\Matrox Imaging\MIL\DLL;C:\Program Files (x86)\EzSoftware UC\AXL(Library)\Library\64Bit;$(ProjectDir)\Library\UbiGEM\Include</IncludePath>
     <LibraryPath>$(ProjectDir)\Library\lib64;C:\Program Files\Matrox Imaging\Mil\LIB;C:\opencv346\install\x64\vc14\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -119,18 +119,16 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;_AFXDLL</PreprocessorDefinitions>
-      <SDLCheck>
-      </SDLCheck>
+      <SDLCheck>true</SDLCheck>
       <AdditionalOptions>-Zm155 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir)\Library\Inspection\Include\LibACMISBlemish;$(ProjectDir)\Library\InspectionK\Include\LibACMISCertification;$(ProjectDir)\Library\Inspection\Include\LibACMISCodec;$(ProjectDir)\Library\Inspection\Include\LibACMISCommon;$(ProjectDir)\Library\Inspection\Include\LibACMISDefect;$(ProjectDir)\Library\Inspection\Include\LibACMISEtc;$(ProjectDir)\Library\Inspection\Include\LibACMISImage;$(ProjectDir)\Library\Inspection\Include\LibACMISNoise;$(ProjectDir)\Library\InspectionK\Include\LibACMISOpticalCenter;$(ProjectDir)\Library\InspectionK\Include\LibACMISParallelInspection;$(ProjectDir)\Library\InspectionK\Include\LibACMISResolution;$(ProjectDir)\Library\InspectionK\Include\LibACMISShading;$(ProjectDir)\Library\InspectionK\Include\LibACMISSoftISP;$(ProjectDir)\Library\InspectionK\Include\LibACMISSoftISPBasic;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\Library\Inspection\Include\LibACMISBlemish;$(ProjectDir)\Library\InspectionK\Include\LibACMISCertification;$(ProjectDir)\Library\Inspection\Include\LibACMISCodec;$(ProjectDir)\Library\Inspection\Include\LibACMISCommon;$(ProjectDir)\Library\Inspection\Include\LibACMISDefect;$(ProjectDir)\Library\Inspection\Include\LibACMISEtc;$(ProjectDir)\Library\Inspection\Include\LibACMISImage;$(ProjectDir)\Library\Inspection\Include\LibACMISNoise;$(ProjectDir)\Library\InspectionK\Include\LibACMISOpticalCenter;$(ProjectDir)\Library\InspectionK\Include\LibACMISParallelInspection;$(ProjectDir)\Library\InspectionK\Include\LibACMISResolution;$(ProjectDir)\Library\InspectionK\Include\LibACMISShading;$(ProjectDir)\Library\InspectionK\Include\LibACMISSoftISP;$(ProjectDir)\Library\InspectionK\Include\LibACMISSoftISPBasic;$(ProgramW6432)\UbiSam\UbiGEM\BIN\lib\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalLibraryDirectories>
-      </AdditionalLibraryDirectories>
-      <AdditionalDependencies>mil.lib;milim.lib;milblob.lib;milmod.lib;milpat.lib;opencv_core346d.lib;opencv_highgui346d.lib;opencv_imgproc346d.lib;opencv_calib3d346d.lib;opencv_flann346d.lib;opencv_features2d346d.lib;opencv_imgcodecs346d.lib;LibACMISBlemish.lib;LibACMISCertification.lib;LibACMISCodec.lib;LibACMISDefect.lib;LibACMISEtc.lib;LibACMISImage.lib;LibACMISNoise.lib;LibACMISOpticalCenter.lib;LibACMISParallelInspection.lib;LibACMISResolution.lib;LibACMISShading.lib;LibACMISSoftISP.lib;LibACMISSoftISPBasic.lib;EECvtColor.lib;GrabberDLL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProgramW6432)\UbiSam\UbiGEM\BIN\lib\$(CharacterSet)_$(Platform)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>mil.lib;milim.lib;milblob.lib;milmod.lib;milpat.lib;opencv_core346d.lib;opencv_highgui346d.lib;opencv_imgproc346d.lib;opencv_calib3d346d.lib;opencv_flann346d.lib;opencv_features2d346d.lib;opencv_imgcodecs346d.lib;LibACMISBlemish.lib;LibACMISCertification.lib;LibACMISCodec.lib;LibACMISDefect.lib;LibACMISEtc.lib;LibACMISImage.lib;LibACMISNoise.lib;LibACMISOpticalCenter.lib;LibACMISParallelInspection.lib;LibACMISResolution.lib;LibACMISShading.lib;LibACMISSoftISP.lib;LibACMISSoftISPBasic.lib;EECvtColor.lib;GrabberDLL.lib;UbiGEM.CLId.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <StackReserveSize>10485760</StackReserveSize>
       <DelayLoadDLLs>
       </DelayLoadDLLs>
@@ -181,15 +179,16 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_WINDOWS;NDEBUG;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\Library\Inspection\Include\LibACMISBlemish;$(ProjectDir)\Library\Inspection\Include\LibACMISCertification;$(ProjectDir)\Library\Inspection\Include\LibACMISCodec;$(ProjectDir)\Library\Inspection\Include\LibACMISCommon;$(ProjectDir)\Library\Inspection\Include\LibACMISDefect;$(ProjectDir)\Library\Inspection\Include\LibACMISEtc;$(ProjectDir)\Library\Inspection\Include\LibACMISImage;$(ProjectDir)\Library\Inspection\Include\LibACMISNoise;$(ProjectDir)\Library\Inspection\Include\LibACMISOpticalCenter;$(ProjectDir)\Library\Inspection\Include\LibACMISParallelInspection;$(ProjectDir)\Library\Inspection\Include\LibACMISResolution;$(ProjectDir)\Library\Inspection\Include\LibACMISShading;$(ProjectDir)\Library\Inspection\Include\LibACMISSoftISP;$(ProjectDir)\Library\Inspection\Include\LibACMISSoftISPBasic;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\Library\Inspection\Include\LibACMISBlemish;$(ProjectDir)\Library\Inspection\Include\LibACMISCertification;$(ProjectDir)\Library\Inspection\Include\LibACMISCodec;$(ProjectDir)\Library\Inspection\Include\LibACMISCommon;$(ProjectDir)\Library\Inspection\Include\LibACMISDefect;$(ProjectDir)\Library\Inspection\Include\LibACMISEtc;$(ProjectDir)\Library\Inspection\Include\LibACMISImage;$(ProjectDir)\Library\Inspection\Include\LibACMISNoise;$(ProjectDir)\Library\Inspection\Include\LibACMISOpticalCenter;$(ProjectDir)\Library\Inspection\Include\LibACMISParallelInspection;$(ProjectDir)\Library\Inspection\Include\LibACMISResolution;$(ProjectDir)\Library\Inspection\Include\LibACMISShading;$(ProjectDir)\Library\Inspection\Include\LibACMISSoftISP;$(ProjectDir)\Library\Inspection\Include\LibACMISSoftISPBasic;$(ProgramW6432)\UbiSam\UbiGEM\BIN\lib\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>mil.lib;milim.lib;milblob.lib;milmod.lib;milpat.lib;opencv_core346.lib;opencv_highgui346.lib;opencv_imgproc346.lib;opencv_calib3d346.lib;opencv_flann346.lib;opencv_features2d346.lib;opencv_imgcodecs346.lib;LibACMISBlemish.lib;LibACMISCertification.lib;LibACMISCodec.lib;LibACMISDefect.lib;LibACMISEtc.lib;LibACMISImage.lib;LibACMISNoise.lib;LibACMISOpticalCenter.lib;LibACMISParallelInspection.lib;LibACMISResolution.lib;LibACMISShading.lib;LibACMISSoftISP.lib;LibACMISSoftISPBasic.lib;EECvtColor.lib;GrabberDLL.lib</AdditionalDependencies>
+      <AdditionalDependencies>mil.lib;milim.lib;milblob.lib;milmod.lib;milpat.lib;opencv_core346.lib;opencv_highgui346.lib;opencv_imgproc346.lib;opencv_calib3d346.lib;opencv_flann346.lib;opencv_features2d346.lib;opencv_imgcodecs346.lib;LibACMISBlemish.lib;LibACMISCertification.lib;LibACMISCodec.lib;LibACMISDefect.lib;LibACMISEtc.lib;LibACMISImage.lib;LibACMISNoise.lib;LibACMISOpticalCenter.lib;LibACMISParallelInspection.lib;LibACMISResolution.lib;LibACMISShading.lib;LibACMISSoftISP.lib;LibACMISSoftISPBasic.lib;EECvtColor.lib;GrabberDLL.lib;UbiGEM.CLI.lib</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
       <StackReserveSize>10485760</StackReserveSize>
+      <AdditionalLibraryDirectories>$(ProgramW6432)\UbiSam\UbiGEM\BIN\lib\$(CharacterSet)_$(Platform)\</AdditionalLibraryDirectories>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -257,6 +256,7 @@
     <ClInclude Include="DioControl.h" />
     <ClInclude Include="DioDefine.h" />
     <ClInclude Include="DioDlg.h" />
+    <ClInclude Include="DriverHelper.h" />
     <ClInclude Include="EEPROMTest.h" />
     <ClInclude Include="EpoxySet.h" />
     <ClInclude Include="FileThread.h" />
@@ -268,13 +268,13 @@
     <ClInclude Include="Grabber\LAON\LPMC500DLLEx.h" />
     <ClInclude Include="Grabber\LAON\MIU.h" />
     <ClInclude Include="Grabber\LAON\PixelFormat.h" />
+    <ClInclude Include="IdlePopupDlg.h" />
     <ClInclude Include="InspConnSocket.h" />
     <ClInclude Include="InterLockDlg.h" />
     <ClInclude Include="KeyBoardDlg.h" />
     <ClInclude Include="KeyPadDlg.h" />
     <ClInclude Include="LaonGrabberWrapper.h" />
     <ClInclude Include="LensAxisThread.h" />
-    <ClInclude Include="LensProcess.h" />
     <ClInclude Include="Library\Inspection\Include\LibACMISBlemish\ACMISBlemishDef.h" />
     <ClInclude Include="Library\Inspection\Include\LibACMISBlemish\ACMISImageBlemish.h" />
     <ClInclude Include="Library\Inspection\Include\LibACMISBlemish\ACMISImageStain.h" />
@@ -347,10 +347,14 @@
     <ClInclude Include="LightDlg.h" />
     <ClInclude Include="LogThread.h" />
     <ClInclude Include="Log\Log.h" />
+    <ClInclude Include="MainDlg.h" />
     <ClInclude Include="ManualDlg.h" />
     <ClInclude Include="Memo.h" />
     <ClInclude Include="MesConnSocket.h" />
+    <ClInclude Include="MesData.h" />
     <ClInclude Include="MessageAskDlg.h" />
+    <ClInclude Include="MessageInput.h" />
+    <ClInclude Include="MessageLot.h" />
     <ClInclude Include="MessageModalDlg.h" />
     <ClInclude Include="MessagePopupDlg.h" />
     <ClInclude Include="ModelFinder.h" />
@@ -358,12 +362,14 @@
     <ClInclude Include="MonitorThread.h" />
     <ClInclude Include="PcbProcess.h" />
     <ClInclude Include="ProductNGDlg.h" />
+    <ClInclude Include="ReportClass.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SerialThread.h" />
     <ClInclude Include="SocketApi.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TeachingDlg.h" />
+    <ClInclude Include="UbiGem.h" />
     <ClInclude Include="UpdateHistoryDlg.h" />
     <ClInclude Include="UserPath.h" />
     <ClInclude Include="Utility\BaseThread\BaseThread.h" />
@@ -395,6 +401,7 @@
     <ClInclude Include="Utility\RS232C\Handler_RS232C.h" />
     <ClInclude Include="Utility\Serial\Serial.h" />
     <ClInclude Include="Utility\SliderCtrlEx\SliderCtrlEx.h" />
+    <ClInclude Include="Utility\xml\Markup.h" />
     <ClInclude Include="uxmodule\uxbutton\ButtonCT.h" />
     <ClInclude Include="visa.h" />
     <ClInclude Include="Vision.h" />
@@ -449,19 +456,23 @@
     <ClCompile Include="FileThread.cpp" />
     <ClCompile Include="GlobalDeclare.cpp" />
     <ClCompile Include="Grabber\LAON\ConvertColor.cpp" />
+    <ClCompile Include="IdlePopupDlg.cpp" />
     <ClCompile Include="InspConnSocket.cpp" />
     <ClCompile Include="InterLockDlg.cpp" />
     <ClCompile Include="KeyBoardDlg.cpp" />
     <ClCompile Include="KeyPadDlg.cpp" />
     <ClCompile Include="LaonGrabberWrapper.cpp" />
     <ClCompile Include="LensAxisThread.cpp" />
-    <ClCompile Include="LensProcess.cpp" />
     <ClCompile Include="LightDlg.cpp" />
     <ClCompile Include="LogThread.cpp" />
     <ClCompile Include="Log\Log.cpp" />
+    <ClCompile Include="MainDlg.cpp" />
     <ClCompile Include="ManualDlg.cpp" />
     <ClCompile Include="MesConnSocket.cpp" />
+    <ClCompile Include="MesData.cpp" />
     <ClCompile Include="MessageAskDlg.cpp" />
+    <ClCompile Include="MessageInput.cpp" />
+    <ClCompile Include="MessageLot.cpp" />
     <ClCompile Include="MessageModalDlg.cpp" />
     <ClCompile Include="MessagePopupDlg.cpp" />
     <ClCompile Include="ModelFinder.cpp" />
@@ -469,6 +480,7 @@
     <ClCompile Include="MonitorThread.cpp" />
     <ClCompile Include="PcbProcess.cpp" />
     <ClCompile Include="ProductNGDlg.cpp" />
+    <ClCompile Include="ReportClass.cpp" />
     <ClCompile Include="SerialThread.cpp" />
     <ClCompile Include="SocketApi.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -478,6 +490,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TeachingDlg.cpp" />
+    <ClCompile Include="UbiGem.cpp" />
     <ClCompile Include="UpdateHistoryDlg.cpp" />
     <ClCompile Include="Utility\BaseThread\BaseThread.cpp" />
     <ClCompile Include="Utility\ButtonEx\ButtonEx.cpp" />
@@ -503,6 +516,7 @@
     <ClCompile Include="Utility\RS232C\Handler_RS232C.cpp" />
     <ClCompile Include="Utility\Serial\Serial.cpp" />
     <ClCompile Include="Utility\SliderCtrlEx\SliderCtrlEx.cpp" />
+    <ClCompile Include="Utility\xml\Markup.cpp" />
     <ClCompile Include="uxmodule\uxbutton\ButtonCT.cpp" />
     <ClCompile Include="Vision.cpp" />
     <ClCompile Include="VisionGrabThread.cpp" />

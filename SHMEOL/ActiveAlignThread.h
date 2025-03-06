@@ -2,7 +2,7 @@
 
 #include "utility\basethread\basethread.h"
 #include "PcbProcess.h"
-#include "LensProcess.h"
+
 
 class CActiveAlignThread :
 	public CBaseThread
@@ -21,8 +21,6 @@ public:
 
 public:
 	CPcbProcess m_clPcbProcess;
-	CLensProcess m_clLensProcess;
-
 	DWORD m_dwTickCount[2];
 	int m_nUnit;
 	int m_nStep;

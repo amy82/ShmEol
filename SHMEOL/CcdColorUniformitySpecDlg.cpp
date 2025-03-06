@@ -89,7 +89,7 @@ BOOL CCcdColorUniformitySpecDlg::OnInitDialog()
 
 	// 그리드 초기화
 
-	this->InitRI4GridCtrl();
+	///this->InitRI4GridCtrl();
 	this->CenterWindow();
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
@@ -156,68 +156,68 @@ void CCcdColorUniformitySpecDlg::InitCtrl()
 void CCcdColorUniformitySpecDlg::InitRI4GridCtrl()
 {
 
-	TCHAR* pszCol[] = { _T("ColorUniformity"), _T("Spec") };
+	//TCHAR* pszCol[] = { _T("ColorUniformity"), _T("Spec") };
 
-	CRect rect;
-	int i, j;
-	int DLG = IDC_STATIC_CCD_RI_SPEC_GRID_SPEC;//IDC_STATIC_CCD_RI4_SPEC_GRID_SPEC
+	//CRect rect;
+	//int i, j;
+	//int DLG = IDC_STATIC_CCD_RI_SPEC_GRID_SPEC;//IDC_STATIC_CCD_RI4_SPEC_GRID_SPEC
 
-	CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
-	int SpecRow = g_ColorUniformitycount + 1;// sizeof(COLOR_UNIFORMITY_SPEC_NAME) / sizeof(COLOR_UNIFORMITY_SPEC_NAME[0]) + 1;//아래
-	int SpecCol = 2;//옆
-	int margin = 4;
-	int gridHeight = 25;
-	int gridWidth1 = 200;
-	int gridWidth2 = 90;
+	//CWnd *pWnd = (CWnd*)GetDlgItem(DLG);
+	//int SpecRow = g_ColorUniformitycount + 1;
+	//int SpecCol = 2;//옆
+	//int margin = 4;
+	//int gridHeight = 25;
+	//int gridWidth1 = 200;
+	//int gridWidth2 = 90;
 
-	int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
-	//
-	pWnd->GetWindowRect(rect);
-	ScreenToClient(rect);
+	//int totalWidth = gridWidth1 + (gridWidth2*(SpecCol - 1));
+	////
+	//pWnd->GetWindowRect(rect);
+	//ScreenToClient(rect);
 
-	rect.right = totalWidth + margin;
-	rect.bottom = (gridHeight*SpecRow) + margin;
-	pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
+	//rect.right = totalWidth + margin;
+	//rect.bottom = (gridHeight*SpecRow) + margin;
+	//pWnd->MoveWindow(rect.left, rect.top, rect.right, rect.bottom);//다이얼로그의 크기와 위치값 조정을 위한 함수.
 
 
-	GetDlgItem(DLG)->GetWindowRect(rect);
-	ScreenToClient(rect);
-	m_clGridColorUniformitySpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
+	//GetDlgItem(DLG)->GetWindowRect(rect);
+	//ScreenToClient(rect);
+	//m_clGridColorUniformitySpec.Create(rect, this, DLG, WS_TABSTOP | WS_VISIBLE);
 
-	m_clGridColorUniformitySpec.SetTextBkColor(RGB_COLOR_WHITE);
-	m_clGridColorUniformitySpec.SetFixedBkColor(GRID_COLOR_TITLE);
-	m_clGridColorUniformitySpec.SetFixedTextColor(RGB_COLOR_WHITE);
-	m_clGridColorUniformitySpec.SetReference_Setting();
-	m_clGridColorUniformitySpec.EnableSelection(FALSE);
-	m_clGridColorUniformitySpec.SetRowCount(SpecRow);
-	m_clGridColorUniformitySpec.SetColumnCount(SpecCol);
-	m_clGridColorUniformitySpec.SetFixedRowCount(1);
-	m_clGridColorUniformitySpec.SetFixedColumnCount(1);
+	//m_clGridColorUniformitySpec.SetTextBkColor(RGB_COLOR_WHITE);
+	//m_clGridColorUniformitySpec.SetFixedBkColor(GRID_COLOR_TITLE);
+	//m_clGridColorUniformitySpec.SetFixedTextColor(RGB_COLOR_WHITE);
+	//m_clGridColorUniformitySpec.SetReference_Setting();
+	//m_clGridColorUniformitySpec.EnableSelection(FALSE);
+	//m_clGridColorUniformitySpec.SetRowCount(SpecRow);
+	//m_clGridColorUniformitySpec.SetColumnCount(SpecCol);
+	//m_clGridColorUniformitySpec.SetFixedRowCount(1);
+	//m_clGridColorUniformitySpec.SetFixedColumnCount(1);
 
-	for (i = 0; i < SpecRow; i++)
-	{
-		m_clGridColorUniformitySpec.SetRowHeight(i, gridHeight);
-		m_clGridColorUniformitySpec.SetItemText(i + 1, 0, COLOR_UNIFORMITY_SPEC_NAME[i]);
+	//for (i = 0; i < SpecRow; i++)
+	//{
+	//	m_clGridColorUniformitySpec.SetRowHeight(i, gridHeight);
+	//	//m_clGridColorUniformitySpec.SetItemText(i + 1, 0, COLOR_UNIFORMITY_SPEC_NAME[i]);
 
-		for (j = 0; j < SpecCol; j++)
-		{
-			if (i == 0)
-			{
-				if (j == 0)
-				{
-					m_clGridColorUniformitySpec.SetColumnWidth(j, gridWidth1);
-				}
-				else
-				{
-					m_clGridColorUniformitySpec.SetColumnWidth(j, gridWidth2);
-				}
+	//	for (j = 0; j < SpecCol; j++)
+	//	{
+	//		if (i == 0)
+	//		{
+	//			if (j == 0)
+	//			{
+	//				m_clGridColorUniformitySpec.SetColumnWidth(j, gridWidth1);
+	//			}
+	//			else
+	//			{
+	//				m_clGridColorUniformitySpec.SetColumnWidth(j, gridWidth2);
+	//			}
 
-				m_clGridColorUniformitySpec.SetItemText(i, j, pszCol[j]);
-			}
+	//			m_clGridColorUniformitySpec.SetItemText(i, j, pszCol[j]);
+	//		}
 
-			m_clGridColorUniformitySpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-		}
-	}
+	//		m_clGridColorUniformitySpec.SetItemFormat(i, j, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	//	}
+	//}
 }
 //-----------------------------------------------------------------------------
 //
@@ -252,13 +252,13 @@ void CCcdColorUniformitySpecDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 //-----------------------------------------------------------------------------
 void CCcdColorUniformitySpecDlg::ShowRI4Spec()
 {
-	TCHAR szData[SIZE_OF_100BYTE];
+	/*TCHAR szData[SIZE_OF_100BYTE];
 	int i = 0;
 	for (i = 0; i < g_ColorUniformitycount; i++)
 	{
 		m_clGridColorUniformitySpec.SetItemText(i + 1, 1, g_clModelData[m_nUnit].m_UniformSpec[i], 3);
 	}
-	m_clGridColorUniformitySpec.Invalidate();
+	m_clGridColorUniformitySpec.Invalidate();*/
 }
 //-----------------------------------------------------------------------------
 //
@@ -268,7 +268,7 @@ void CCcdColorUniformitySpecDlg::ShowRI4Spec()
 
 void CCcdColorUniformitySpecDlg::GetRI4Spec()
 {
-	CString sData = _T("");
+	/*CString sData = _T("");
 	int i;
 	int _x = 0;
 	int _y = 0;
@@ -277,7 +277,7 @@ void CCcdColorUniformitySpecDlg::GetRI4Spec()
 	{
 		sData = m_clGridColorUniformitySpec.GetItemText(i + 1, 1);
 		g_clModelData[m_nUnit].m_UniformSpec[i] = _ttof((TCHAR*)(LPCTSTR)sData);
-	}
+	}*/
 }
 //-----------------------------------------------------------------------------
 //
@@ -450,7 +450,7 @@ void CCcdColorUniformitySpecDlg::OnBnClickedButtonCcdSfrSpecClose()
 //-----------------------------------------------------------------------------
 void CCcdColorUniformitySpecDlg::OnNMDblClickedRiSpec(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	NM_GRIDVIEW* pNMGridView = (NM_GRIDVIEW*)pNMHDR;
+	/*NM_GRIDVIEW* pNMGridView = (NM_GRIDVIEW*)pNMHDR;
 	CString sData = _T("");
 	int nRow, nCol;
 
@@ -473,7 +473,7 @@ void CCcdColorUniformitySpecDlg::OnNMDblClickedRiSpec(NMHDR* pNMHDR, LRESULT* pR
 
 			delete pDlg;
 		}
-	}
+	}*/
 }
 
 //-----------------------------------------------------------------------------

@@ -470,6 +470,8 @@ void CConfigDlg::InitCtrl()
 	SetWindowTheme(GetDlgItem(IDC_CHECK_CONFIG_ALIGN_PASS)->m_hWnd, L"", L"");
 	SetWindowTheme(GetDlgItem(IDC_CHECK_CONFIG_RAW_SAVE_PASS)->m_hWnd, L"", L"");
 	SetWindowTheme(GetDlgItem(IDC_CHECK_CONFIG_JXL_SAVE_PASS)->m_hWnd, L"", L"");
+	SetWindowTheme(GetDlgItem(IDC_CHECK_CONFIG_IDLE_REPORT_PASS)->m_hWnd, L"", L"");
+	
 	
 	SetWindowTheme(GetDlgItem(IDC_CHECK_CONFIG_LASER_LOCK)->m_hWnd, L"", L"");
 	SetWindowTheme(GetDlgItem(IDC_CHECK_CONFIG_DOME_CHART_USE)->m_hWnd, L"", L"");
@@ -2063,7 +2065,7 @@ void CConfigDlg::OnStnClickedStaticConfigPinStopVal()
 	{
 		if (pDlg->DoModal() == IDOK)
 		{
-			nRetVal = pDlg->GetReturnVal();
+			nRetVal = (int)pDlg->GetReturnVal();
 
 			sData.Format(_T("%d"), nRetVal);
 			m_clColorStaticPinStopVal.SetWindowText(sData);
@@ -3008,6 +3010,13 @@ void CConfigDlg::ShowData()
 	else
 		pButton->SetCheck(0);
 	
+	//IDLE REASON REPORT
+	pButton = (CButton*)GetDlgItem(IDC_CHECK_CONFIG_IDLE_REPORT_PASS);
+	if (g_clModelData[m_nUnit].m_nIdleReasonPass == 1)
+		pButton->SetCheck(1);
+	else
+		pButton->SetCheck(0);
+	
 
 	// STAIN 검사 사용
 	pButton = (CButton*)GetDlgItem(IDC_CHECK_CONFIG_STAIN_INSP_USE);
@@ -3626,6 +3635,13 @@ void CConfigDlg::GetData()
 		g_clModelData[m_nUnit].m_nJxlSavePass = 1;
 	else
 		g_clModelData[m_nUnit].m_nJxlSavePass = 0;
+
+	//idle reason report
+	pButton = (CButton*)GetDlgItem(IDC_CHECK_CONFIG_IDLE_REPORT_PASS);
+	if (pButton->GetCheck() == 1)
+		g_clModelData[m_nUnit].m_nIdleReasonPass = 1;
+	else
+		g_clModelData[m_nUnit].m_nIdleReasonPass = 0;
 	
 	
 	//sfr 평균 체크
@@ -3818,7 +3834,7 @@ void CConfigDlg::GetData()
 	
 	// 
 	m_clColorStaticPinStopVal.GetWindowText(sData);
-	g_clSysData.m_nMaxPinCount = (float)_ttof((TCHAR*)(LPCTSTR)sData);
+	g_clSysData.m_nMaxPinCount = _ttoi((TCHAR*)(LPCTSTR)sData);
 
 	// LASER CONTROL LOCK
 	pButton = (CButton*)GetDlgItem(IDC_CHECK_CONFIG_LASER_LOCK);
@@ -4008,7 +4024,8 @@ HBRUSH CConfigDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		pWnd->GetDlgCtrlID() == IDC_CHECK_CONFIG_IRFILTER_INSP_USE || pWnd->GetDlgCtrlID() == IDC_CHECK_CONFIG_COLOR_REPRODUCTION_INSP_USE ||
 		pWnd->GetDlgCtrlID() == IDC_CHECK_CONFIG_RI_INSP_USE ||
 		pWnd->GetDlgCtrlID() == IDC_CHECK_CONFIG_INSP_PASS || pWnd->GetDlgCtrlID() == IDC_CHECK_CONFIG_ALIGN_PASS||
-		pWnd->GetDlgCtrlID() == IDC_CHECK_CONFIG_RAW_SAVE_PASS || pWnd->GetDlgCtrlID() == IDC_CHECK_CONFIG_JXL_SAVE_PASS
+		pWnd->GetDlgCtrlID() == IDC_CHECK_CONFIG_RAW_SAVE_PASS || pWnd->GetDlgCtrlID() == IDC_CHECK_CONFIG_JXL_SAVE_PASS||
+		pWnd->GetDlgCtrlID() == IDC_CHECK_CONFIG_IDLE_REPORT_PASS
 
 		
 		)
@@ -4576,12 +4593,12 @@ void CConfigDlg::OnStnClickedStaticConfigContactRetryDelay()
 	{
 		if (pDlg->DoModal() == IDOK)
 		{
-			int dtemp = pDlg->GetReturnVal();
+			double dtemp = pDlg->GetReturnVal();
 			if (dtemp < 0.1)
 			{
 				dtemp = 0.1;
 			}
-			sData.Format(_T("%.01lf"), pDlg->GetReturnVal());
+			sData.Format(_T("%.01lf"), dtemp);
 			m_clColorStaticContactRetryDelay.SetWindowText(sData);
 		}
 

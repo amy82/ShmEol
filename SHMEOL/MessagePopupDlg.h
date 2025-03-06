@@ -48,7 +48,15 @@ public:
 	int CloseTime;
     CLabel m_clColorStaticTitle;
     CLabel m_clColorStaticMsg;
+
+	CEdit m_edtMsg;
+	CBrush m_brush;  // 클래스 멤버 선언
+
     CButtonCT m_clColorButtonConfirm;
+
+
+
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 };

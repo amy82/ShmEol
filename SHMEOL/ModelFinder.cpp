@@ -18,11 +18,11 @@ CModelFinder::CModelFinder(void)
 			m_MilModModel[i][j] = M_NULL;
 			m_bMarkState[i][j] = false;
 			m_bMarkState[i][j] = false;
-			m_clPtMarkSize[i][j].x = 0.0;
-			m_clPtMarkSize[i][j].y = 0.0;
+			m_clPtMarkSize[i][j].x = 0;
+			m_clPtMarkSize[i][j].y = 0;
 
-			m_clPtMarkSize[i][j].x = 0.0;
-			m_clPtMarkSize[i][j].y = 0.0;
+			m_clPtMarkSize[i][j].x = 0;
+			m_clPtMarkSize[i][j].y = 0;
 		}
 
 		m_MilModResult[i] = M_NULL;

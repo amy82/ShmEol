@@ -47,6 +47,8 @@ CPcbProcess::CPcbProcess(void)
 	rawSumCount = 0;
 	m_nDiffTestOk = false;
 	nDiffRetry = 0;
+	nLotProcessingComplete_ACK = -1;
+	nRunOnlineControlState = false;
 }
 
 
@@ -76,6 +78,7 @@ int CPcbProcess::HomeProcess(int nStep)
 	if (g_clDioControl.CurtainDoorCheck(m_nUnit, true) == true)		//HomeProcess
 	{
 		g_clMotorSet.StopAxisAll(m_nUnit);
+		g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1008);
 		_stprintf_s(szLog, SIZE_OF_1K, _T("[ERROR] 원점동작 중 CURTAIN 감지. 일시 정지"));
 		nRetStep *= -1;
 		AddLog(szLog, 1, m_nUnit, true);
@@ -84,6 +87,39 @@ int CPcbProcess::HomeProcess(int nStep)
 	switch (nStep)
 	{
 	case 10000:
+		if (g_clMesCommunication[m_nUnit].m_dEqupControlState[1] == eOnlineRemote &&
+			g_clMesCommunication[m_nUnit].m_dProcessState[0] != g_clMesCommunication[m_nUnit].m_dProcessState[1])
+		{
+			g_clMesCommunication[m_nUnit].m_dProcessState[0] = g_clMesCommunication[m_nUnit].m_dProcessState[1];
+			g_clMesCommunication[m_nUnit].m_dProcessState[1] = eIDLE;
+			g_clMesCommunication[m_nUnit].m_uAlarmList.clear();
+
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[ORG] (Idle)Process State Change Report [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+
+			g_clTaskWork[0].bIdleTimeExceed = false;		//init
+			g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(PROCESS_STATE_CHANGED_REPORT_10401);	//SEND S6F11
+
+
+			CTime cTime = CTime::GetCurrentTime();
+			CString strData;
+			strData.Format(_T("%02d%02d%02d%02d%02d%02d"),
+				cTime.GetYear(),
+				cTime.GetMonth(),
+				cTime.GetDay(),
+				cTime.GetHour(),
+				cTime.GetMinute(),
+				cTime.GetSecond());
+			_stprintf_s(g_clTaskWork[m_nUnit].m_szIdleStartTime, SIZE_OF_100BYTE, _T("%s"), strData);		//Auto_M_PCBLoading
+			g_pCarAABonderDlg->KillTimer(WM_IDLE_REASON_TIMER);
+
+			if (g_clMesCommunication[m_nUnit].IdleSetTimeInterval < 1)
+			{
+				g_clMesCommunication[m_nUnit].IdleSetTimeInterval = 5;	//min  1min = 60000
+			}
+			g_pCarAABonderDlg->SetTimer(WM_IDLE_REASON_TIMER, g_clMesCommunication[m_nUnit].IdleSetTimeInterval * 60000, NULL);		//30000 Step
+			strData.Empty();
+		}
 		nRetStep = 10100;
 		break;
 	case 10100:
@@ -222,7 +258,7 @@ int CPcbProcess::HomeProcess(int nStep)
 			if (g_clDioControl.PcbVacuumCheck(m_nUnit, true) == false)		//소켓 흡착 상태 확인	Home
 			{
 				g_clMotorSet.StopAxisAll(m_nUnit);
-
+				g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1007);
 				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PCB Vacuum 확인 실패 [STEP : %d]"), nStep);
 				AddLog(szLog, 1, m_nUnit, true);
 
@@ -799,13 +835,46 @@ int CPcbProcess::AutoReadyProcess(int nStep)
 		g_clMotorSet.StopAxisAll(m_nUnit);
 		_stprintf_s(szLog, SIZE_OF_1K, _T("[ERROR] 운전 운전 중 CURTAIN 감지. 일시 정지"));
 		nRetStep *= -1;
+		g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1008);
 		AddLog(szLog, 1, m_nUnit, true);
 		return nRetStep;
 	}
 	switch (nStep)
 	{
 	case 20000:
-		
+		if (g_clMesCommunication[m_nUnit].m_dEqupControlState[1] == eOnlineRemote &&
+			g_clMesCommunication[m_nUnit].m_dProcessState[0] != g_clMesCommunication[m_nUnit].m_dProcessState[1])
+		{
+			g_clMesCommunication[m_nUnit].m_dProcessState[0] = g_clMesCommunication[m_nUnit].m_dProcessState[1];
+			g_clMesCommunication[m_nUnit].m_dProcessState[1] = eIDLE;
+			g_clMesCommunication[m_nUnit].m_uAlarmList.clear();
+
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[READY] (Idle)Process State Change Report [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+
+			g_clTaskWork[0].bIdleTimeExceed = false;		//init
+			g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(PROCESS_STATE_CHANGED_REPORT_10401);	//SEND S6F11
+
+
+			CTime cTime = CTime::GetCurrentTime();
+			CString strData;
+			strData.Format(_T("%02d%02d%02d%02d%02d%02d"),
+				cTime.GetYear(),
+				cTime.GetMonth(),
+				cTime.GetDay(),
+				cTime.GetHour(),
+				cTime.GetMinute(),
+				cTime.GetSecond());
+			_stprintf_s(g_clTaskWork[m_nUnit].m_szIdleStartTime, SIZE_OF_100BYTE, _T("%s"), strData);		//Auto_M_PCBLoading
+			g_pCarAABonderDlg->KillTimer(WM_IDLE_REASON_TIMER);
+
+			if (g_clMesCommunication[m_nUnit].IdleSetTimeInterval < 1)
+			{
+				g_clMesCommunication[m_nUnit].IdleSetTimeInterval = 5;	//min  1min = 60000
+			}
+			g_pCarAABonderDlg->SetTimer(WM_IDLE_REASON_TIMER, g_clMesCommunication[m_nUnit].IdleSetTimeInterval * 60000, NULL);		//30000 Step
+			strData.Empty();
+		}
 		nRetStep = 20100;
 		break;
 	case 20100:
@@ -821,6 +890,7 @@ int CPcbProcess::AutoReadyProcess(int nStep)
 	case 20200:
 		if (g_clMotorSet.MovePcbZMotor(m_nUnit, WAIT_POS) == false)
 		{
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1036);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PCB Z축 WAIT_POS 위치 이동 실패 [STEP : %d]"), nStep);
 			AddLog(szLog, 1, m_nUnit, true);
 
@@ -840,6 +910,7 @@ int CPcbProcess::AutoReadyProcess(int nStep)
 		curPos = g_clMotorSet.GetEncoderPos(m_nUnit, MOTOR_PCB_Z);		// -g_clSysData.m_dOrgDataset[m_nUnit][MOTOR_PCB_Z];
 		if (g_clMotorSet.GetStopAxis(m_nUnit, MOTOR_PCB_Z) && (curPos - dPos[0]) < ENCORDER_GAP)
 		{
+
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PCB Z축 WAIT_POS 위치 이동 완료 [STEP : %d]"), nStep);
 			AddLog(szLog, 0, m_nUnit);
 			nRetStep = 20400;
@@ -848,6 +919,7 @@ int CPcbProcess::AutoReadyProcess(int nStep)
 
 		if ((GetTickCount() - g_clTaskWork[m_nUnit].m_dwPcbTickCount) > MAX_MOTOR_MOVE_TIME)
 		{
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1036);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PCB Z축 WAIT_POS 위치 이동 시간 초과 [STEP : %d]"), nStep);
 			AddLog(szLog, 1, m_nUnit, true);
 
@@ -899,6 +971,7 @@ int CPcbProcess::AutoReadyProcess(int nStep)
 		{
 			if (g_clDioControl.PcbVacuumCheck(m_nUnit, true) == false)		//소켓 흡착 상태 확인	Ready
 			{
+				g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1038);
 				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO READY] PCB Vacuum 확인 실패 [STEP : %d]"), nStep);
 				AddLog(szLog, 1, m_nUnit, true);
 
@@ -1125,6 +1198,56 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 	switch (nStep)
 	{
 	case 30000:
+		if (g_pCarAABonderDlg->m_clUbiGemDlg.bConnected() == false)
+		{
+			sMsg.Format(_T("MES DISCONNECTED"));
+			AddLog(sMsg, 1, m_nUnit, true);
+			nRetStep = -30000;
+			break;
+		}
+		if (g_clMesCommunication[m_nUnit].m_dEqupControlState[1] == eOnlineRemote &&
+			g_clMesCommunication[m_nUnit].m_dProcessState[0] != g_clMesCommunication[m_nUnit].m_dProcessState[1])
+		{
+			g_clMesCommunication[m_nUnit].m_dProcessState[0] = g_clMesCommunication[m_nUnit].m_dProcessState[1];
+			g_clMesCommunication[m_nUnit].m_dProcessState[1] = eIDLE;
+			g_clMesCommunication[m_nUnit].m_uAlarmList.clear();
+
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] (Idle)Process State Change Report [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+
+			g_clTaskWork[0].bIdleTimeExceed = false;		//init
+			g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(PROCESS_STATE_CHANGED_REPORT_10401);	//SEND S6F11
+
+
+			CTime cTime = CTime::GetCurrentTime();
+			CString strData;
+			strData.Format(_T("%02d%02d%02d%02d%02d%02d"),
+				cTime.GetYear(),
+				cTime.GetMonth(),
+				cTime.GetDay(),
+				cTime.GetHour(),
+				cTime.GetMinute(),
+				cTime.GetSecond());
+			_stprintf_s(g_clTaskWork[m_nUnit].m_szIdleStartTime, SIZE_OF_100BYTE, _T("%s"), strData);		//Auto_M_PCBLoading
+			g_pCarAABonderDlg->KillTimer(WM_IDLE_REASON_TIMER);
+
+			if (g_clMesCommunication[m_nUnit].IdleSetTimeInterval < 1)
+			{
+				g_clMesCommunication[m_nUnit].IdleSetTimeInterval = 5;	//min  1min = 60000
+			}
+			g_pCarAABonderDlg->SetTimer(WM_IDLE_REASON_TIMER, g_clMesCommunication[m_nUnit].IdleSetTimeInterval * 60000, NULL);		//30000 Step
+			strData.Empty();
+		}
+		else
+		{
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Process Control State:%d [STEP : %d]"), g_clMesCommunication[m_nUnit].m_dEqupControlState[1],  nStep);
+			AddLog(szLog, 0, m_nUnit);
+		}
+		nRetStep = 30010;
+		break;
+
+	case 30010:
+
 		mOcLightChannel = 1;	//channel init
 
 		g_clTaskWork[m_nUnit].m_ContactCount = 0;		//step 30000
@@ -1136,6 +1259,7 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 		{
 			if (g_clTaskWork[m_nUnit].m_nUsePinCount > g_clSysData.m_nMaxPinCount)//g_clModelData[m_nUnit].m_nSensorCnt)
 			{
+				g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1041);
 				sMsg.Format(_T("Socket PIN %d(Spec: %d) \nReset after replacement"), g_clTaskWork[m_nUnit].m_nUsePinCount, g_clSysData.m_nMaxPinCount);// g_clModelData[m_nUnit].m_nSensorCnt);
 				AddLog(sMsg, 1, m_nUnit, true);
 				nRetStep = -30000;
@@ -1144,6 +1268,7 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 		}
 		if (g_clMotorSet.MovePcbZMotor(m_nUnit, WAIT_POS, 0.0, true) == false)
 		{
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1042);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PCB Z축 대기 위치 이동 실패 [STEP : %d]"), nStep);
 			AddLog(szLog, 1, m_nUnit, true);
 
@@ -1160,6 +1285,7 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 		nRetStep = 30030;
 		break;
 	case 30030:
+
 		nRetStep = 30050;
 		break;
 	case 30050:
@@ -1168,6 +1294,7 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 
 		if (g_clMotorSet.MovePcbXYTMotor(m_nUnit, SUPPLY_POS) == false)
 		{
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1043);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO][PCB] PCB X,Y,T축 투입 위치 이동 명령 실패 [STEP : %d]"), nStep);
 			AddLog(szLog, 1, m_nUnit, true);
 
@@ -1313,6 +1440,7 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 		
 		if (g_clDioControl.PcbSensorCheck(m_nUnit) == false)
 		{
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1046);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PCB 제품 감지 실패 [STEP : %d]"), nStep);
 
 			AddLog(szLog, 1, m_nUnit, true);
@@ -1365,39 +1493,7 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 		BackDuLightControl[m_nUnit].ctrlLedVolume(LIGHT_BD_ALIGN_CH1, g_clModelData[m_nUnit].m_nLight[LIGHT_DATA_ALIGN_SENSOR]);
 		nRetStep = 30400;
 		break;
-		//if (g_clDioControl.PcbSensorCheck(m_nUnit, true) == false)
-		//{
-		//	//제품 없음
-		//	g_clTaskWork[m_nUnit].m_bPcbSocketIF[PCB_BCR] = false;	//제품 xxx
-		//	_stprintf_s(g_clTaskWork[m_nUnit].m_szChipID, SIZE_OF_100BYTE, _T("EMPTY")); //bcr 초기화
-		//	g_pCarAABonderDlg->ShowBarcode(m_nUnit);
-		//	g_clTaskWork[m_nUnit].m_nEmission = 0;
-		//	g_clTaskWork[m_nUnit].SaveData();
-		//	g_pCarAABonderDlg->ShowOkNgState(m_nUnit, g_clTaskWork[m_nUnit].m_nEmission);
 
-		//	_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PCB SOCKET 제품 미확인 [STEP : %d]"), nStep);
-		//	AddLog(szLog, 0, m_nUnit);
-
-		//	nRetStep = 30400;
-		//	break;
-		//}
-		//else
-		//{
-		//	g_clTaskWork[m_nUnit].m_bPcbSocketIF[PCB_BCR] = true;	//제품 ooo
-		//	_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PCB SOCKET 제품 확인 [STEP : %d]"), nStep);
-		//	AddLog(szLog, 0, m_nUnit);
-
-		//	if (g_ShowMsgModal(_T("확인"), _T("[AUTO] PCB 제품이 있습니다. 진행하시겠습니까?"), RGB_COLOR_RED) == false)
-		//	{
-		//		nRetStep = -30200;
-		//	}
-		//	else
-		//	{
-		//		g_clTaskWork[m_nUnit].m_IoRetry = 0;
-		//		nRetStep = 30700;	//jump
-		//	}
-		//}
-		break;
 	case 30400:
 		MbufClear(g_clVision.MilDefectOverlayImage[m_nUnit], (MIL_DOUBLE)g_clVision.m_nMilDefectTransparent[m_nUnit]);
 		MbufClear(g_clVision.MilDefectImage[m_nUnit], 0);
@@ -1406,29 +1502,667 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 		break;
 
 	case 30500:
-		nRetStep = 30700;
+		nRunOnlineControlState = false;
+		nRunTimeOutSec = g_clMesCommunication[m_nUnit].ConversationTimeoutCount * 1000;
+		if (nRunTimeOutSec < 1)
+		{
+			nRunTimeOutSec = 60 * 1000;
+		}
+		if (g_clMesCommunication[m_nUnit].m_dEqupControlState[1] == eOnlineRemote)
+		{
+			nRunOnlineControlState = true;
+		}
+		if (nRunOnlineControlState == false)
+		{
+			//Offline 이면 전부 Skip
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Equipment Offline State Object Id Pass [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			nRetStep = 32750;	//Jump Setp
+			break;
+		}
+		nRetStep = 30600;
 		break;
-	case 30700:
+	case 30600:
+		//OBJECT ID REPORT
+		g_clTaskWork[m_nUnit].bRecv_Lgit_Pp_select = -1;
+		g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start = -1;
+		g_pCarAABonderDlg->KillTimer(WM_IDLE_REASON_TIMER);		//OBJECT ID REPORT start
+		//
+		g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(OBJECT_ID_REPORT_10701);
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Object Id Report Send [STEP : %d]"), nStep);	//-----------------------OBJECT ID REPORT start
+		AddLog(szLog, 0, m_nUnit);
+		nRetStep = 30700;
+
+		g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
+		break;
+	case 30700:	//ok
+		if (g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start == 0) 
+		{
+			//g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start = -1;
+			//Recv LGIT_LOT_START
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Id Start Recv [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			nRetStep = 31400;	//Jump Step
+		}
+		else if (g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start == 1)
+		{
+			g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start = -1;
+			//Recv LGIT_LOT_ID_FAIL
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Id Fail Recv [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			sMsg.Empty();
+
+			//std::vector<RcmdList_T2> resultsT2;
+			//resultsT2 = g_clReportData.T2_FindChildList(g_clReportData.rLot_Id_Fail.parameters);
+
+			//if (resultsT2.size() > 0)
+			//{
+			//	for (int i = 0; i < resultsT2[0].rVec.size(); i++)
+			//	{
+			//		if (resultsT2[0].rVec[i].cpName == "MODULEID")
+			//		{
+			//			//g_pCarAABonderDlg->m_clMessageLot.setLotID(_T("LOT ID"), resultsT2[0].rVec[i].cepVal);		//여긴 lot id? , moduleid?
+			//			sMsg.Format(_T("LOT ID:%s"), resultsT2[0].rVec[i].cepVal);// g_clModelData[m_nUnit].m_nSensorCnt);
+
+			//			break;
+			//		}
+			//	}
+			//}
+			if (g_clReportData.vLotIdFail.size() > 0)
+			{
+				for (int i = 0; i < g_clReportData.vLotIdFail[0].children.size(); i++)
+				{
+					if (g_clReportData.vLotIdFail[0].children[i].name == "MODULEID")
+					{
+						sMsg.Format(_T("LOT ID:%s"), g_clReportData.vLotIdFail[0].children[i].value);
+						break;
+					}
+				}
+			}
+			//
+			//_stprintf_s(szLog, SIZE_OF_1K, _T("[RCMD L%d]Name:%s, Val:%s"), i + 1, g_clReportData.vLotIdFail[0].children[i].name, g_clReportData.vLotIdFail[0].children[i].value);
+			//
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(2000);
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[LGIT_LOT_ID_FAIL]\n%s \nCode :%s\nText:%s\n재시도 하시겠습니까?"), sMsg,
+				g_clMesCommunication[m_nUnit].m_sErcmdCode, g_clMesCommunication[m_nUnit].m_sErcmdText);
+
+			if (g_ShowMsgModal(_T("[INFO]"), szLog, RGB_COLOR_BLUE, _T("RETRY"), _T("PAUSE")) == true)
+			{
+				g_clMesCommunication[m_nUnit].m_uAlarmList.clear();
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot ID Fail Retry [STEP : %d]"), nStep);
+				AddLog(szLog, 0, m_nUnit);
+				nRetStep = 30600;
+			}
+			else
+			{
+				nRetStep = -30600;
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO](%s) LOT id Cancel. by Host [STEP : %d]"), g_clTaskWork[m_nUnit].m_szChipID, nStep);
+				AddLog(szLog, 1, m_nUnit, true);
+				break;
+			}
+
+		}
+		else if (g_clTaskWork[m_nUnit].bRecv_Lgit_Pp_select == 0)//LOT START 가 올수고있다  아
+		{
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lgit PP Select Recv OK [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			g_clTaskWork[m_nUnit].bRecv_Lgit_Pp_select = -1;
+			nRetStep = 30750;
+		}
+		else if (g_clTaskWork[m_nUnit].bRecv_Lgit_Pp_select == 1) 
+		{
+			//Recipe ID Check
+			//
+			//
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(2001);
+			g_clDioControl.SetBuzzer(true, BUZZER_ALARM);
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[%s] 사용중인 RECIPE (%s) 와 다릅니다.\n재시도 하시겠습니까?"), g_clMesCommunication[m_nUnit].m_sRecipeId, g_clMesCommunication[m_nUnit].m_sMesPPID);
+			if (g_ShowMsgModal(_T("[INFO]"), szLog, RGB_COLOR_BLUE, _T("RETRY"), _T("PAUSE")) == true)
+			{
+				g_clMesCommunication[m_nUnit].m_uAlarmList.clear();
+				g_clDioControl.SetBuzzer(true, BUZZER_OFF);
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Object Id Report Retry [STEP : %d]"), nStep);
+				AddLog(szLog, 0, m_nUnit);
+				nRetStep = 30600;
+			}
+			else
+			{
+				nRetStep = -30600;
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] RECIPE ID 확인 실패 [STEP : %d]"), nStep);
+				AddLog(szLog, 1, m_nUnit, true);
+				break;
+			}
+		}
+		else if ((GetTickCount() - g_clTaskWork[m_nUnit].m_dwPcbTickCount) > nRunTimeOutSec)
+		{
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] LGIT PP SELECT Ct TimeOut [STEP : %d]"), nStep);
+			AddLog(szLog, 1, m_nUnit, true);
+
+			g_pCarAABonderDlg->m_clUbiGemDlg.cTTimeOutSendFn(_T("S06F12"), _T("10701"));
+			nRetStep = -30600;
+			break;
+		}
 		
-		nRetStep = 31000;
+		break;
+	case 30750:
+		
+		g_clMesCommunication[m_nUnit].m_dProcessState[0] = g_clMesCommunication[m_nUnit].m_dProcessState[1];
+		g_clMesCommunication[m_nUnit].m_dProcessState[1] = eSETUP;
+		g_clMesCommunication[m_nUnit].m_uAlarmList.clear();
+
+		g_clTaskWork[m_nUnit].bRecv_S6F12_Process_State_Change = -1;
+
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] (Setup)Process State Change Report [STEP : %d]"), nStep);
+		AddLog(szLog, 0, m_nUnit);
+
+
+		g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(PROCESS_STATE_CHANGED_REPORT_10401);	//SEND S6F11
+																								//Event = Process State Change Report ("SETUP");
+		g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
+		nRetStep = 30800;
+		
+		break;
+	case 30800:
+		if (g_clTaskWork[m_nUnit].bRecv_S6F12_Process_State_Change == 0)	//SETUP
+		{
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] (Setup)Process State Change Send Acknowledge [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			g_clTaskWork[m_nUnit].bRecv_S6F12_Process_State_Change = -1;
+			//Recipe Setup Completion
+			//SV:Recipe ID Set
+
+			g_clMesCommunication[m_nUnit].m_dProcessState[0] = g_clMesCommunication[m_nUnit].m_dProcessState[1];
+			g_clMesCommunication[m_nUnit].m_dProcessState[1] = eREADY;
+
+			g_clMesCommunication[m_nUnit].m_uAlarmList.clear();
+			
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] (Ready)Process State Change Report [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+
+			g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(PROCESS_STATE_CHANGED_REPORT_10401); //SEND S6F11
+			//S6F11 Send
+
+			g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
+			nRetStep = 30900;
+		}
+		else if ((GetTickCount() - g_clTaskWork[m_nUnit].m_dwPcbTickCount) > nRunTimeOutSec)
+		{
+			//g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(CT_TIMEOUT_REPORT_11002); //SEND S6F11
+			g_pCarAABonderDlg->m_clUbiGemDlg.cTTimeOutSendFn(_T("S06F12"), _T("10401"));
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] (Setup)Process State Change Ct TimeOut [STEP : %d]"), nStep);
+			AddLog(szLog, 1, m_nUnit, true);
+
+			nRetStep = -30600;	//OBJECT ID REPORT Step
+			break;
+		}
+		
+		
+		break;
+	case 30900:
+		if (g_clTaskWork[m_nUnit].bRecv_S6F12_Process_State_Change == 0)	//READY
+		{
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] (Ready)Process State Change Send Acknowledge [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			g_clTaskWork[m_nUnit].bRecv_S6F12_Process_State_Change = -1;
+			g_clTaskWork[m_nUnit].bRecv_S6F12_PP_Selected = -1;
+			g_clTaskWork[m_nUnit].bRecv_S7F25_Formatted_Process_Program = -1;		//<--미리 초기화
+			g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start = -1;		//미리 초기화
+
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PP-Selected Report [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(PP_SELECTED_REPORT_10702);//SEND S6F11
+			//Event - PP-Selected Report
+
+
+			//두 종류로 올 수 있다.
+			//1..여기서 LGIT_LOT_START 오거나 Jmp
+			//2..LGIT_LOT_ID_FAIL Lot ID Cancel by Host 올 수 있따.
+			g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
+			nRetStep = 31000;
+		}
+		else if ((GetTickCount() - g_clTaskWork[m_nUnit].m_dwPcbTickCount) > nRunTimeOutSec)
+		{
+			//g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(CT_TIMEOUT_REPORT_11002); //SEND S6F11
+			g_pCarAABonderDlg->m_clUbiGemDlg.cTTimeOutSendFn(_T("S06F12"), _T("10401"));
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] (Ready)Process State Change Ct TimeOut [STEP : %d]"), nStep);
+			AddLog(szLog, 1, m_nUnit, true);
+
+			nRetStep = -30600;	//OBJECT ID REPORT Step
+			break;
+		}
+		
 		break;
 	case 31000:
+		
+		if (g_clTaskWork[m_nUnit].bRecv_S6F12_PP_Selected == 0)		//S6F12 대기
+		{
+			g_clTaskWork[m_nUnit].bRecv_S6F12_PP_Selected = -1;
+			//Recv PP-Select Report
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PP-Selected Send Acknowledge [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			nRetStep = 31050;
+
+			g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
+		}
+		
+		else if ((GetTickCount() - g_clTaskWork[m_nUnit].m_dwPcbTickCount) > nRunTimeOutSec)
+		{
+			//g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(CT_TIMEOUT_REPORT_11002); //SEND S6F11
+			g_pCarAABonderDlg->m_clUbiGemDlg.cTTimeOutSendFn(_T("S06F12"), _T("10702"));
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PP-Select Report Ct TimeOut [STEP : %d]"), nStep);
+			AddLog(szLog, 1, m_nUnit, true);
+
+			nRetStep = -30600;	//OBJECT ID REPORT Step
+			break;
+		}
+
+		
+		break;
+	case 31050:
+		//
+		////Recipe Parameter Validation EQP 안하면 바로 Lot Start 온다.
+		//
+		nRetStep = 31100;
+		g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
+		
+		break;
+	case 31100:
+		if (g_clTaskWork[m_nUnit].bRecv_S7F25_Formatted_Process_Program == 0)		//Ubisam 에서 보내고 0으로 변경
+		{
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Formatted Process Program Request [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			//수신 대기 S7F25 - Formatted Process Program Request
+			g_clTaskWork[m_nUnit].bRecv_S2F49_PP_UpLoad_Confirm = -1;
+			g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
+			nRetStep = 31200;
+		}
+		else if (g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start == 0)
+		{
+			g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start = -1;
+			//Recv LGIT_LOT_START
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Id Start Recv [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			nRetStep = 31400;	//Jump Step
+		}
+		else if (g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start == 1)
+		{
+			g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start = -1;
+			//Recv LGIT_LOT_ID_FAIL
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Id Fail Recv [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			sMsg.Empty();
+
+			//std::vector<RcmdList_T2> resultsT2;
+			//resultsT2 = g_clReportData.T2_FindChildList(g_clReportData.rLot_Id_Fail.parameters);
+			//if (resultsT2.size() > 0)
+			//{
+			//	for (int i = 0; i < resultsT2[0].rVec.size(); i++)
+			//	{
+			//		if (resultsT2[0].rVec[i].cpName == "MODULEID")
+			//		{
+			//			sMsg.Format(_T("LOT ID:%s"), resultsT2[0].rVec[i].cepVal);// g_clModelData[m_nUnit].m_nSensorCnt);
+			//			break;
+			//		}
+			//	}
+			//}
+			if (g_clReportData.vLotIdFail.size() > 0)
+			{
+				for (int i = 0; i < g_clReportData.vLotIdFail[0].children.size(); i++)
+				{
+					if (g_clReportData.vLotIdFail[0].children[i].name == "MODULEID")
+					{
+						sMsg.Format(_T("LOT ID:%s"), g_clReportData.vLotIdFail[0].children[i].value);
+						break;
+					}
+				}
+			}
+
+
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(2002);
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[LGIT_LOT_ID_FAIL]\n%s \nCode :%s\nText:%s\n재시도 하시겠습니까?"), sMsg,
+				g_clMesCommunication[m_nUnit].m_sErcmdCode, g_clMesCommunication[m_nUnit].m_sErcmdText);
+
+			if (g_ShowMsgModal(_T("[INFO]"), szLog, RGB_COLOR_BLUE, _T("RETRY"), _T("PAUSE")) == true)
+			{
+				g_clMesCommunication[m_nUnit].m_uAlarmList.clear();
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot ID Fail Retry [STEP : %d]"), nStep);
+				AddLog(szLog, 0, m_nUnit);
+				nRetStep = 30600;
+			}
+			else
+			{
+				nRetStep = -30600;
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO](%s) LOT id Cancel. by Host [STEP : %d]"), g_clTaskWork[m_nUnit].m_szChipID, nStep);
+				AddLog(szLog, 1, m_nUnit, true);
+				break;
+			}
+
+		}
+		else if ((GetTickCount() - g_clTaskWork[m_nUnit].m_dwPcbTickCount) > nRunTimeOutSec)
+		{
+			//g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(CT_TIMEOUT_REPORT_11002); //SEND S6F11
+			g_pCarAABonderDlg->m_clUbiGemDlg.cTTimeOutSendFn(_T("S07F25"), _T("10702"));//<<<여긴 맞나
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Formatted Process Program Ct TimeOut [STEP : %d]"), nStep);
+			AddLog(szLog, 1, m_nUnit, true);
+
+			nRetStep = -30600;	//OBJECT ID REPORT Step
+			break;
+		}
+		break;
+	case 31200:
+		if (g_clTaskWork[m_nUnit].bRecv_S2F49_PP_UpLoad_Confirm == 0)	//LGIT_PP_UPLOAD_CONFIRM
+		{
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PP Upload Confirm Recv [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			//LGIT_PP_UPLOAD_CONFIRM 오고 S2F50보낸뒤 , 정상 진행
+			g_clTaskWork[m_nUnit].bRecv_S2F49_PP_UpLoad_Confirm = -1;
+			g_clTaskWork[m_nUnit].bRecv_S6F12_PP_UpLoad_Completed = -1;
+			g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start = -1;		//미리 초기화
+			
+
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PP Upload Completed Report [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(PP_UPLOAD_COMPLETED_REPORT_10703);//SEND S6F11
+			//Event - PP Upload Completed Report
+			g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
+			nRetStep = 31300;
+		}
+		else if (g_clTaskWork[m_nUnit].bRecv_S2F49_PP_UpLoad_Confirm == 1)	//LGIT_PP_UPLOAD_FAIL 확인필요 250112
+		{
+			//LGIT_PP_UPLOAD_FAIL 오고 S2F50보낸뒤,  NG (Recipe Body Cancel by Host)
+			g_clTaskWork[m_nUnit].bRecv_S2F49_PP_UpLoad_Confirm = -1;
+
+			_stprintf_s(szLog, SIZE_OF_1K, _T("RECIPE ID:%s \nLGIT_PP_UPLOAD_FAIL\nCode :%s\nText:%s\n재시도 하시겠습니까?"), 
+				g_clMesCommunication[m_nUnit].m_sRecipeId, g_clMesCommunication[m_nUnit].m_sErcmdCode, g_clMesCommunication[m_nUnit].m_sErcmdText);
+			if (g_ShowMsgModal(_T("[INFO]"), szLog, RGB_COLOR_BLUE, _T("RETRY"), _T("PAUSE")) == true)
+			{
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PP Upload Fail Retry [STEP : %d]"), nStep);
+				AddLog(szLog, 0, m_nUnit);
+				nRetStep = 30600;
+			}
+			else
+			{
+				nRetStep = -30600;
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO](%s) PP Upload Fail Pause [STEP : %d]"), g_clTaskWork[m_nUnit].m_szChipID, nStep);
+				AddLog(szLog, 1, m_nUnit, true);
+				break;
+			}
+		}
+		else if ((GetTickCount() - g_clTaskWork[m_nUnit].m_dwPcbTickCount) > nRunTimeOutSec)
+		{
+			//g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(CT_TIMEOUT_REPORT_11002); //SEND S6F11
+			g_pCarAABonderDlg->m_clUbiGemDlg.cTTimeOutSendFn(_T("S02F49"), _T("10703"));
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PP Upload Confirm Ct TimeOut [STEP : %d]"), nStep);
+			AddLog(szLog, 1, m_nUnit, true);
+
+			nRetStep = -30600;	//OBJECT ID REPORT Step
+			break;
+		}
+		break;
+	case 31300:
+		if (g_clTaskWork[m_nUnit].bRecv_S6F12_PP_UpLoad_Completed == 0)
+		{
+			g_clTaskWork[m_nUnit].bRecv_S6F12_PP_UpLoad_Completed = -1;
+			//Recv S6F12
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PP Upload Completed Send acknowledge [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			nRetStep = 31400;
+			g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
+		}
+		else if ((GetTickCount() - g_clTaskWork[m_nUnit].m_dwPcbTickCount) > nRunTimeOutSec)
+		{
+			//g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(CT_TIMEOUT_REPORT_11002); //SEND S6F11
+			g_pCarAABonderDlg->m_clUbiGemDlg.cTTimeOutSendFn(_T("S06F12"), _T("10703"));
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PP Upload Completed Ct TimeOut [STEP : %d]"), nStep);
+			AddLog(szLog, 1, m_nUnit, true);
+
+			nRetStep = -30600;	//OBJECT ID REPORT Step
+			break;
+		}
+		break;
+	case 31400:
+
+		if (g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start == 0)
+		{
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lgit Lot Start Send acknowledge [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start = -1;
+			g_clTaskWork[m_nUnit].bRecv_S6F12_Process_State_Change = -1;
+			//Recv LGIT_LOT_START
+
+
+			//Lot Processing Start ????
+
+			g_clMesCommunication[m_nUnit].m_dProcessState[0] = g_clMesCommunication[m_nUnit].m_dProcessState[1];
+			g_clMesCommunication[m_nUnit].m_dProcessState[1] = eEXECUTING;
+
+			g_clMesCommunication[m_nUnit].m_uAlarmList.clear();
+			g_clMesCommunication[m_nUnit].m_dLotProcessingState = eWait;
+
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] (Executing)Process State Change Report [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(PROCESS_STATE_CHANGED_REPORT_10401); //SEND S6F11
+
+			g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
+			nRetStep = 31500;
+		}
+		else if (g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start == 1)	//확인필요
+		{
+			//Recv LGIT_LOT_ID_FAIL
+			//NG - Lot ID Cancel by Host
+
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Id Fail Recv [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+
+			sMsg.Empty();
+
+			/*std::vector<RcmdList_T2> resultsT2;
+			resultsT2 = g_clReportData.T2_FindChildList(g_clReportData.rLot_Id_Fail.parameters);
+			if (resultsT2.size() > 0)
+			{
+				for (int i = 0; i < resultsT2[0].rVec.size(); i++)
+				{
+					if (resultsT2[0].rVec[i].cpName == "MODULEID")
+					{
+						sMsg.Format(_T("LOT ID:%s"), resultsT2[0].rVec[i].cepVal);
+						break;
+					}
+				}
+			}*/
+
+			if (g_clReportData.vLotIdFail.size() > 0)
+			{
+				for (int i = 0; i < g_clReportData.vLotIdFail[0].children.size(); i++)
+				{
+					if (g_clReportData.vLotIdFail[0].children[i].name == "MODULEID")
+					{
+						sMsg.Format(_T("LOT ID:%s"), g_clReportData.vLotIdFail[0].children[i].value);
+						break;
+					}
+				}
+			}
+
+
+
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(2003);
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[LGIT_LOT_ID_FAIL]\n%s \nCode :%s\nText:%s\n재시도 하시겠습니까?"), sMsg,
+				g_clMesCommunication[m_nUnit].m_sErcmdCode, g_clMesCommunication[m_nUnit].m_sErcmdText);
+
+			if (g_ShowMsgModal(_T("[INFO]"), szLog, RGB_COLOR_BLUE, _T("RETRY"), _T("PAUSE")) == true)
+			{
+				g_clMesCommunication[m_nUnit].m_uAlarmList.clear();
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot ID Fail Retry [STEP : %d]"), nStep);
+				AddLog(szLog, 0, m_nUnit);
+				nRetStep = 30600;
+			}
+			else
+			{
+				nRetStep = -30600;
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO](%s) LOT id Cancel. by Host [STEP : %d]"), g_clTaskWork[m_nUnit].m_szChipID, nStep);
+				AddLog(szLog, 1, m_nUnit, true);
+				break;
+			}
+		}
+		else if ((GetTickCount() - g_clTaskWork[m_nUnit].m_dwPcbTickCount) > nRunTimeOutSec)
+		{
+			//g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(CT_TIMEOUT_REPORT_11002); //SEND S6F11
+			g_pCarAABonderDlg->m_clUbiGemDlg.cTTimeOutSendFn(_T("S02F49"), _T("10704"));
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Start Ct TimeOut [STEP : %d]"), nStep);
+			AddLog(szLog, 1, m_nUnit, true);
+
+			nRetStep = -30600;	//OBJECT ID REPORT Step
+			break;
+		}
+		//두 종류로 올 수 있다.
+		//1..여기서 LGIT_LOT_START 오거나 Jmp
+		//2..LGIT_LOT_ID_FAIL Lot ID Cancel by Host 올 수 있따.
+		break;
+	case 31500:
+		if (g_clTaskWork[m_nUnit].bRecv_S6F12_Process_State_Change == 0)
+		{
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] (Executing) Process State Change Acknowledge [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+
+			g_clTaskWork[m_nUnit].bRecv_S6F12_Process_State_Change = -1;
+			g_clTaskWork[m_nUnit].bRecv_S6F12_Lot_Processing_Started = -1;
+			g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start = -1;		
+			nLotProcessingComplete_ACK = -1;
+
+
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Processing Started Report [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(LOT_PROCESSING_STARTED_REPORT_10704);//SEND S6F11 Lot Processing Started Report
+			nRetStep = 31600;
+			g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
+		}
+		else if ((GetTickCount() - g_clTaskWork[m_nUnit].m_dwPcbTickCount) > nRunTimeOutSec)
+		{
+			//g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(CT_TIMEOUT_REPORT_11002); //SEND S6F11
+			g_pCarAABonderDlg->m_clUbiGemDlg.cTTimeOutSendFn(_T("S06F12"), _T("10401"));
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] (Executing) Process State Change Ct TimeOut [STEP : %d]"), nStep);
+			AddLog(szLog, 1, m_nUnit, true);
+
+			nRetStep = -30600;	//OBJECT ID REPORT Step
+			break;
+		}
+		break;
+	case 31600:
+		
+
+		if (g_clTaskWork[m_nUnit].bRecv_S6F12_Lot_Processing_Started == 0)	//ack  0일대만 양품 배출해야된다.
+		{
+			nLotProcessingComplete_ACK = g_clTaskWork[m_nUnit].bRecv_S6F12_Lot_Processing_Started;
+
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Processing Started Acknowledge,Ack:%d [STEP : %d]"), nLotProcessingComplete_ACK, nStep);
+			AddLog(szLog, 0, m_nUnit);
+			//ack 0 확인하고 진행하면되는지?
+			//아니면 LGIT_LOT_ID_FAIL 또 올 수 있는지 확인 필요
+			nRetStep = 31700;
+		}
+		else if (g_clTaskWork[m_nUnit].bRecv_S6F12_Lot_Processing_Started == 1)	//nack 1일 아닐수도있다.
+		{
+			//ack를 체크해야되나?
+
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Processing Started Fail Recv [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[%s] LOT id Fail.\n재시도 하시겠습니까?"), g_clTaskWork[m_nUnit].m_szChipID);
+			if (g_ShowMsgModal(_T("[INFO]"), szLog, RGB_COLOR_BLUE, _T("RETRY"), _T("PAUSE")) == true)
+			{
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot ID Fail Retry [STEP : %d]"), nStep);
+				AddLog(szLog, 0, m_nUnit);
+				nRetStep = 30600;
+			}
+			else
+			{
+				nRetStep = -30600;
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO](%s) LOT id Cancel. by Host [STEP : %d]"), g_clTaskWork[m_nUnit].m_szChipID, nStep);
+				AddLog(szLog, 1, m_nUnit, true);
+				break;
+			}
+
+		}
+		else if ((GetTickCount() - g_clTaskWork[m_nUnit].m_dwPcbTickCount) > nRunTimeOutSec)
+		{
+			//g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(CT_TIMEOUT_REPORT_11002); //SEND S6F11
+			g_pCarAABonderDlg->m_clUbiGemDlg.cTTimeOutSendFn(_T("S06F12"), _T("10704"));
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Processing Start Ct TimeOut [STEP : %d]"), nStep);
+			AddLog(szLog, 1, m_nUnit, true);
+
+			nRetStep = -30600;	//OBJECT ID REPORT Step
+			break;
+		}
+		break;
+	case 31700:
+		nRetStep = 31800;
+		///
+		// Lot Processing Start 받고나서 Lot ID Start , Fail 체크해야되나?
+		//nLotProcessingComplete_ACK  값 확인해서 배출 할때 판단?
+		//
+		//
+#if 0
+		if (g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start == 0)
+		{
+			//LGIT_LOT_START
+			//NG Lot ID Cancel by Host
+		}else if (g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start == 1)
+		{
+			//LGIT_LOT_ID_FAIL
+			//NG Lot ID Cancel by Host
+			sMsg.Empty();
+			std::vector<RcmdList_T2> resultsT2;
+			resultsT2 = g_clReportData.T2_FindChildList(g_clReportData.rLot_Id_Fail.parameters);
+			if (resultsT2.size() > 0)
+			{
+				for (int i = 0; i < resultsT2[0].rVec.size(); i++)
+				{
+					if (resultsT2[0].rVec[i].cpName == "MODULEID")
+					{
+						//g_pCarAABonderDlg->m_clMessageLot.setLotID(_T("LOT ID"), resultsT2[0].rVec[i].cepVal);		//여긴 lot id? , moduleid?
+						sMsg.Format(_T("LOT ID:%s"), resultsT2[0].rVec[i].cepVal);// g_clModelData[m_nUnit].m_nSensorCnt);
+
+						break;
+					}
+				}
+			}
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[LGIT_LOT_ID_FAIL]\n%s \nCode :%s\nText:%s\n재시도 하시겠습니까?"), sMsg,
+				g_clMesCommunication[m_nUnit].m_sErcmdCode, g_clMesCommunication[m_nUnit].m_sErcmdText);
+			if (g_ShowMsgModal(_T("[INFO]"), szLog, RGB_COLOR_BLUE, _T("RETRY"), _T("PAUSE")) == true)
+			{
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot ID Fail Retry [STEP : %d]"), nStep);
+				AddLog(szLog, 0, m_nUnit);
+				nRetStep = 30600;
+			}
+			else
+			{
+				nRetStep = -30600;
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO](%s) LOT id Cancel. by Host [STEP : %d]"), g_clTaskWork[m_nUnit].m_szChipID, nStep);
+				AddLog(szLog, 1, m_nUnit, true);
+				break;
+			}
+
+		}
+#endif
+		break;
+	case 31800:
+		nRetStep = 31900;
+		break;
+	case 31900:
 		nRetStep = 32000;
 		break;
+
 	case 32000:
-		//딜레이
 		nRetStep = 32500;
 		break;
 	case 32500:
+		
 		nRetStep = 32600;
 		
 		break;
 	case 32600:
-		// MES 확인
-		
 		nRetStep = 32750;
 		break;
-	case 32750:
+	case 32750:		//jump sTep Offline
 		// 바코드값 수신
 		if (g_clPriInsp[m_nUnit].func_ModelLotCheck(g_clTaskWork[m_nUnit].m_szChipID) == 0)
 		{
@@ -1448,6 +2182,7 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 #endif
 			if (g_ShowMsgModal(_T("확인"), szLog, RGB_COLOR_BLUE) == false)
 			{
+				g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1047);
 				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] BCR 모델 확인 실패 [STEP : %d]"), nStep);
 				AddLog(szLog, 1, m_nUnit, true);
 
@@ -1762,6 +2497,7 @@ int CPcbProcess::AutoPcbSensorAlign(int nStep)
 		{
 			g_clMotorSet.StopAxisAll(m_nUnit);
 
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1007);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PCB Vacuum 확인 실패 [STEP : %d]"), nStep);
 			AddLog(szLog, 1, m_nUnit, true);
 
@@ -1795,7 +2531,7 @@ int CPcbProcess::AutoPcbSensorAlign(int nStep)
 		if (g_clDioControl.PcbVacuumCheck(m_nUnit, true) == false)		//소켓 흡착 상태 확인  align
 		{
 			g_clMotorSet.StopAxisAll(m_nUnit);
-
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1007);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PCB Vacuum 확인 실패 [STEP : %d]"), nStep);
 			AddLog(szLog, 1, m_nUnit, true);
 
@@ -1969,6 +2705,7 @@ int CPcbProcess::AutoPcbSensorAlign(int nStep)
 		}
 		if (nRetVal == 0)
 		{
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1051);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Sensor Align 보정량 초과 [STEP : %d]"), nStep);
 			AddLog(szLog, 1, m_nUnit , true);
 			//
@@ -2017,6 +2754,7 @@ int CPcbProcess::AutoPcbSensorAlign(int nStep)
 
 		if (g_clTaskWork[m_nUnit].m_nRetryCount > (g_clModelData[m_nUnit].m_nSensorAlignRetryCount - 1))
 		{
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1052);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PCB SENSOR ALIGN RETRY 횟수(%d) 초과 [STEP : %d]"), g_clModelData[m_nUnit].m_nSensorAlignRetryCount, nStep);
 			AddLog(szLog, 1, m_nUnit, true);
 			nRetStep = -44000;
@@ -2168,6 +2906,9 @@ int CPcbProcess::AutoPcbLaser(int nStep)
 		g_pCarAABonderDlg->CAMChangeHandler(0, VIDEO_CCD);
 		g_clVision.ClearOverlay(m_nUnit);
 		g_clVision.DrawOverlayAll(m_nUnit);
+
+		g_clMesCommunication[m_nUnit].m_dMesLaserTilt[0] = 0.0;
+		g_clMesCommunication[m_nUnit].m_dMesLaserTilt[1] = 0.0;
 		nRetStep = 50200;
 		break;
 	case 50200:
@@ -2277,7 +3018,7 @@ int CPcbProcess::AutoPcbLaser(int nStep)
 		if (g_clDioControl.PcbVacuumCheck(m_nUnit, true) == false)		//소켓 흡착 상태 확인  Laser
 		{
 			g_clMotorSet.StopAxisAll(m_nUnit);
-
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1007);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PCB Vacuum 확인 실패 [STEP : %d]"), nStep);
 			AddLog(szLog, 1, m_nUnit, true);
 
@@ -2306,7 +3047,7 @@ int CPcbProcess::AutoPcbLaser(int nStep)
 		if (g_clDioControl.PcbVacuumCheck(m_nUnit, true) == false)		//소켓 흡착 상태 확인  Laser
 		{
 			g_clMotorSet.StopAxisAll(m_nUnit);
-
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1007);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PCB Vacuum 확인 실패 [STEP : %d]"), nStep);
 			AddLog(szLog, 1, m_nUnit, true);
 
@@ -2400,6 +3141,7 @@ int CPcbProcess::AutoPcbLaser(int nStep)
 
 		if (g_pCarAABonderDlg->SendLaserMeasurePacket(m_nUnit) == false)
 		{
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1057);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[LASER] 변위센서 측정 명령 송신 실패. [STEP : %d]"), nStep);
 			AddLog(szLog, 1, m_nUnit, true);
 
@@ -2421,6 +3163,7 @@ int CPcbProcess::AutoPcbLaser(int nStep)
 		}
 		if ((GetTickCount() - g_clTaskWork[m_nUnit].m_dwPcbTickCount) > 5000)
 		{
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1058);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[LASER] 변위센서 %d번째 측정 데이터 수신 실패"), g_clTaskWork[m_nUnit].m_nLaserTiltIndex + 1);
 			AddLog(szLog, 1, m_nUnit, true);
 
@@ -2508,6 +3251,9 @@ int CPcbProcess::AutoPcbLaser(int nStep)
 		g_clTaskWork[m_nUnit].m_dLaserTiltX[0] = dLaserTx;
 		g_clTaskWork[m_nUnit].m_dLaserTiltY[0] = dLaserTy ;		//PCB TY , LENS TY 방향반대라서 
 
+		g_clMesCommunication[m_nUnit].m_dMesLaserTilt[0] += dLaserTx;
+		g_clMesCommunication[m_nUnit].m_dMesLaserTilt[1] += dLaserTy;
+
 		nRetVal = g_CheckTiltLimit(m_nUnit, 0, dLaserTx, dLaserTy);
 
 		if (nRetVal == 1)	// 보정이동
@@ -2524,6 +3270,7 @@ int CPcbProcess::AutoPcbLaser(int nStep)
 		// 보정 LIMIT 초과
 		else
 		{
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1063);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[LASER] TILT 보정값 LIMIT 초과 [STEP : %d]"), nStep);
 			AddLog(szLog, 1, m_nUnit, true);
 			nRetStep = -53000;		// -55400;
@@ -2552,6 +3299,7 @@ int CPcbProcess::AutoPcbLaser(int nStep)
 	case 56000:
 		if (g_clTaskWork[m_nUnit].m_nRetryCount > (g_clModelData[m_nUnit].m_nLaserRetryCount - 1))
 		{
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1065);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[LASER] TILT 보정 횟수(%d) 초과 [STEP : %d]"), g_clModelData[m_nUnit].m_nLaserRetryCount, nStep);
 			AddLog(szLog, 1, m_nUnit, true);
 
@@ -2572,6 +3320,11 @@ int CPcbProcess::AutoPcbLaser(int nStep)
 		break;
 	case 56500: 
 		
+
+		g_clMesCommunication[m_nUnit].m_dMesLaserTilt[0] += dLaserTx;
+		g_clMesCommunication[m_nUnit].m_dMesLaserTilt[1] += dLaserTy;
+
+
 		nRetStep = 56700;
 		break;
 	case 56700:
@@ -2658,7 +3411,7 @@ int CPcbProcess::AutoChartMoving(int nStep)
 	int nRetStep;
 	bool bResult = false;
 
-	return nRetStep;
+	return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -2872,6 +3625,7 @@ int CPcbProcess::Auto_OC_Insp(int nStep)
 				{
 					if (g_ShowMsgModal(_T("확인"), _T("[AUTO] FPS값이 낮습니다. 진행하시겠습니까?"), RGB_COLOR_RED) == false)
 					{
+						g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1076);
 						_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] FPS:%.f ERROR. 제품 안착 확인하세요 [STEP : %d]"), g_clTaskWork[m_nUnit].m_fFps, nStep);
 						AddLog(szLog, 1, m_nUnit, true);
 						nRetStep = -83100;
@@ -3373,6 +4127,7 @@ int CPcbProcess::AutoChartInsp(int nStep)
 		}
 		else if ((GetTickCount() - g_clTaskWork[m_nUnit].m_dwPcbTickCount) > 40000)	//10초 ->30초
 		{
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1069);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] CCD OPEN 실패.제품 안착 상태 및 제품 불량을 확인하세요. [STEP : %d]"), nStep);
 			AddLog(szLog, 1, m_nUnit, true);
 			nRetStep = -64000;
@@ -3420,6 +4175,7 @@ int CPcbProcess::AutoChartInsp(int nStep)
 			////	g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
 			////	break;
 			////}
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1070);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] 원형 마크 확인 실패 [STEP : %d]"), nStep);
 			AddLog(szLog, 1, m_nUnit, true);
 
@@ -3463,6 +4219,7 @@ int CPcbProcess::AutoChartInsp(int nStep)
 #endif
 		if (g_clMotorSet.MovePcbTMotor(m_nUnit, g_clTaskWork[m_nUnit].m_dImgShiftTh * thcount, true) == false)
 		{
+			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1071);
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PCB TH축 SFR 영상 SHIFT(%.03lf) 보정 실패 [STEP : %d]"),g_clTaskWork[m_nUnit].m_dImgShiftTh, nStep);
 			AddLog(szLog, 1, m_nUnit, true);
 
@@ -3496,6 +4253,7 @@ int CPcbProcess::AutoChartInsp(int nStep)
 			}
 			else
 			{
+				g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1072);
 				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PCB TH축 보정(%.03lf) 실패 [STEP : %d]"), g_clTaskWork[m_nUnit].m_dImgShiftTh, nStep);
 				AddLog(szLog, 1, m_nUnit, true);
 
@@ -4027,7 +4785,9 @@ int CPcbProcess::AutoEOLFinalSFR(int nStep)
 
 
 		g_ShowCloseMsgPopup(_T("INFO"), _T("[AUTO] Firmware 검사 진행중입니다."), true);
+
 		g_clPriInsp[m_nUnit].func_Insp_FirmwareVerify(true);
+
 		g_ShowCloseMsgPopup(_T("INFO"), _T("[AUTO] Firmware 검사 진행중입니다."), false);
 
 
@@ -4167,7 +4927,7 @@ int CPcbProcess::AutoEOLFinalSFR(int nStep)
 		//g_clMesCommunication[m_nUnit].m_dwCycleTactEndTime = GetTickCount();
 		//g_clMesCommunication[m_nUnit].m_dwMesCycleTime = (g_clMesCommunication[m_nUnit].m_dwCycleTactEndTime - g_clMesCommunication[m_nUnit].m_dwCycleTactStartTime) / 1000;		//SEC
 
-		nRetStep = 116500;
+		nRetStep = 116300;
 		//if (g_clMesCommunication[m_nUnit].MesEolSave(m_nUnit) == false)//mes 저장
 		//{
 		//	_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] MES SAVE FAIL! \n통신상태,LOT 확인바랍니다[STEP : %d]"), nStep);
@@ -4183,8 +4943,89 @@ int CPcbProcess::AutoEOLFinalSFR(int nStep)
 		//	nRetStep = 116500;
 		//}
 		break;
+	case 116300:
+		if (nRunOnlineControlState == false)
+		{
+			//Offline 이면 전부 Skip
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Equipment Offline State Apd Pass [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			nRetStep = 116500;
+			break;
+		}
+		g_clTaskWork[m_nUnit].bRecv_S6F12_Lot_Apd = -1;
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot APD Report Send [STEP : %d]"), nStep);
+		AddLog(szLog, 0, m_nUnit);
+		g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(LOT_APD_REPORT_10711);
+		nRetStep = 116350;
 
-	case 116500:
+		g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
+		break;
+	case 116350:
+		if (g_clTaskWork[m_nUnit].bRecv_S6F12_Lot_Apd == 0)
+		{
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot APD Send Acknowledge [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+
+			g_clTaskWork[m_nUnit].bRecv_S6F12_Lot_Processing_Completed = -1;
+			g_clTaskWork[m_nUnit].bRecv_S6F12_Lot_Processing_Completed_Ack = -1;
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Processing Completed Report Send [STEP : %d]"), nStep);
+			AddLog(szLog, 0, m_nUnit);
+			g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(LOT_PROCESSING_COMPLETED_REPORT_10710);//SEND S6F11
+			nRetStep = 116400;
+
+			g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
+		}
+		else if ((GetTickCount() - g_clTaskWork[m_nUnit].m_dwPcbTickCount) > nRunTimeOutSec)
+		{
+			//g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(CT_TIMEOUT_REPORT_11002); //SEND S6F11
+			g_pCarAABonderDlg->m_clUbiGemDlg.cTTimeOutSendFn(_T("S06F12"), _T("10711"));
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot APD Ct TimeOut [STEP : %d]"), nStep);
+			AddLog(szLog, 1, m_nUnit, true);
+
+			nRetStep = -116300;
+			break;
+		}
+		
+		break;
+	case 116400:
+		g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
+		nRetStep = 116450;
+		break;
+	case 116450:
+		if (g_clTaskWork[m_nUnit].bRecv_S6F12_Lot_Processing_Completed == 0)
+		{
+			if (g_clTaskWork[m_nUnit].bRecv_S6F12_Lot_Processing_Completed_Ack != 0)
+			{
+				//nack
+				//
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Processing Completed Fail [STEP : %d]"), nStep);
+				AddLog(szLog, 0, m_nUnit);
+				g_ShowMsgPopup(_T("[INFO]"), szLog, RGB_COLOR_RED);
+			}
+			else
+			{
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Processing Completed OK [STEP : %d]"), nStep);
+				AddLog(szLog, 0, m_nUnit);
+			}
+
+
+			//0 == OK, ACK
+			nRetStep = 116500;
+		}
+		else if ((GetTickCount() - g_clTaskWork[m_nUnit].m_dwPcbTickCount) > nRunTimeOutSec)
+		{
+			//g_pCarAABonderDlg->m_clUbiGemDlg.EventReportSendFn(CT_TIMEOUT_REPORT_11002); //SEND S6F11
+			g_pCarAABonderDlg->m_clUbiGemDlg.cTTimeOutSendFn(_T("S06F12"), _T("10710"));
+			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Processing Completed Ct TimeOut [STEP : %d]"), nStep);
+			AddLog(szLog, 1, m_nUnit, true);
+
+			nRetStep = -116300;
+			break;
+		}
+		
+		break;
+
+	case 116500:	//jump Step 
 
 		g_clVision.ClearOverlay(m_nUnit);
 		if (g_clMesCommunication[m_nUnit].m_nMesFinalResult == 1)	//양불 판정 EOL
@@ -4231,11 +5072,11 @@ int CPcbProcess::AutoEOLFinalSFR(int nStep)
 		
 		break;
 	case 119400:
-		if (g_clModelData[m_nUnit].m_nDryRunMode == 1)
-		{
-			g_clMesCommunication[m_nUnit].g_Grr____LaserMotorPos(m_nUnit);
+		//if (g_clModelData[m_nUnit].m_nDryRunMode == 1)
+		//{
+			//g_clMesCommunication[m_nUnit].g_Grr____LaserMotorPos(m_nUnit);
 			//D:\\EVMS\\Log\\RESULT 저장
-		}
+		//}
 		nRetStep = 119450;
 		break;
 	case 119450:
@@ -4276,7 +5117,7 @@ int CPcbProcess::AutoEOLFinalSFR(int nStep)
 //-----------------------------------------------------------------------------
 bool CPcbProcess::CheckDecreaseSFR()
 {
-	int nStartIndex;
+	/*int nStartIndex;
 	int nCheckIndex;
 	int i, j;
 
@@ -4318,7 +5159,7 @@ bool CPcbProcess::CheckDecreaseSFR()
 			return false;
 		else
 			continue;
-	}
+	}*/
 
 	return true;
 }
@@ -4354,6 +5195,6 @@ int CPcbProcess::AutoUV(int nStep)
 	int nRetStep;
 	bool mRtn = false;
 
-	return nRetStep;
+	return 0;
 }
 
