@@ -66,6 +66,13 @@ bool bCurrentConnect;
 
 int VEC_FOV_COUNT;
 int VEC_FOV_FIND_COUNT;
+
+TCHAR BASE_PATH[SIZE_OF_1K];
+TCHAR BASE_DATA_PATH[SIZE_OF_1K];
+TCHAR BASE_ALARM_PATH[SIZE_OF_1K];
+TCHAR MIU_DIR[SIZE_OF_1K];
+TCHAR FW_DIR[SIZE_OF_1K];
+
 //-----------------------------------------------------------------------------
 //
 //	현재 경로 구하기

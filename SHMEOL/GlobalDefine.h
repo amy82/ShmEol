@@ -195,23 +195,23 @@
 
 
 
-#if (____MACHINE_NAME ==  MODEL_FRONT_100)
-
-#define BASE_PATH					_T("D:\\EVMS\\SHM_EOL_FRONT_100")
-#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Data")
-#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Alarm")
-#define	MIU_DIR						_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Initialize")
-#define	FW_DIR						_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Firmware")
-
-#else
-
-#define BASE_PATH					_T("D:\\EVMS\\SHM_EOL_OHC_150")
-#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_EOL_OHC_150\\Data")
-#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_EOL_OHC_150\\Alarm")
-#define	MIU_DIR						_T("D:\\EVMS\\SHM_EOL_OHC_150\\Initialize")
-#define	FW_DIR						_T("D:\\EVMS\\SHM_EOL_OHC_150\\Firmware")
-
-#endif
+//#if (____MACHINE_NAME ==  MODEL_FRONT_100)
+//
+//#define BASE_PATH					_T("D:\\EVMS\\SHM_EOL_FRONT_100")
+//#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Data")
+//#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Alarm")
+//#define	MIU_DIR						_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Initialize")
+//#define	FW_DIR						_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Firmware")
+//
+//#else
+//
+//#define BASE_PATH					_T("D:\\EVMS\\SHM_EOL_OHC_150")
+//#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_EOL_OHC_150\\Data")
+//#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_EOL_OHC_150\\Alarm")
+//#define	MIU_DIR						_T("D:\\EVMS\\SHM_EOL_OHC_150\\Initialize")
+//#define	FW_DIR						_T("D:\\EVMS\\SHM_EOL_OHC_150\\Firmware")
+//
+//#endif
 
 
 #define	BASE_SECSGEM_PATH			_T("D:\\EVMS\\SecsGem")

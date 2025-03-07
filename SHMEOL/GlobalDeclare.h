@@ -82,6 +82,13 @@ extern bool MesSpecLoadCheck;
 
 extern int VEC_FOV_COUNT;
 extern int VEC_FOV_FIND_COUNT;
+
+extern TCHAR BASE_PATH[SIZE_OF_1K];
+extern TCHAR BASE_DATA_PATH[SIZE_OF_1K];
+extern TCHAR BASE_ALARM_PATH[SIZE_OF_1K];
+extern TCHAR MIU_DIR[SIZE_OF_1K];
+extern TCHAR FW_DIR[SIZE_OF_1K];
+
 //-----------------------------------------------------------------------------
 //
 //

@@ -157,11 +157,23 @@ void CModelList::ModelListLoad()
 	{
 		VEC_FOV_COUNT = 12;
 		VEC_FOV_FIND_COUNT = 16;
+
+		_stprintf_s(BASE_PATH, SIZE_OF_1K, _T("D:\\EVMS\\SHM_EOL_FRONT_100"));
+		_stprintf_s(BASE_DATA_PATH, SIZE_OF_1K, _T("D:\\EVMS\\SHM_EOL_FRONT_100\\Data"));
+		_stprintf_s(BASE_ALARM_PATH, SIZE_OF_1K, _T("D:\\EVMS\\SHM_EOL_FRONT_100\\Alarm"));
+		_stprintf_s(MIU_DIR, SIZE_OF_1K, _T("D:\\EVMS\\SHM_EOL_FRONT_100\\Initialize"));
+		_stprintf_s(FW_DIR, SIZE_OF_1K, _T("D:\\EVMS\\SHM_EOL_FRONT_100\\Firmware"));
 	}
 	else
 	{
 		VEC_FOV_COUNT = 10;
 		VEC_FOV_FIND_COUNT = 14;
+
+		_stprintf_s(BASE_PATH, SIZE_OF_1K, _T("D:\\EVMS\\SHM_EOL_OHC_150"));
+		_stprintf_s(BASE_DATA_PATH, SIZE_OF_1K, _T("D:\\EVMS\\SHM_EOL_OHC_150\\Data"));
+		_stprintf_s(BASE_ALARM_PATH, SIZE_OF_1K, _T("D:\\EVMS\\SHM_EOL_OHC_150\\Alarm"));
+		_stprintf_s(MIU_DIR, SIZE_OF_1K, _T("D:\\EVMS\\SHM_EOL_OHC_150\\Initialize"));
+		_stprintf_s(FW_DIR, SIZE_OF_1K, _T("D:\\EVMS\\SHM_EOL_OHC_150\\Firmware"));
 	}
 }
 
@@ -1034,7 +1046,6 @@ void CSystemData::sDCopyBackup()
 	if (clFinder.FindFile(szPath) == FALSE)
 		CreateDirectory(szPath, NULL);
 
-	
 	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\Backup"), BASE_PATH);
 	if (clFinder.FindFile(szPath) == FALSE)
 	CreateDirectory(szPath, NULL);
@@ -2696,7 +2707,6 @@ bool CModelData::FinaLogCopy(TCHAR* szTempLog)
 
 void CModelData::ModelChange_ModelData()
 {
-
 	m_clSfrInfo.m_clRectFov.resize(VEC_FOV_COUNT);
 	m_clSfrInfo.m_clPtFovOffset.resize(VEC_FOV_COUNT);
 	m_clSfrInfo.m_nFovSizeX.resize(VEC_FOV_COUNT);

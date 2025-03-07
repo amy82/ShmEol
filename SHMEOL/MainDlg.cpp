@@ -1183,7 +1183,7 @@ void CMainDlg::OnBnClickedButtonMainModelLoad()
 	}
 
 	ModelList.ModelListSave();
-	ModelList.ModelListLoad();
+	ModelList.ModelListLoad();		//<-----경로 변경
 
 	ShowGridData();
 
@@ -1194,22 +1194,17 @@ void CMainDlg::OnBnClickedButtonMainModelLoad()
 	AddLog(szLog, 0, 0);
 	
 
+	//모델 변경 점 250307
+	//모델별 설정 다시 로드
 
-	if (SHM_FRONT_100_MODEL == ModelList.m_szCurrentModel)
-	{
-		VEC_FOV_COUNT = 12;
-		VEC_FOV_FIND_COUNT = 16;
-	}
-	else
-	{
-		VEC_FOV_COUNT = 10;
-		VEC_FOV_FIND_COUNT = 14;
-	}
+
+	//fov resize
+	//
 	g_clModelData[0].ModelChange_ModelData();
 	g_clTaskWork[0].ModelChange_TaskWork();
 	g_pCarAABonderDlg->m_clVisionStaticCcd[0].ModelChange_Vision();
 	g_clMandoInspLog[0].ModelChange_Mando();
-	//모델 변경 점 250307
+
 }
 
 
