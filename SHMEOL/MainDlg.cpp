@@ -1196,14 +1196,47 @@ void CMainDlg::OnBnClickedButtonMainModelLoad()
 
 	//모델 변경 점 250307
 	//모델별 설정 다시 로드
+	ModelList.RecipeModelLoad();
+	g_clSysData.sDLoad();
+	g_clSysData.commonDataLoad();
+	g_clSysData.OcOffsetLoad();
+	for (int i = 0; i < 1; i++)//MAX_UNIT_COUNT; i++)
+	{
+		//fov resize
+		//순서 1 <--resize 라서 먼저 진행
+		g_clModelData[i].ModelChange_ModelData();
+		g_clTaskWork[i].ModelChange_TaskWork();
+		g_pCarAABonderDlg->m_clVisionStaticCcd[i].ModelChange_Vision();
+		g_clMandoInspLog[i].ModelChange_Mando();
 
 
-	//fov resize
-	//
-	g_clModelData[0].ModelChange_ModelData();
-	g_clTaskWork[0].ModelChange_TaskWork();
-	g_pCarAABonderDlg->m_clVisionStaticCcd[0].ModelChange_Vision();
-	g_clMandoInspLog[0].ModelChange_Mando();
+		//순서2 바뀌면안됨
+		g_clModelData[i].LoadTeachData(g_clSysData.m_szModelName);
+		g_clModelData[i].Load(g_clSysData.m_szModelName);
+
+		g_clLaonGrabberWrapper[i].UiconfigLoad(INI_RAW_IMAGE);		//pg start
+		g_clLaonGrabberWrapper[i].SelectSensor();
+
+		g_clMesCommunication[i].vPPRecipeSpecEquip = g_clMesCommunication[i].RecipeIniLoad(g_clMesCommunication[i].m_sMesPPID);
+		g_clMarkData[i].LoadData(g_clSysData.m_szModelName);
+
+		g_clTaskWork[i].LoadData();
+		g_clTaskWork[i].PinLoadData();
+
+		g_pCarAABonderDlg->m_clVisionGrabThread[i].SetUnit(i);
+
+		g_clMandoSfrSpec[i].Load();
+		g_clModelData[i].PatternLoad(g_clSysData.m_szModelName);        //패턴 이미지 로드
+		g_clModelData[i].AcmisDataLoad(g_clSysData.m_szModelName);
+		
+
+		g_pCarAABonderDlg->m_clVisionStaticCcd[i].Vision_RoiSet();
+
+
+		g_clPriInsp[i].func_Insp_Firmware_BinFile_Read(false);		//pg start
+	}
+
+	
 
 }
 

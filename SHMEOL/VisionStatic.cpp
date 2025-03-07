@@ -76,6 +76,26 @@ void CVisionStatic::SetInit(int nUnit, double dZoomFac, CPoint clPtSize)
 	m_clMeasure[1].y = (m_clCamSize.y / 2) + 30;
 
 	m_bLock = false;
+	
+	
+		
+    m_FovSetMode = false;
+    m_SnrSetMode = false;
+	::ShowScrollBar(this->GetSafeHwnd(), SB_HORZ, FALSE);
+	::ShowScrollBar(this->GetSafeHwnd(), SB_VERT, FALSE);
+
+#ifdef ON_LINE_MIL
+
+	this->ClearMeasure();
+#endif
+	this->LoadStandardCursor();
+
+	Vision_RoiSet();
+}
+
+void CVisionStatic::Vision_RoiSet()
+{
+	int i = 0;
 	for (i = 0; i < MAX_LAST_INSP_COUNT; i++)
 	{
 		m_nSfrSizeX[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_nSizeX[i];
@@ -87,37 +107,15 @@ void CVisionStatic::SetInit(int nUnit, double dZoomFac, CPoint clPtSize)
 		m_nFovSizeX[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_nFovSizeX[i];
 		m_nFovSizeY[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_nFovSizeY[i];
 	}
-	m_nCenterSfrSizeX = 150;
-	m_nCenterSfrSizeY = 150;
-
-
-	
-		
-    m_FovSetMode = false;
-    m_SnrSetMode = false;
-	::ShowScrollBar(this->GetSafeHwnd(), SB_HORZ, FALSE);
-	::ShowScrollBar(this->GetSafeHwnd(), SB_VERT, FALSE);
-
-#ifdef ON_LINE_MIL
-	/*if (g_clVision.m_MilDisplay[m_nCamNo])
-	{
-		MdispZoom(g_clVision.m_MilDisplay[m_nCamNo], m_dZoomFac, m_dZoomFac);
-		this->ImageScroll();
-	}*/
-
-	
 
 	m_nCenterSfrSizeX = g_clModelData[m_nUnit].m_clSfrInfo.m_nCenSizeX;
 	m_nCenterSfrSizeY = g_clModelData[m_nUnit].m_clSfrInfo.m_nCenSizeY;
 
-	this->ClearMeasure();
-#endif
-	this->LoadStandardCursor();
-
-    this->SetSfrRoi();
-    this->SetFovRoi();
-    this->SetSnrRoi();
+	this->SetSfrRoi();
+	this->SetFovRoi();
+	this->SetSnrRoi();
 }
+
 void CVisionStatic::ModelChange_Vision()
 {
 	m_clPtFovOffset.resize(VEC_FOV_COUNT);

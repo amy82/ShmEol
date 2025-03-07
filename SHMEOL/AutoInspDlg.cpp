@@ -583,17 +583,12 @@ void CAutoInspDlg::InitializeService()
 	ModelList.RecipeModelLoad();
 
 
-
-	//g_clModelType.mTLoad();
-
-	
-
     // 시스템 데이터 로드
 	g_clSysData.sDLoad();
 	g_clSysData.commonDataLoad();
 	g_clSysData.OcOffsetLoad();
-	//Spec Load
-	MesDataLoad();
+
+
 
 	
 
@@ -1573,15 +1568,16 @@ void CAutoInspDlg::InitCtrl()
 //
 //#endif
 
+	
 	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
 	{
-		strtemp.Format("SHM Front 100 %s %s", szData, VER_STR);
-		m_clColorStaticVersion[0].SetWindowText(strtemp);
+		MainTitleSet(1);
+		
 	}
 	else
 	{
-		strtemp.Format("SHM OHC 150 %s %s", szData, VER_STR);
-		m_clColorStaticVersion[0].SetWindowText(strtemp);
+		MainTitleSet(2);
+		
 	}
 
 	TCHAR szLog[SIZE_OF_1K];
@@ -1647,7 +1643,21 @@ void CAutoInspDlg::InitCtrl()
     m_clColorButtonMinimize.state = 200;
     m_clColorButtonExit.state = 200;
 }
-
+void CAutoInspDlg::MainTitleSet(int index)
+{
+	CString strtemp;
+	if (index == 1)
+	{
+		strtemp.Format("SHM Front 100 EOL %s", VER_STR);
+		m_clColorStaticVersion[0].SetWindowText(strtemp);
+	}
+	else
+	{
+		strtemp.Format("SHM OHC 150 EOL %s", VER_STR);
+		m_clColorStaticVersion[0].SetWindowText(strtemp);
+	}
+	m_clColorStaticVersion[0].Invalidate();
+}
 //-----------------------------------------------------------------------------
 //
 //	그래프 생성
@@ -1901,6 +1911,7 @@ void CAutoInspDlg::InitMilLib()
 		dZoomFac = (double)((double)(CCD1_DISP_SIZE_X) / (double)(g_clLaonGrabberWrapper[i].m_stMIUDevice.nWidth));
 
         m_clVisionStaticCcd[i].SetInit(i, dZoomFac, clPt);
+		m_clVisionStaticCcd[i].Vision_RoiSet();
         m_clVisionStaticCcd[i].m_nDragType = MOUSE_DRAG;
         m_clVisionStaticCcd[i].m_bDrag = false;
 

@@ -153,7 +153,8 @@ void CModelList::ModelListLoad()
 		ModelListSave();
 	}
 
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	//if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		VEC_FOV_COUNT = 12;
 		VEC_FOV_FIND_COUNT = 16;
@@ -163,6 +164,8 @@ void CModelList::ModelListLoad()
 		_stprintf_s(BASE_ALARM_PATH, SIZE_OF_1K, _T("D:\\EVMS\\SHM_EOL_FRONT_100\\Alarm"));
 		_stprintf_s(MIU_DIR, SIZE_OF_1K, _T("D:\\EVMS\\SHM_EOL_FRONT_100\\Initialize"));
 		_stprintf_s(FW_DIR, SIZE_OF_1K, _T("D:\\EVMS\\SHM_EOL_FRONT_100\\Firmware"));
+
+		g_pCarAABonderDlg->MainTitleSet(1);
 	}
 	else
 	{
@@ -174,6 +177,8 @@ void CModelList::ModelListLoad()
 		_stprintf_s(BASE_ALARM_PATH, SIZE_OF_1K, _T("D:\\EVMS\\SHM_EOL_OHC_150\\Alarm"));
 		_stprintf_s(MIU_DIR, SIZE_OF_1K, _T("D:\\EVMS\\SHM_EOL_OHC_150\\Initialize"));
 		_stprintf_s(FW_DIR, SIZE_OF_1K, _T("D:\\EVMS\\SHM_EOL_OHC_150\\Firmware"));
+
+		g_pCarAABonderDlg->MainTitleSet(2);
 	}
 }
 

@@ -151,6 +151,7 @@ public:
 	//int m_nFovSizeX[MAX_FOV_COUNT];
 	//int m_nFovSizeY[MAX_FOV_COUNT];
 	void ModelChange_Vision();
+	void Vision_RoiSet();
 	std::vector<CPoint> m_clPtFovOffset;
 	std::vector<CRect> m_clRectFov;
 	std::vector<int> m_nFovSizeX;
