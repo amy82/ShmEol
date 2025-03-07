@@ -328,12 +328,20 @@ void CModelList::RecipeModelLoad()
 	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\RecipelList.ini"), BASE_SECSGEM_PATH);
 
 
-#if (____MACHINE_NAME ==  MODEL_FRONT_100)
-	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("FRONT"));
-#else
-	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("OHC"));
-#endif
-	
+//#if (____MACHINE_NAME ==  MODEL_FRONT_100)			//ok
+//	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("FRONT"));
+//#else
+//	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("OHC"));
+//#endif
+
+	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	{
+		_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("FRONT"));
+	}
+	else
+	{
+		_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("OHC"));
+	}
 	
 
 
@@ -363,13 +371,22 @@ void CModelList::RecipeModelSave()
 
 	_stprintf_s(szPath, SIZE_OF_1K, _T("%s\\RecipelList.ini"), BASE_SECSGEM_PATH);
 	
+//
+//#if (____MACHINE_NAME ==  MODEL_FRONT_100)			//ok
+//	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("FRONT"));
+//#else
+//	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("OHC"));
+//#endif
 
-#if (____MACHINE_NAME ==  MODEL_FRONT_100)
-	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("FRONT"));
-#else
-	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("OHC"));
-#endif
-	
+	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	{
+		_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("FRONT"));
+	}
+	else
+	{
+		_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("OHC"));
+	}
+
 
 	_stprintf_s(szIniBuff, SIZE_OF_1K, _T("%s"), g_clMesCommunication[0].m_sMesPPID);
 	WritePrivateProfileString(_T("RECIPE_MODEL"), szIniIndex, szIniBuff, szPath);

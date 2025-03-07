@@ -192,39 +192,28 @@
 //	Program Path
 //
 
-	//EOL , GP12 
-#ifdef KUMI_TEST_MODE
-	#if (____MACHINE_NAME ==  MODEL_FRONT_100)
-	#define BASE_PATH					_T("D:\\EVMS\\TEST_IMAGE_FRONT_100")
-	#define BASE_DATA_PATH				_T("D:\\EVMS\\TEST_IMAGE_FRONT_100\\Data")
-	#define BASE_ALARM_PATH				_T("D:\\EVMS\\TEST_IMAGE_FRONT_100\\Alarm")
-	#define	MIU_DIR				        _T("D:\\EVMS\\TEST_IMAGE_FRONT_100\\Initialize")
 
-#else
-	#define BASE_PATH					_T("D:\\EVMS\\TEST_IMAGE_OHC_150")
-	#define BASE_DATA_PATH				_T("D:\\EVMS\\TEST_IMAGE_OHC_150\\Data")
-	#define BASE_ALARM_PATH				_T("D:\\EVMS\\TEST_IMAGE_OHC_150\\Alarm")
-	#define	MIU_DIR				        _T("D:\\EVMS\\TEST_IMAGE_OHC_150\\Initialize")
 
-	#endif
-#else
+
 #if (____MACHINE_NAME ==  MODEL_FRONT_100)
-	#define BASE_PATH					_T("D:\\EVMS\\SHM_EOL_FRONT_100")
-	#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Data")
-	#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Alarm")
-	#define	MIU_DIR						_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Initialize")
-	#define	FW_DIR						_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Firmware")
+
+#define BASE_PATH					_T("D:\\EVMS\\SHM_EOL_FRONT_100")
+#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Data")
+#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Alarm")
+#define	MIU_DIR						_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Initialize")
+#define	FW_DIR						_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Firmware")
 
 #else
-	#define BASE_PATH					_T("D:\\EVMS\\SHM_EOL_OHC_150")
-	#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_EOL_OHC_150\\Data")
-	#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_EOL_OHC_150\\Alarm")
-	#define	MIU_DIR						_T("D:\\EVMS\\SHM_EOL_OHC_150\\Initialize")
-	#define	FW_DIR						_T("D:\\EVMS\\SHM_EOL_OHC_150\\Firmware")
-	
-	
+
+#define BASE_PATH					_T("D:\\EVMS\\SHM_EOL_OHC_150")
+#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_EOL_OHC_150\\Data")
+#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_EOL_OHC_150\\Alarm")
+#define	MIU_DIR						_T("D:\\EVMS\\SHM_EOL_OHC_150\\Initialize")
+#define	FW_DIR						_T("D:\\EVMS\\SHM_EOL_OHC_150\\Firmware")
+
 #endif
-#endif
+
+
 #define	BASE_SECSGEM_PATH			_T("D:\\EVMS\\SecsGem")
 #define	BASE_UBISAM_PATH			_T("D:\\EVMS\\SecsGem\\ugc")
 #define	BASE_RECIPE_PATH			_T("D:\\EVMS\\SecsGem\\Recipe")
@@ -243,7 +232,24 @@
 
 
 
-
+//EOL , GP12 
+//#ifdef KUMI_TEST_MODE
+//	#if (____MACHINE_NAME ==  MODEL_FRONT_100)
+//	#define BASE_PATH					_T("D:\\EVMS\\TEST_IMAGE_FRONT_100")
+//	#define BASE_DATA_PATH				_T("D:\\EVMS\\TEST_IMAGE_FRONT_100\\Data")
+//	#define BASE_ALARM_PATH				_T("D:\\EVMS\\TEST_IMAGE_FRONT_100\\Alarm")
+//	#define	MIU_DIR				        _T("D:\\EVMS\\TEST_IMAGE_FRONT_100\\Initialize")
+//
+//#else
+//	#define BASE_PATH					_T("D:\\EVMS\\TEST_IMAGE_OHC_150")
+//	#define BASE_DATA_PATH				_T("D:\\EVMS\\TEST_IMAGE_OHC_150\\Data")
+//	#define BASE_ALARM_PATH				_T("D:\\EVMS\\TEST_IMAGE_OHC_150\\Alarm")
+//	#define	MIU_DIR				        _T("D:\\EVMS\\TEST_IMAGE_OHC_150\\Initialize")
+//
+//	#endif
+//#else
+//
+//#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 #define		MES_VERIFY_SPEC_COUNT		45//42

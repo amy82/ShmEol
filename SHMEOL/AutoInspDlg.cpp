@@ -1563,15 +1563,27 @@ void CAutoInspDlg::InitCtrl()
 
 
 
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	strtemp.Format("SHM Front 100 %s %s", szData, VER_STR);
-	m_clColorStaticVersion[0].SetWindowText(strtemp);
+//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
+//	strtemp.Format("SHM Front 100 %s %s", szData, VER_STR);
+//	m_clColorStaticVersion[0].SetWindowText(strtemp);
+//
+//#elif (____MACHINE_NAME == MODEL_OHC_150)			//ok
+//	strtemp.Format("SHM OHC 150 %s %s", szData, VER_STR);
+//	m_clColorStaticVersion[0].SetWindowText(strtemp);
+//
+//#endif
 
-#elif (____MACHINE_NAME == MODEL_OHC_150)		//MODEL_FOV_IP)
-	strtemp.Format("SHM OHC 150 %s %s", szData, VER_STR);
-	m_clColorStaticVersion[0].SetWindowText(strtemp);
+	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	{
+		strtemp.Format("SHM Front 100 %s %s", szData, VER_STR);
+		m_clColorStaticVersion[0].SetWindowText(strtemp);
+	}
+	else
+	{
+		strtemp.Format("SHM OHC 150 %s %s", szData, VER_STR);
+		m_clColorStaticVersion[0].SetWindowText(strtemp);
+	}
 
-#endif
 	TCHAR szLog[SIZE_OF_1K];
 
 
@@ -6427,6 +6439,15 @@ void CAutoInspDlg::OnStnClickedStaticMainVersion1()
 
 
 	g_clPriInsp[0].func_ModelLotCheck(_T("ACD02C001X0001241002"));
+	TCHAR pszModel[10];
+	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	{
+		_tcscpy(pszModel, _T("Front100"));
+	}
+	else
+	{
+		_tcscpy(pszModel, _T("Ohc150"));
+	}
 
 	//g_pCarAABonderDlg->m_clMessageLot.ShowWindow(SW_SHOW);		//test
 
