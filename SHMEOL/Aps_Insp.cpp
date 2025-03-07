@@ -206,7 +206,7 @@ int CAps_Insp::func_ModelLotCheck(TCHAR *BcrLot)
 	}
 	TCHAR compareStr[4];
 
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		_tcscpy(compareStr, _T("002"));
 	}
@@ -887,7 +887,7 @@ bool CAps_Insp::FnShmFastCornerFind(BYTE* ChartRawImage, bool bAutoMode)
 
 	std::vector<FOV_AREA_CHECK> nFovMode;
 	nFovMode.resize(VEC_FOV_FIND_COUNT);  // 초기 크기 설정
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		nFovMode[0] = LT_FOV_PIONT;
 		nFovMode[1] = RT_FOV_PIONT;
@@ -1676,7 +1676,7 @@ bool CAps_Insp::func_Insp_Shm_Fov_Distortion(BYTE* img, bool bAutoMode)
 //	std::vector<double> vParam = { 82.83, 84.4, 118.11, 122.58, 133.8, 83.8, 145.7 };
 //#endif
 	std::vector<double> vParam;
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		vParam = { 50.46, 61.65, 91.42, 108.61, 99.66, 55.69, 114.81 };
 	}
@@ -1711,7 +1711,7 @@ bool CAps_Insp::func_Insp_Shm_Fov_Distortion(BYTE* img, bool bAutoMode)
 //	forIndex = { 1,2,5,6,0,3,4,7,12,13,8,9,10,11 };
 //#endif
 
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		forIndex = { 1,2,5,6,0,3,4,7,8,9,10,11,12,13,14,15 };
 	}
@@ -4300,7 +4300,7 @@ bool CAps_Insp::func_Insp_FirmwareVerify(bool bAutoMode)
 //#endif
 	TCHAR pszModel[10];
 
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		_tcscpy(pszModel, _T("Front100"));
 	}
@@ -4336,7 +4336,7 @@ bool CAps_Insp::func_Insp_FirmwareVerify(bool bAutoMode)
 //
 //#endif
 
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\FlashData_%02d%02d%02d_%s_100.bin"), szPath, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond, g_clTaskWork[m_nUnit].m_szLotID);
 	}
@@ -5513,7 +5513,7 @@ bool CAps_Insp::func_Insp_LightTest(int mLightIndex, bool bAutoMode)
 //		m_clPtBrightPos[7].y = 820;
 //#endif
 
-		if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+		if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 		{
 			//Top Chart LT
 			m_clPtBrightPos[0].x = 610;

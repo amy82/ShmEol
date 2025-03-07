@@ -1905,7 +1905,7 @@ bool CLaonGrabberWrapper::ImageEncode()		//raw -> jxl ∑Œ æ–√‡
 //	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("150"));
 //#endif
 
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("100"));
 	}
@@ -2167,7 +2167,7 @@ void CLaonGrabberWrapper::RawImageSave(CString nType , BYTE* LoadImg, int index,
 //	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_150.raw"), szPath, strRawFileName[index]);
 //#endif
 	
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_100.raw"), szPath, strRawFileName[index]);
 	}
@@ -2201,7 +2201,7 @@ void CLaonGrabberWrapper::RawImageSave(CString nType , BYTE* LoadImg, int index,
 //		_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%02d%02d%02d_150.jpg"), szPath, cnamePath, nType, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
 //#endif
 		
-		if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+		if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 		{
 			_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%02d%02d%02d_100.jpg"), szPath, cnamePath, nType, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
 		}

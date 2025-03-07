@@ -87,7 +87,7 @@ void CLogThread::CreateLogFolder(CString strLog)
 //	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("150"));
 //#endif
 
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("100"));
 	}

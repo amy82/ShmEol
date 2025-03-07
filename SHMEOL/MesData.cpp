@@ -745,7 +745,7 @@ bool CMesCommunication::g_Grr____Align(int nUnit)
 //	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
 //#endif
 
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
 	}
@@ -867,7 +867,7 @@ bool CMesCommunication::g_Grr____LaserMotorPos(int nUnit)
 //	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
 //#endif
 
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
 	}
@@ -1024,7 +1024,7 @@ bool CMesCommunication::g_FovVertexLog(int nUnit)
 //	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
 //#endif
 
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
 }
@@ -1087,7 +1087,7 @@ bool CMesCommunication::g_FovVertexLog(int nUnit)
 //#endif
 
 	std::vector<std::basic_string<TCHAR>> pszCol;
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		roiCount = 16;
 		pszCol = {
@@ -1232,7 +1232,7 @@ bool CMesCommunication::g_FinalEolLog(int nUnit)
 //	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
 //#endif
 
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
 	}

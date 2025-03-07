@@ -2171,7 +2171,7 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 //#else
 //			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO]BCR 확인 완료:%s[001]"), g_clTaskWork[m_nUnit].m_szChipID);
 //#endif
-			if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+			if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 			{
 				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO]BCR 확인 완료:%s[002]"), g_clTaskWork[m_nUnit].m_szChipID);
 			}
@@ -2188,7 +2188,7 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 //#else
 //			_stprintf_s(szLog, SIZE_OF_1K, _T("[BCR] 150H 프로그램입니다. 모델 확인 바랍니다. (001)\n계속 진행하시겠습니까?"));
 //#endif
-			if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+			if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 			{
 				_stprintf_s(szLog, SIZE_OF_1K, _T("[BCR] 100H 프로그램입니다. 모델 확인 바랍니다. (002)\n계속 진행하시겠습니까?"));
 			}

@@ -351,7 +351,7 @@ void CModelList::RecipeModelLoad()
 //	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("OHC"));
 //#endif
 
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("FRONT"));
 	}
@@ -395,7 +395,7 @@ void CModelList::RecipeModelSave()
 //	_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("OHC"));
 //#endif
 
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		_stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("FRONT"));
 	}

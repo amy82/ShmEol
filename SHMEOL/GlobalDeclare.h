@@ -46,6 +46,8 @@ extern CMessageInput* m_clTeminalMessageDlg[MAX_TERMINAL_COUNT];
 extern int g_nPopupIndex;
 extern int g_nTerminalIindex;
 
+extern int g_nRunMode;		//1 = 엔지니어
+
 extern CModelList ModelList;
 //extern CModelType g_clModelType;
 extern CSystemData g_clSysData;

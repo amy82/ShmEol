@@ -2242,7 +2242,7 @@ void CVisionStatic::InitFovRoi()
 //#endif
 //#endif
 
-		if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+		if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 		{
 			if (i < 4)
 			{
@@ -2376,7 +2376,7 @@ void CVisionStatic::InitSfrRoi()
 //		}
 //#endif
 
-		if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+		if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 		{
 			if (i == 0)
 			{
@@ -2450,7 +2450,7 @@ void CVisionStatic::InitSfrRoi()
 //		case 8:		dOffsetX = 1.17;	dOffsetY = 1.19;	break;
 //		}
 //#endif
-		if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+		if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 		{
 			switch (i)
 			{
@@ -2546,7 +2546,7 @@ void CVisionStatic::InitSfrRoi()
 //	m_clRectCircle[3].right = (LONG)((double)m_clRectCircle[3].left + dCircleSizeX);
 //	m_clRectCircle[3].bottom = (LONG)((double)m_clRectCircle[3].top + dCircleSizeY);
 //#endif
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		dCircleSizeX = 170;
 		dCircleSizeY = 140;

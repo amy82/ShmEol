@@ -18,6 +18,8 @@ CMessageInput* m_clTeminalMessageDlg[MAX_TERMINAL_COUNT];
 CMessagePopupDlg* g_pMessageClosePopupDlg;
 int g_nPopupIndex;
 int g_nTerminalIindex;
+int g_nRunMode;		//0 = op ,1 = 엔지니어
+
 
 CModelList ModelList;
 //CModelType g_clModelType;
@@ -63,6 +65,7 @@ CLightControl		LightRightChartControl[MAX_UNIT_COUNT];		//Right Side Chart
 //CQueue<STRUC_LOG_NODE*> g_clLogQueue;
 bool MesSpecLoadCheck;
 bool bCurrentConnect;
+
 
 int VEC_FOV_COUNT;
 int VEC_FOV_FIND_COUNT;
@@ -139,7 +142,7 @@ bool MesDataSave(int nUnit)
 //	strPathIni.Format("%s\\spec\\SPEC_SHM_150.txt", BASE_PATH);
 //#endif
 
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		strPathIni.Format("%s\\spec\\SPEC_SHM_100.txt", BASE_PATH);
 	}
@@ -728,7 +731,7 @@ void LogSave(CString logStr , int nUnit)
 //	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("150"));
 //#endif
 
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("100"));
 	}
@@ -4138,7 +4141,7 @@ bool findSmallSfrRectPos(int nUnit, unsigned char* ucImage, int pitch, int sizeX
 //#endif
 
 	std::vector<int> roiPos;
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		roiPos = {
 			1,0,2,3,			//CENTER  0,1,2,3,
@@ -6097,7 +6100,7 @@ bool g_SaveLGITLog(int nUnit, TCHAR *lgitName, string lgitTitle, string lgitData
 //	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%04d%02d%02d_%02d%02d%02d_150.csv"), szPath, lgitName, szTempLotid, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
 //
 //#endif
-	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{
 		_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%04d%02d%02d_%02d%02d%02d_100.csv"), szPath, lgitName, szTempLotid, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
 	}

@@ -70,6 +70,7 @@ public:
 	void OnMnuInitilaize();	//Initialize
 	void OnMnuStart();		//Start
 	void OnMnuStop();		//Stop
+	void Finalexit();
 private:
 	int m_nUnit;
 	CEdit m_edtLog;
