@@ -281,13 +281,16 @@ public:
 	double m_dSfrOcX;
 	double m_dSfrOcY;
 
-    CRect m_clRectFov[MAX_FOV_COUNT];
-   // CPoint m_clPtFov[MAX_FOV_COUNT];
+    /*CRect m_clRectFov[MAX_FOV_COUNT];
 	CPoint m_clPtFovOffset[MAX_FOV_COUNT];
-
-
 	int m_nFovSizeX[MAX_FOV_COUNT];
-	int m_nFovSizeY[MAX_FOV_COUNT];
+	int m_nFovSizeY[MAX_FOV_COUNT];*/
+
+
+	std::vector<CRect> m_clRectFov;
+	std::vector<CPoint> m_clPtFovOffset;
+	std::vector<int> m_nFovSizeX;
+	std::vector<int> m_nFovSizeY;
 
 	double m_dFovOcX;
 	double m_dFovOcY;
@@ -374,6 +377,8 @@ public:
 	void EpoxyDataLoad(TCHAR* szModelName);
 	void EpoxyDataSave(TCHAR* szModelName);
 	
+	void ModelChange_ModelData();
+
 	void SetUnit(int nUnit);
 	void ModulTypeLoad();
 
@@ -896,16 +901,25 @@ public:
 
 	bool m_bRecvMesBcr;				//mes bcr 수신 여부.
 
-	CRect m_FindCircleRect[MAX_FOV_COUNT];
-	CRect m_FindFovRect[MAX_FOV_COUNT];
+	
+
 	CPoint m_clPtCircle[4];
 
 	CDMPoint m_clPtRotationCircle[4];
 	CDMPoint m_clPtChartOc;
 
+	//CRect m_FindCircleRect[MAX_FOV_COUNT];			//x
+	//CRect m_FindFovRect[MAX_FOV_COUNT];			//x
+    //CPoint m_clPtFov[MAX_FOV_COUNT];			//x
+    //CPoint m_clPtSnr[MAX_FOV_COUNT];			//x
 
-    CPoint m_clPtFov[MAX_FOV_COUNT];
-    CPoint m_clPtSnr[MAX_FOV_COUNT];
+	void ModelChange_TaskWork();
+	std::vector<CRect> m_FindCircleRect;
+	std::vector<CRect> m_FindFovRect;
+	std::vector<CPoint> m_clPtFov;
+	std::vector<CPoint> m_clPtSnr;
+
+	
 	double m_dFOV[5];
 
 	double m_dOpticalPosX;
@@ -1091,6 +1105,8 @@ public:
 
 	void DrawNGOverlay(int nCh);	//NG항목 Overlay Draw
 	void NGCheck(CString strNg);
+
+	void ModelChange_Mando();
 public:
 	SYSTEMTIME	m_stInspTime;		//검사 시작 시간 저장
 
@@ -1104,7 +1120,8 @@ public:
 
 	CRectPos m_ChartVertex[50];	//김성봉 책임 SHM모델사용 차트 꼭짓점 좌표 23개 사용
 
-	CPoint m_ShmFovPoint[MAX_FOV_FIND_COUNT];
+	//CPoint m_ShmFovPoint[MAX_FOV_FIND_COUNT];
+	std::vector<CPoint> m_ShmFovPoint;
 	CString		m_sI2C;				//TestPattern 검사 틀린 갯수
 	bool m_TpTestResult[2];
 	//-------------------------------------------------------------------------------------

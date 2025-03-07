@@ -1195,14 +1195,21 @@ void CMainDlg::OnBnClickedButtonMainModelLoad()
 	
 
 
-	if (SHM_OHC_150_MODEL == ModelList.m_szCurrentModel)
+	if (SHM_FRONT_100_MODEL == ModelList.m_szCurrentModel)
 	{
-
+		VEC_FOV_COUNT = 12;
+		VEC_FOV_FIND_COUNT = 16;
 	}
 	else
 	{
-
+		VEC_FOV_COUNT = 10;
+		VEC_FOV_FIND_COUNT = 14;
 	}
+	g_clModelData[0].ModelChange_ModelData();
+	g_clTaskWork[0].ModelChange_TaskWork();
+	g_pCarAABonderDlg->m_clVisionStaticCcd[0].ModelChange_Vision();
+	g_clMandoInspLog[0].ModelChange_Mando();
+	//¸ðµ¨ º¯°æ Á¡ 250307
 }
 
 

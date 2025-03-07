@@ -64,6 +64,8 @@ CLightControl		LightRightChartControl[MAX_UNIT_COUNT];		//Right Side Chart
 bool MesSpecLoadCheck;
 bool bCurrentConnect;
 
+int VEC_FOV_COUNT;
+int VEC_FOV_FIND_COUNT;
 //-----------------------------------------------------------------------------
 //
 //	현재 경로 구하기
@@ -1915,7 +1917,7 @@ bool g_FindFovPos(int nUnit, unsigned char* pImage, int nPitch, int nSizeX, int 
 	//g_clVision.DrawMOverlayBox(nUnit,m_clRectFovTemp,M_COLOR_DARK_YELLOW, 1, FALSE, PS_SOLID);
 	//g_clVision.DrawOverlayAll(nUnit);
 
-    for (int i = 0; i < MAX_FOV_COUNT; i++)
+    for (int i = 0; i < VEC_FOV_COUNT; i++)
     {
 		clRectRoi[i].left += offsetX; 
 		clRectRoi[i].top += offsetY;

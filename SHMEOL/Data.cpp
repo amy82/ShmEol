@@ -137,13 +137,31 @@ void CModelList::ModelListLoad()
 	}
 	else 
 	{
-		_tcscpy_s(m_szCurrentModel, SIZE_OF_100BYTE, _T("00000000001"));
-		clModelInfo.m_nNo = 1;
 		m_nCurrentNo = 1;
-		_tcscpy_s(clModelInfo.m_szName, SIZE_OF_100BYTE, m_szCurrentModel);	// TODO: 모델 없을 경우 하나 추가하기
+		_tcscpy_s(m_szCurrentModel, SIZE_OF_100BYTE, SHM_FRONT_100_MODEL);
+
+
+		_tcscpy_s(clModelInfo.m_szName, SIZE_OF_100BYTE, SHM_FRONT_100_MODEL);	// TODO: 모델 없을 경우 하나 추가하기
+		clModelInfo.m_nNo = 1;
 		m_clModelList.Add(clModelInfo);
 
+		_tcscpy_s(clModelInfo.m_szName, SIZE_OF_100BYTE, SHM_OHC_150_MODEL);	// TODO: 모델 없을 경우 하나 추가하기
+		clModelInfo.m_nNo = 2;
+		m_clModelList.Add(clModelInfo);
+
+		m_nTotalCount = 2;
 		ModelListSave();
+	}
+
+	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	{
+		VEC_FOV_COUNT = 12;
+		VEC_FOV_FIND_COUNT = 16;
+	}
+	else
+	{
+		VEC_FOV_COUNT = 10;
+		VEC_FOV_FIND_COUNT = 14;
 	}
 }
 
@@ -1384,6 +1402,8 @@ CModelData::~CModelData()
 void CModelData::SetUnit(int nUnit)
 {
 	m_nUnit = nUnit;
+
+	ModelChange_ModelData();
 }
 
 
@@ -1895,7 +1915,7 @@ void CModelData::Load(TCHAR* szModelName)
     //------------------------------------------------------------------------------
     //fov
     //------------------------------------------------------------------------------
-    for (i = 0; i < MAX_FOV_COUNT; i++)
+    for (i = 0; i < VEC_FOV_COUNT; i++)
     {
         // fov 마크 위치
         _stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("%02d"), i + 1);
@@ -1927,14 +1947,14 @@ void CModelData::Load(TCHAR* szModelName)
         }
     }
 	GetPrivateProfileString(_T("FOV_SIZE"), _T("SizeX"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-	for (i = 0; i < MAX_FOV_COUNT; i++)
+	for (i = 0; i < VEC_FOV_COUNT; i++)
 	{
 		AfxExtractSubString(sToken, szIniBuff, i, _T('/'));
 		m_clSfrInfo.m_nFovSizeX[i] = _ttoi((TCHAR*)(LPCTSTR)sToken);
 	}
 
 	GetPrivateProfileString(_T("FOV_SIZE"), _T("SizeY"), _T(""), szIniBuff, sizeof(szIniBuff), szPath);
-	for (i = 0; i < MAX_FOV_COUNT; i++)
+	for (i = 0; i < VEC_FOV_COUNT; i++)
 	{
 		AfxExtractSubString(sToken, szIniBuff, i, _T('/'));
 		m_clSfrInfo.m_nFovSizeY[i] = _ttoi((TCHAR*)(LPCTSTR)sToken);
@@ -2497,7 +2517,7 @@ void CModelData::Save(TCHAR* szModelName)
     //------------------------------------------------------------------------------
 
 
-    for (i = 0; i < MAX_FOV_COUNT; i++)
+    for (i = 0; i < VEC_FOV_COUNT; i++)
     {
         // FOV 마크 위치
         _stprintf_s(szIniIndex, SIZE_OF_100BYTE, _T("%02d"), i + 1);
@@ -2512,14 +2532,14 @@ void CModelData::Save(TCHAR* szModelName)
     }
 	CString addStr;
 	addStr.Empty();
-	for (i = 0; i < MAX_FOV_COUNT; i++)
+	for (i = 0; i < VEC_FOV_COUNT; i++)
 	{
 		addStr.AppendFormat(_T("%d / "), m_clSfrInfo.m_nFovSizeX[i]);
 	}
 	_stprintf_s(szData, SIZE_OF_1K, _T("%s"), addStr);
 	WritePrivateProfileString(_T("FOV_SIZE"), _T("SizeX"), szData, szPath);
 	addStr.Empty();
-	for (i = 0; i < MAX_FOV_COUNT; i++)
+	for (i = 0; i < VEC_FOV_COUNT; i++)
 	{
 		addStr.AppendFormat(_T("%d / "), m_clSfrInfo.m_nFovSizeY[i]);
 	}
@@ -2657,6 +2677,14 @@ bool CModelData::FinaLogCopy(TCHAR* szTempLog)
 	///false 일 경우엔 해당경로에 파일이 존재 하더라도 그 파일 위에 덮어쓴다.
 }
 
+void CModelData::ModelChange_ModelData()
+{
+
+	m_clSfrInfo.m_clRectFov.resize(VEC_FOV_COUNT);
+	m_clSfrInfo.m_clPtFovOffset.resize(VEC_FOV_COUNT);
+	m_clSfrInfo.m_nFovSizeX.resize(VEC_FOV_COUNT);
+	m_clSfrInfo.m_nFovSizeY.resize(VEC_FOV_COUNT);
+}
 //-----------------------------------------------------------------------------
 //
 //	티칭 데이터 로드
@@ -3862,6 +3890,8 @@ CTaskWork::CTaskWork()
 	{
 		m_stSfrInsp.mChartRectFind[i] = false;
 	}
+	
+	
 
 	m_clOpticalRoi.left = (LONG)(g_clModelData[m_nUnit].m_nWidth * 0.1 + 0.5);
 	m_clOpticalRoi.top = (LONG)((g_clModelData[m_nUnit].m_nHeight/* - 4*/) * 0.1 + 0.5);
@@ -4005,7 +4035,13 @@ CTaskWork::~CTaskWork()
 
    
 }
-
+void CTaskWork::ModelChange_TaskWork()
+{
+	m_FindCircleRect.resize(VEC_FOV_COUNT);
+	m_FindFovRect.resize(VEC_FOV_COUNT);
+	m_clPtFov.resize(VEC_FOV_COUNT);
+	m_clPtSnr.resize(VEC_FOV_COUNT);
+}
 //-----------------------------------------------------------------------------
 //
 //	TASK 데이터 유닛번호 설정
@@ -4014,6 +4050,8 @@ CTaskWork::~CTaskWork()
 void CTaskWork::SetUnit(int nUnit)
 {
 	m_nUnit = nUnit;
+
+	ModelChange_TaskWork();
 }
 
 void CTaskWork::PinLoadData()
@@ -4326,7 +4364,9 @@ double CMandoInspLog::getMaxMin(int pos, int type)
 //-----------------------------------------------------------------------------
 CMandoInspLog::CMandoInspLog()
 {
+
 	m_sBarcodeID = _T("EMPTY");
+
 	this->InitData();
 }
 
@@ -4339,7 +4379,10 @@ CMandoInspLog::~CMandoInspLog()
 {
 
 }
-
+void CMandoInspLog::ModelChange_Mando()
+{
+	m_ShmFovPoint.resize(VEC_FOV_FIND_COUNT);
+}
 //-----------------------------------------------------------------------------
 //
 //	데이터 초기화
@@ -4358,12 +4401,11 @@ void CMandoInspLog::InitData()
 	m_dPCBOffset[0] = m_dPCBOffset[1] = m_dPCBOffset[2] = 0.0;
 
 
-	for (i = 0; i < MAX_FOV_FIND_COUNT; i++)
+	for (i = 0; i < VEC_FOV_FIND_COUNT; i++)
 	{
 		m_ShmFovPoint[i].x = 0;
 		m_ShmFovPoint[i].y = 0;
 	}
-	//CPoint m_ShmFovPoint[MAX_FOV_COUNT]
 	for (i = 0; i < 50; i++)
 	{
 		m_ChartVertex[i].Pos[0].x = 0;

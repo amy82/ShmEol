@@ -1081,7 +1081,7 @@ bool CMesCommunication::g_FovVertexLog(int nUnit)
 		if (fp != NULL)
 		{
 			_ftprintf_s(fp, _T(",,,,,"));
-			for (i = 0; i < MAX_FOV_FIND_COUNT; i++)
+			for (i = 0; i < VEC_FOV_FIND_COUNT; i++)
 			{
 				if (i > 0)
 				{
@@ -1094,7 +1094,8 @@ bool CMesCommunication::g_FovVertexLog(int nUnit)
 			fprintf_s(fp, "Date,Time ");
 			fprintf_s(fp, ",SW Version,Model");
 			fprintf_s(fp, ",BarcodeID");
-			for (i = 0; i < MAX_FOV_FIND_COUNT; i++)
+
+			for (i = 0; i < VEC_FOV_FIND_COUNT; i++)
 			{
 				_ftprintf_s(fp, _T(",x,y"));
 			}
@@ -1117,7 +1118,7 @@ bool CMesCommunication::g_FovVertexLog(int nUnit)
 		_ftprintf_s(fp, _T("'%02d:%02d:%02d,"), stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
 		_ftprintf_s(fp, _T("VER.%s, %s,"), VER_STR, m_szModel);
 		_ftprintf_s(fp, _T("%s,"), g_clTaskWork[nUnit].m_szChipID);
-		for (i = 0; i < MAX_FOV_FIND_COUNT; i++)
+		for (i = 0; i < VEC_FOV_FIND_COUNT; i++)
 		{
 			fprintf_s(fp, "%d,%d,", g_clMandoInspLog[nUnit].m_ShmFovPoint[i].x, g_clMandoInspLog[nUnit].m_ShmFovPoint[i].y);
 		}

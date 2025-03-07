@@ -608,6 +608,7 @@ void CAutoInspDlg::InitializeService()
     {
 		// 모델 데이터 로드
 		g_clModelData[i].SetUnit(i);
+
 		g_clModelData[i].LoadTeachData(g_clSysData.m_szModelName);
 		g_clModelData[i].Load(g_clSysData.m_szModelName); 
 		//g_clModelData[i].EpoxyDataLoad(g_clSysData.m_szModelName);
@@ -649,6 +650,8 @@ void CAutoInspDlg::InitializeService()
 		//My 스레드 시작
 		m_clCustomThread[i].SetUnit(i);
 
+
+		g_clMandoInspLog[i].ModelChange_Mando();
     }
 
     // MIL 라이브러리 초기화
@@ -6423,13 +6426,14 @@ void CAutoInspDlg::OnStnClickedStaticMainVersion1()
 	//g_pCarAABonderDlg->m_clMessageLot.setContent(g_clReportData.rCtrlOp_Call.OpCall_Text);
 
 
+	g_clPriInsp[0].func_ModelLotCheck(_T("ACD02C001X0001241002"));
 
 	//g_pCarAABonderDlg->m_clMessageLot.ShowWindow(SW_SHOW);		//test
 
 	//g_clMesCommunication[0].m_dEqupOperationMode[0] = 1;	//1 = Full-Auto Mode, 9 = Manual Mode
 	//g_clMesCommunication[0].m_dEqupOperationMode[1] = 2;
 	//m_clUbiGemDlg.EventReportSendFn(EQUIPMENT_OPERATION_MODE_CHANGED_REPORT);
-	SetTimer(WM_IDLE_REASON_TIMER, 1000, NULL);		//30000 Step
+	//SetTimer(WM_IDLE_REASON_TIMER, 1000, NULL);		//30000 Step
 
 	return;
 	int m_nUnit = 0;

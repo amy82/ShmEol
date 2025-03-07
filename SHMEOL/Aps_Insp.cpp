@@ -204,11 +204,17 @@ int CAps_Insp::func_ModelLotCheck(TCHAR *BcrLot)
 	{
 		return -1;
 	}
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	const TCHAR compareStr[] = _T("002");
-#else
-	const TCHAR compareStr[] = _T("001");
-#endif
+	TCHAR compareStr[4];
+
+	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	{
+		_tcscpy(compareStr, _T("002"));
+	}
+	else
+	{
+		_tcscpy(compareStr, _T("001"));
+	}
+
 	int nRtn = 0;
 	nRtn = _tcsncmp(&BcrLot[6], compareStr, 3);		//0이면 일치
 	
@@ -877,35 +883,80 @@ bool CAps_Insp::FnShmFastCornerFind(BYTE* ChartRawImage, bool bAutoMode)
 	int offsetY = ((g_clModelData[m_nUnit].m_nHeight / 2) - (g_clTaskWork[m_nUnit].m_clPtCircle[0].y + g_clTaskWork[m_nUnit].m_clPtCircle[1].y + g_clTaskWork[m_nUnit].m_clPtCircle[2].y + g_clTaskWork[m_nUnit].m_clPtCircle[3].y) / 4) * -1;
 
 	// Shi-Tomasi 코너 검출 파라미터 설정
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	//100도는 8개 전부 원형 마크
-	//new 16개 꼭짓점
-	FOV_AREA_CHECK nFovMode[MAX_FOV_FIND_COUNT] = {
-		LT_FOV_PIONT, RT_FOV_PIONT,
-		LT_FOV_PIONT, BR_FOV_PIONT,
-		LT_FOV_PIONT, BR_FOV_PIONT,
-		BL_FOV_PIONT, RT_FOV_PIONT,
-		LT_FOV_PIONT, RT_FOV_PIONT,BL_FOV_PIONT, BR_FOV_PIONT,
-		BR_FOV_PIONT, BL_FOV_PIONT,RT_FOV_PIONT, LT_FOV_PIONT,
-	};
-	int maxCorners = 6;					//검출할 코너의 최대 개수입니다.
-#else
-	//150도는 2개 원형 , 6개 꼭짓점
-	//new 14개 꼭짓점
-	FOV_AREA_CHECK nFovMode[MAX_FOV_FIND_COUNT] = {
-		BL_FOV_PIONT, RT_FOV_PIONT,
-		LT_FOV_PIONT, BR_FOV_PIONT,
-		LT_FOV_PIONT, BR_FOV_PIONT,
-		BL_FOV_PIONT, RT_FOV_PIONT,
-		BL_FOV_PIONT, BR_FOV_PIONT,LT_FOV_PIONT, RT_FOV_PIONT,
-		LT_FOV_PIONT, BR_FOV_PIONT };// , LT_FOV_PIONT, BR_FOV_PIONT
-	int maxCorners = 4;					//검출할 코너의 최대 개수입니다.
-#endif
+	int maxCorners = 0;					//검출할 코너의 최대 개수입니다.
+
+	std::vector<FOV_AREA_CHECK> nFovMode;
+	nFovMode.resize(VEC_FOV_FIND_COUNT);  // 초기 크기 설정
+	if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
+	{
+		nFovMode[0] = LT_FOV_PIONT;
+		nFovMode[1] = RT_FOV_PIONT;
+		nFovMode[2] = LT_FOV_PIONT;
+		nFovMode[3] = BR_FOV_PIONT;
+		nFovMode[4] = LT_FOV_PIONT;
+		nFovMode[5] = BR_FOV_PIONT;
+		nFovMode[6] = BL_FOV_PIONT;
+		nFovMode[7] = RT_FOV_PIONT;
+		nFovMode[8] = LT_FOV_PIONT;
+		nFovMode[9] = RT_FOV_PIONT;
+		nFovMode[10] = BL_FOV_PIONT;
+		nFovMode[11] = BR_FOV_PIONT;
+		nFovMode[12] = BR_FOV_PIONT;
+		nFovMode[13] = BL_FOV_PIONT;
+		nFovMode[14] = RT_FOV_PIONT;
+		nFovMode[15] = LT_FOV_PIONT;
+		maxCorners = 6;					//검출할 코너의 최대 개수입니다.
+	}
+	else
+	{
+		nFovMode[0] = BL_FOV_PIONT;
+		nFovMode[1] = RT_FOV_PIONT;
+		nFovMode[2] = LT_FOV_PIONT;
+		nFovMode[3] = BR_FOV_PIONT;
+		nFovMode[4] = LT_FOV_PIONT;
+		nFovMode[5] = BR_FOV_PIONT;
+		nFovMode[6] = BL_FOV_PIONT;
+		nFovMode[7] = RT_FOV_PIONT;
+		nFovMode[8] = BL_FOV_PIONT;
+		nFovMode[9] = BR_FOV_PIONT;
+		nFovMode[10] = LT_FOV_PIONT;
+		nFovMode[11] = RT_FOV_PIONT;
+		nFovMode[12] = LT_FOV_PIONT;
+		nFovMode[13] = BR_FOV_PIONT;
+		maxCorners = 4;					//검출할 코너의 최대 개수입니다.
+	}
+//#if (____MACHINE_NAME == MODEL_FRONT_100)
+//	//100도는 8개 전부 원형 마크
+//	//new 16개 꼭짓점
+//	FOV_AREA_CHECK nFovMode[MAX_FOV_FIND_COUNT] = {
+//		LT_FOV_PIONT, RT_FOV_PIONT,
+//		LT_FOV_PIONT, BR_FOV_PIONT,
+//		LT_FOV_PIONT, BR_FOV_PIONT,
+//		BL_FOV_PIONT, RT_FOV_PIONT,
+//		LT_FOV_PIONT, RT_FOV_PIONT,BL_FOV_PIONT, BR_FOV_PIONT,
+//		BR_FOV_PIONT, BL_FOV_PIONT,RT_FOV_PIONT, LT_FOV_PIONT
+//	};
+//	maxCorners = 6;					//검출할 코너의 최대 개수입니다.
+//#else
+//	//150도는 2개 원형 , 6개 꼭짓점
+//	//new 14개 꼭짓점
+//	FOV_AREA_CHECK nFovMode[MAX_FOV_FIND_COUNT] = {
+//		BL_FOV_PIONT, RT_FOV_PIONT,
+//		LT_FOV_PIONT, BR_FOV_PIONT,
+//		LT_FOV_PIONT, BR_FOV_PIONT,
+//
+//		BL_FOV_PIONT, RT_FOV_PIONT,
+//		BL_FOV_PIONT, BR_FOV_PIONT,LT_FOV_PIONT, RT_FOV_PIONT,
+//		LT_FOV_PIONT, BR_FOV_PIONT };// , LT_FOV_PIONT, BR_FOV_PIONT
+//	maxCorners = 4;					//검출할 코너의 최대 개수입니다.
+//#endif
 	
 	int nIndex = 0;
 	Mat grayImg;
-	CPoint m_clPtFov[MAX_FOV_COUNT];
+	//CPoint m_clPtFov[MAX_FOV_COUNT];
 
+	std::vector<CPoint> m_clPtFov;
+	m_clPtFov.resize(VEC_FOV_COUNT);  // 초기 크기 설정
 
 
 	double qualityLevel = 0.05;//0.05;			//코너 품질을 평가하는 값입니다. 일반적으로 0과 1 사이의 값을 사용
@@ -919,10 +970,11 @@ bool CAps_Insp::FnShmFastCornerFind(BYTE* ChartRawImage, bool bAutoMode)
 
 
 
-	for (int k = 0; k < MAX_FOV_COUNT; k++)
+	for (int k = 0; k < VEC_FOV_COUNT; k++)
 	{
 		mRoiX = g_clModelData[m_nUnit].m_clSfrInfo.m_clPtFovOffset[k].x + offsetX;
 		mRoiY = g_clModelData[m_nUnit].m_clSfrInfo.m_clPtFovOffset[k].y + offsetY;
+
 		if (mRoiX < 0) mRoiX = 0;
 		if (mRoiY < 0) mRoiY = 0;
 
@@ -965,7 +1017,11 @@ bool CAps_Insp::FnShmFastCornerFind(BYTE* ChartRawImage, bool bAutoMode)
 			}
 			int msize = corners.size();
 			if (msize < 1) msize = 1;
-			CPoint m_clPtCornerTemp[MAX_FOV_FIND_COUNT];
+
+			//CPoint m_clPtCornerTemp[MAX_FOV_FIND_COUNT];
+			std::vector<CPoint> m_clPtCornerTemp;
+			m_clPtCornerTemp.resize(VEC_FOV_FIND_COUNT);  // 초기 크기 설정
+
 			//sort(corners.begin(), corners.end(), [](const Point2f& p1, const Point2f& p2) {
 				//return p1.x < p2.x;
 			//});
@@ -995,7 +1051,7 @@ bool CAps_Insp::FnShmFastCornerFind(BYTE* ChartRawImage, bool bAutoMode)
 					bottomLeft = corners[i];
 				}
 				circle(img_corners, corners[i], 5, Scalar(0, 255, 0), 2, 8, 0);
-				if (i < MAX_FOV_FIND_COUNT)
+				if (i < VEC_FOV_FIND_COUNT)
 				{
 					m_clPtCornerTemp[i].x = corners[i].x;
 					m_clPtCornerTemp[i].y = corners[i].y;
@@ -1187,7 +1243,7 @@ bool CAps_Insp::FnShmCornerFind(BYTE* ChartRawImage, bool bAutoMode)
 
 	int k = 0;
 	int thresh = 245;
-	for (k = 0; k < MAX_FOV_COUNT; k++)
+	for (k = 0; k < VEC_FOV_COUNT; k++)
 	{
 		mRoiX = g_clModelData[m_nUnit].m_clSfrInfo.m_clPtFovOffset[k].x;
 		mRoiY = g_clModelData[m_nUnit].m_clSfrInfo.m_clPtFovOffset[k].y;
@@ -1353,7 +1409,7 @@ bool CAps_Insp::FnShmEdgeFind(BYTE* ChartRawImage, bool bAutoMode)
 	
 
 	int k = 0;
-	for (k = 0; k < MAX_FOV_COUNT; k++)
+	for (k = 0; k < VEC_FOV_COUNT; k++)
 	{
 		mRoiX = g_clModelData[m_nUnit].m_clSfrInfo.m_clPtFovOffset[k].x;
 		mRoiY = g_clModelData[m_nUnit].m_clSfrInfo.m_clPtFovOffset[k].y;
@@ -1700,18 +1756,20 @@ bool CAps_Insp::func_Insp_Shm_Fov_Distortion(BYTE* img, bool bAutoMode)
 	spec.nMaxROIBoxSize = 0;
 
 
-	std::vector<POINT> vMark(MAX_FOV_FIND_COUNT);
+	std::vector<POINT> vMark(VEC_FOV_FIND_COUNT);
 
-
+	std::vector<int> forIndex;
 #if (____MACHINE_NAME == MODEL_FRONT_100)
 
-	int forIndex[MAX_FOV_FIND_COUNT] = { 1,2,5,6,0,3,4,7,8,9,10,11,12,13,14,15 };
+	//int forIndex[MAX_FOV_FIND_COUNT] = { 1,2,5,6,0,3,4,7,8,9,10,11,12,13,14,15 };
+	forIndex = { 1,2,5,6,0,3,4,7,8,9,10,11,12,13,14,15 };
 #else
 	int forIndex[MAX_FOV_FIND_COUNT] = { 1,2,5,6,0,3,4,7,12,13,8,9,10,11 };
+	forIndex = { 1,2,5,6,0,3,4,7,12,13,8,9,10,11 };
 #endif
 
 	int cnt = 0;
-	for (i = 0; i < MAX_FOV_FIND_COUNT; i++)
+	for (i = 0; i < VEC_FOV_FIND_COUNT; i++)
 	{
 		cnt = forIndex[i];
 

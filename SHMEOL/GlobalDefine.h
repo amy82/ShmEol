@@ -148,9 +148,9 @@
 	//#define ON_LINE_LASER
 	//#define ON_LINE_DIO
 	//#define ON_LINE_LIGHT
-	//#define ON_LINE_CAM
-	//#define ON_LINE_MIL
-	//#define ON_LINE_GRABBER
+	#define ON_LINE_CAM
+	#define ON_LINE_MIL
+	#define ON_LINE_GRABBER
 	
 #else
 	#ifdef ON_LINE_MODE
@@ -693,13 +693,15 @@ static TCHAR* RECIPE_PARAM_NAME[g_RecipeParamCount] =
 #define MAX_DEFECT_COUNT				10
 
 
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	#define MAX_FOV_COUNT				12		//8//12		//8개 원만 8개
-	#define MAX_FOV_FIND_COUNT			16
-#else
-	#define MAX_FOV_COUNT				10		//8//10		//8개 2=원, 6 = 꼭짓점
-	#define MAX_FOV_FIND_COUNT			14
-#endif
+//#if (____MACHINE_NAME == MODEL_FRONT_100)
+//	#define MAX_FOV_COUNT				12		//8//12		//8개 원만 8개
+//	#define MAX_FOV_FIND_COUNT			16
+//#else
+//	#define MAX_FOV_COUNT				10		//8//10		//8개 2=원, 6 = 꼭짓점
+//	#define MAX_FOV_FIND_COUNT			14
+//#endif
+
+
 //#define MAX_FOV_COUNT				8       //
 //기존 샘플 100도 = 12 , 150 = 10개
 

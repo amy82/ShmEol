@@ -12,6 +12,9 @@ IMPLEMENT_DYNAMIC(CVisionStatic, CStatic)
 CVisionStatic::CVisionStatic()
 {	
 	m_nUnit = UNIT_AA1;
+
+	
+	
 }
 
 CVisionStatic::~CVisionStatic()
@@ -46,6 +49,7 @@ void CVisionStatic::SetInit(int nUnit, double dZoomFac, CPoint clPtSize)
 	m_dZoomFac = dZoomFac;
 	m_clCamSize = clPtSize;
 
+	ModelChange_Vision();
 	//TRACE("CamNo:%d, ZoomFac:%lf, Size:%ld,%ld", nCamNo, dZoomFac, clPtSize.x, clPtSize.y);
 
 	m_clDisplaySize.x = (LONG)(m_clCamSize.x * m_dZoomFac);
@@ -78,7 +82,7 @@ void CVisionStatic::SetInit(int nUnit, double dZoomFac, CPoint clPtSize)
 		m_nSfrSizeY[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_nSizeY[i];
 	}
 
-	for (i = 0; i < MAX_FOV_COUNT; i++)
+	for (i = 0; i < VEC_FOV_COUNT; i++)
 	{
 		m_nFovSizeX[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_nFovSizeX[i];
 		m_nFovSizeY[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_nFovSizeY[i];
@@ -114,7 +118,13 @@ void CVisionStatic::SetInit(int nUnit, double dZoomFac, CPoint clPtSize)
     this->SetFovRoi();
     this->SetSnrRoi();
 }
-
+void CVisionStatic::ModelChange_Vision()
+{
+	m_clPtFovOffset.resize(VEC_FOV_COUNT);
+	m_clRectFov.resize(VEC_FOV_COUNT);
+	m_nFovSizeX.resize(VEC_FOV_COUNT);
+	m_nFovSizeY.resize(VEC_FOV_COUNT);
+}
 //-----------------------------------------------------------------------------
 //
 //	Display Zoom
@@ -1141,7 +1151,7 @@ int CVisionStatic::GetSelectedFovNo(CPoint point)
     clPtPos.x = (int)((point.x * ((double)g_clModelData[m_nUnit].m_nWidth / (double)CCD1_DISP_SIZE_X)) + 0.5);
     clPtPos.y = (int)((point.y * ((double)g_clModelData[m_nUnit].m_nHeight / (double)CCD1_DISP_SIZE_Y)) + 0.5);
     //
-    for (i = 0; i < MAX_FOV_COUNT; i++)
+    for (i = 0; i < VEC_FOV_COUNT; i++)
     {
 		clRect.left = m_clPtFovOffset[i].x;
 		clRect.top = m_clPtFovOffset[i].y;
@@ -1233,7 +1243,7 @@ int CVisionStatic::GetSelectedCursor(CPoint point)
 
 	if (g_pCarAABonderDlg->m_clVisionStaticCcd[m_nUnit].m_FovSetMode == true)
 	{
-		for (i = 0; i < MAX_FOV_COUNT; i++)
+		for (i = 0; i < VEC_FOV_COUNT; i++)
 		{
 			clRectBox.left = m_clPtFovOffset[i].x;
 			clRectBox.top = m_clPtFovOffset[i].y;
@@ -2081,7 +2091,7 @@ void CVisionStatic::SetSnrRoi()
 void CVisionStatic::SetFovRoi()
 {
     int i;
-    for (i = 0; i < MAX_FOV_COUNT; i++)
+    for (i = 0; i < VEC_FOV_COUNT; i++)
     {
         m_clRectFov[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_clRectFov[i];
     }
@@ -2107,7 +2117,7 @@ void CVisionStatic::SetSfrRoi()
 	}
 
 
-	for (i = 0; i < MAX_FOV_COUNT; i++)
+	for (i = 0; i < VEC_FOV_COUNT; i++)
 	{
 		m_clPtFovOffset[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_clPtFovOffset[i];
 	}
@@ -2123,7 +2133,7 @@ void CVisionStatic::InitFovRoi()
 	int i;
 	double dOffsetX, dOffsetY;
 	int nCount = 0;
-	nCount = MAX_FOV_COUNT;
+	nCount = VEC_FOV_COUNT;
 	for (i = 0; i < nCount; i++)
 	{
 		m_clPtFovOffset[i].x = m_clPtFovOffset[i].y = 0;
@@ -2472,14 +2482,14 @@ void CVisionStatic::DrawRectFov(int nIndex)
 
     g_clVision.ClearOverlay(m_nUnit);
 
-	for (i = 0; i < MAX_FOV_COUNT; i++)
+	for (i = 0; i < VEC_FOV_COUNT; i++)
 	{
 		m_clRectFov[i].left = m_clPtFovOffset[i].x;
 		m_clRectFov[i].top = m_clPtFovOffset[i].y;
 		m_clRectFov[i].right = m_clRectFov[i].left + m_nFovSizeX[i];
 		m_clRectFov[i].bottom = m_clRectFov[i].top + m_nFovSizeY[i];
 	}
-    for (i = 0; i < MAX_FOV_COUNT; i++)
+    for (i = 0; i < VEC_FOV_COUNT; i++)
     {
 		if (nIndex == i) 
 		{
@@ -2660,7 +2670,7 @@ void CVisionStatic::MoveRectFov(int nMoveType, int nType, int nMoveSize)
     if (m_nSelectIndexFOV < 0)
         return;
 
-    nCount = MAX_FOV_COUNT;
+    nCount = VEC_FOV_COUNT;
 
     switch (nType)
     {
@@ -2990,7 +3000,7 @@ void CVisionStatic::RegistFovMark()
     nSizeY = (int)MbufInquire(g_clVision.m_MilCcdProcChild[m_nUnit][1], M_SIZE_Y, M_NULL);
 
 
-    for (i = 0; i < MAX_FOV_COUNT; i++)
+    for (i = 0; i < VEC_FOV_COUNT; i++)
     {
 		if (m_clPtFovOffset[i].x < 1)
 		{
@@ -3049,7 +3059,7 @@ void CVisionStatic::RegistFovMark()
 
 
 
-    for (i = 0; i < MAX_FOV_COUNT; i++)
+    for (i = 0; i < VEC_FOV_COUNT; i++)
     {
 		iWidth = m_nFovSizeX[i];
 		iHeight = m_nFovSizeY[i];

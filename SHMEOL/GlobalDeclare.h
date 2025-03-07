@@ -80,7 +80,8 @@ extern CInterLockDlg* InterLockDlg;
 extern bool bCurrentConnect;
 extern bool MesSpecLoadCheck;
 
-
+extern int VEC_FOV_COUNT;
+extern int VEC_FOV_FIND_COUNT;
 //-----------------------------------------------------------------------------
 //
 //
