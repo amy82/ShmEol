@@ -33,7 +33,8 @@
 
 //YMEAN_N_MAX_RECURSIVE_COUNT  레시피 이름 수정 YMEAN_MAX_RECURSIVE_COUNT
 //====================================================================================================
-#define				VER_STR										_T("250226_1")				//MES TEST 완료후 적용
+#define				VER_STR										_T("250307_1")			//모델 통합중
+//#define				VER_STR										_T("250226_1")				//MES TEST 완료후 적용
 //#define				VER_STR										_T("250225_1")					//EstablishCommunication 추가
 //#define				VER_STR										_T("250224_2")				////cstring = cstring 대입 사용 금지
 //#define				VER_STR										_T("250224_1")			//OQA 와 동일하게 수정
