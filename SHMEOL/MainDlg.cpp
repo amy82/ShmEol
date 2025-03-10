@@ -71,6 +71,11 @@ void CMainDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_MAIN_CONTROL_OFFLINE_REQ, m_clColorButtonMainControlOfflineReq);
 	DDX_Control(pDX, IDC_BUTTON_MAIN_CONTROL_ONLINE_REMOTE_REQ, m_clColorButtonMainControlOnlineRemoteReq);
 	
+
+
+	DDX_Control(pDX, IDC_BUTTON_MAIN_OP, m_clColorButtonMainOp);
+	DDX_Control(pDX, IDC_BUTTON_MAIN_ENGINNER, m_clColorButtonMainEn);
+	
 	
 	CDialogEx::DoDataExchange(pDX);
 }
@@ -104,6 +109,8 @@ BEGIN_MESSAGE_MAP(CMainDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_MAIN_MATERIAL_ID_REPORT, &CMainDlg::OnBnClickedButtonMainMaterialIdReport)
 	ON_BN_CLICKED(IDC_BUTTON_MAIN_CONTROL_OFFLINE_REQ, &CMainDlg::OnBnClickedButtonMainControlOfflineReq)
 	ON_BN_CLICKED(IDC_BUTTON_MAIN_CONTROL_ONLINE_REMOTE_REQ, &CMainDlg::OnBnClickedButtonMainControlOnlineRemoteReq)
+	ON_BN_CLICKED(IDC_BUTTON_MAIN_OP, &CMainDlg::OnBnClickedButtonMainOp)
+	ON_BN_CLICKED(IDC_BUTTON_MAIN_ENGINNER, &CMainDlg::OnBnClickedButtonMainEnginner)
 END_MESSAGE_MAP()
 
 
@@ -1183,7 +1190,7 @@ void CMainDlg::OnBnClickedButtonMainModelLoad()
 	}
 
 	ModelList.ModelListSave();
-	ModelList.ModelListLoad();
+	ModelList.ModelListLoad();		//<-----경로 변경
 
 	ShowGridData();
 
@@ -1194,15 +1201,51 @@ void CMainDlg::OnBnClickedButtonMainModelLoad()
 	AddLog(szLog, 0, 0);
 	
 
-
-	if (SHM_OHC_150_MODEL == ModelList.m_szCurrentModel)
+	//모델 변경 점 250307
+	//모델별 설정 다시 로드
+	ModelList.RecipeModelLoad();
+	g_pCarAABonderDlg->m_clMainDlg.setRecipeComboBox();	//Recipe 콤보박스 갱신
+	g_clSysData.sDLoad();
+	g_clSysData.commonDataLoad();
+	g_clSysData.OcOffsetLoad();
+	for (int i = 0; i < 1; i++)//MAX_UNIT_COUNT; i++)
 	{
+		//fov resize
+		//순서 1 <--resize 라서 먼저 진행
+		g_clModelData[i].ModelChange_ModelData();
+		g_clTaskWork[i].ModelChange_TaskWork();
+		g_pCarAABonderDlg->m_clVisionStaticCcd[i].ModelChange_Vision();
+		g_clMandoInspLog[i].ModelChange_Mando();
 
-	}
-	else
-	{
 
+		//순서2 바뀌면안됨
+		g_clModelData[i].LoadTeachData(g_clSysData.m_szModelName);
+		g_clModelData[i].Load(g_clSysData.m_szModelName);
+
+		g_clLaonGrabberWrapper[i].UiconfigLoad(INI_RAW_IMAGE);		//pg start
+		g_clLaonGrabberWrapper[i].SelectSensor();
+
+		g_clMesCommunication[i].vPPRecipeSpecEquip = g_clMesCommunication[i].RecipeIniLoad(g_clMesCommunication[i].m_sMesPPID);
+		g_clMarkData[i].LoadData(g_clSysData.m_szModelName);
+
+		g_clTaskWork[i].LoadData();
+		g_clTaskWork[i].PinLoadData();
+
+		g_pCarAABonderDlg->m_clVisionGrabThread[i].SetUnit(i);
+
+		g_clMandoSfrSpec[i].Load();
+		g_clModelData[i].PatternLoad(g_clSysData.m_szModelName);        //패턴 이미지 로드
+		g_clModelData[i].AcmisDataLoad(g_clSysData.m_szModelName);
+		
+
+		g_pCarAABonderDlg->m_clVisionStaticCcd[i].Vision_RoiSet();
+
+
+		g_clPriInsp[i].func_Insp_Firmware_BinFile_Read(false);		//pg start
 	}
+
+	
+
 }
 
 
@@ -1220,6 +1263,8 @@ void CMainDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 		ShowGridData();
 
 		showRecipeGrid();
+
+		RunModeChange(g_nRunMode);
 	}
 }
 void CMainDlg::OnCbnSelchangeComboRecipeIdVal()
@@ -1708,6 +1753,12 @@ void CMainDlg::OnBnClickedButtonMainControlOfflineReq()
 		return;
 	}
 
+	if (g_nRunMode == 0)
+	{
+		g_ShowMsgPopup(_T("WARNING"), _T("엔지니어 모드만 접근 가능합니다."), RGB_COLOR_RED);
+		return;
+	}
+
 	CString sMsg;
 	sMsg.Format(_T("설비 오프라인 전환하시겠습니까? "));
 
@@ -1748,4 +1799,68 @@ void CMainDlg::OnBnClickedButtonMainControlOnlineRemoteReq()
 	AddLog(_T("[INFO] Online Remote Req"), 0, m_nUnit);
 	g_pCarAABonderDlg->m_clUbiGemDlg.OnBnClickedButtonUbigemCsOnlineRemote();
 	sMsg.Empty();
+}
+
+void CMainDlg::RunModeChange(int nMode)
+{
+	g_nRunMode = nMode;
+	m_clColorButtonMainOp.state = 0;
+	m_clColorButtonMainEn.state = 0;
+		
+	if (nMode == 0)
+	{
+		m_clColorButtonMainOp.state = 1;
+	}
+	else
+	{
+		m_clColorButtonMainEn.state = 1;
+	}
+
+	m_clColorButtonMainOp.Invalidate();
+	m_clColorButtonMainEn.Invalidate();
+}
+void CMainDlg::OnBnClickedButtonMainOp()
+{
+	// TODO: Add your control notification handler code here
+	if (g_ShowMsgModal(_T("확인"), _T("Operation Mode On?"), RGB_COLOR_RED) == false)
+	{
+		return;
+	}
+	RunModeChange(0);
+}
+
+
+void CMainDlg::OnBnClickedButtonMainEnginner()
+{
+	// TODO: Add your control notification handler code here
+
+	CKeyBoardDlg* pDlg = new CKeyBoardDlg(20, true);
+	if (pDlg != NULL)
+	{
+		if (pDlg->DoModal() == IDOK)
+		{
+			if (_tcscmp(g_clSysData.m_szPassword, (TCHAR*)(LPCTSTR)pDlg->GetReturnValue()))
+			{
+				AddLog(_T("비밀번호가 일치하지 않습니다."), 1, m_nUnit);
+				delete pDlg;
+
+				return;
+			}
+		}
+		else
+		{
+			delete pDlg;
+			return;
+		}
+
+		delete pDlg;
+	}
+
+	if (g_ShowMsgModal(_T("확인"), _T("Engineer Mode On?"), RGB_COLOR_RED) == false)
+	{
+		return;
+	}
+
+
+	RunModeChange(1);
 }

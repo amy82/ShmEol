@@ -81,11 +81,20 @@ void CLogThread::CreateLogFolder(CString strLog)
 
 
 	TCHAR m_szModel[SIZE_OF_100BYTE];
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("100"));
-#else
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("150"));
-#endif
+//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
+//	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("100"));
+//#else
+//	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("150"));
+//#endif
+
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("100"));
+	}
+	else
+	{
+		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("150"));
+	}
 
 	TCHAR szFilePath[SIZE_OF_1K];
 

@@ -46,6 +46,8 @@ extern CMessageInput* m_clTeminalMessageDlg[MAX_TERMINAL_COUNT];
 extern int g_nPopupIndex;
 extern int g_nTerminalIindex;
 
+extern int g_nRunMode;		//1 = 엔지니어
+
 extern CModelList ModelList;
 //extern CModelType g_clModelType;
 extern CSystemData g_clSysData;
@@ -80,6 +82,14 @@ extern CInterLockDlg* InterLockDlg;
 extern bool bCurrentConnect;
 extern bool MesSpecLoadCheck;
 
+extern int VEC_FOV_COUNT;
+extern int VEC_FOV_FIND_COUNT;
+
+extern TCHAR BASE_PATH[SIZE_OF_1K];
+extern TCHAR BASE_DATA_PATH[SIZE_OF_1K];
+extern TCHAR BASE_ALARM_PATH[SIZE_OF_1K];
+extern TCHAR MIU_DIR[SIZE_OF_1K];
+extern TCHAR FW_DIR[SIZE_OF_1K];
 
 //-----------------------------------------------------------------------------
 //

@@ -12,6 +12,9 @@ IMPLEMENT_DYNAMIC(CVisionStatic, CStatic)
 CVisionStatic::CVisionStatic()
 {	
 	m_nUnit = UNIT_AA1;
+
+	
+	
 }
 
 CVisionStatic::~CVisionStatic()
@@ -46,6 +49,7 @@ void CVisionStatic::SetInit(int nUnit, double dZoomFac, CPoint clPtSize)
 	m_dZoomFac = dZoomFac;
 	m_clCamSize = clPtSize;
 
+	ModelChange_Vision();
 	//TRACE("CamNo:%d, ZoomFac:%lf, Size:%ld,%ld", nCamNo, dZoomFac, clPtSize.x, clPtSize.y);
 
 	m_clDisplaySize.x = (LONG)(m_clCamSize.x * m_dZoomFac);
@@ -72,21 +76,7 @@ void CVisionStatic::SetInit(int nUnit, double dZoomFac, CPoint clPtSize)
 	m_clMeasure[1].y = (m_clCamSize.y / 2) + 30;
 
 	m_bLock = false;
-	for (i = 0; i < MAX_LAST_INSP_COUNT; i++)
-	{
-		m_nSfrSizeX[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_nSizeX[i];
-		m_nSfrSizeY[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_nSizeY[i];
-	}
-
-	for (i = 0; i < MAX_FOV_COUNT; i++)
-	{
-		m_nFovSizeX[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_nFovSizeX[i];
-		m_nFovSizeY[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_nFovSizeY[i];
-	}
-	m_nCenterSfrSizeX = 150;
-	m_nCenterSfrSizeY = 150;
-
-
+	
 	
 		
     m_FovSetMode = false;
@@ -95,26 +85,44 @@ void CVisionStatic::SetInit(int nUnit, double dZoomFac, CPoint clPtSize)
 	::ShowScrollBar(this->GetSafeHwnd(), SB_VERT, FALSE);
 
 #ifdef ON_LINE_MIL
-	/*if (g_clVision.m_MilDisplay[m_nCamNo])
-	{
-		MdispZoom(g_clVision.m_MilDisplay[m_nCamNo], m_dZoomFac, m_dZoomFac);
-		this->ImageScroll();
-	}*/
-
-	
-
-	m_nCenterSfrSizeX = g_clModelData[m_nUnit].m_clSfrInfo.m_nCenSizeX;
-	m_nCenterSfrSizeY = g_clModelData[m_nUnit].m_clSfrInfo.m_nCenSizeY;
 
 	this->ClearMeasure();
 #endif
 	this->LoadStandardCursor();
 
-    this->SetSfrRoi();
-    this->SetFovRoi();
-    this->SetSnrRoi();
+	Vision_RoiSet();
 }
 
+void CVisionStatic::Vision_RoiSet()
+{
+	int i = 0;
+	for (i = 0; i < MAX_LAST_INSP_COUNT; i++)
+	{
+		m_nSfrSizeX[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_nSizeX[i];
+		m_nSfrSizeY[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_nSizeY[i];
+	}
+
+	for (i = 0; i < VEC_FOV_COUNT; i++)
+	{
+		m_nFovSizeX[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_nFovSizeX[i];
+		m_nFovSizeY[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_nFovSizeY[i];
+	}
+
+	m_nCenterSfrSizeX = g_clModelData[m_nUnit].m_clSfrInfo.m_nCenSizeX;
+	m_nCenterSfrSizeY = g_clModelData[m_nUnit].m_clSfrInfo.m_nCenSizeY;
+
+	this->SetSfrRoi();
+	this->SetFovRoi();
+	this->SetSnrRoi();
+}
+
+void CVisionStatic::ModelChange_Vision()
+{
+	m_clPtFovOffset.resize(VEC_FOV_COUNT);
+	m_clRectFov.resize(VEC_FOV_COUNT);
+	m_nFovSizeX.resize(VEC_FOV_COUNT);
+	m_nFovSizeY.resize(VEC_FOV_COUNT);
+}
 //-----------------------------------------------------------------------------
 //
 //	Display Zoom
@@ -1141,7 +1149,7 @@ int CVisionStatic::GetSelectedFovNo(CPoint point)
     clPtPos.x = (int)((point.x * ((double)g_clModelData[m_nUnit].m_nWidth / (double)CCD1_DISP_SIZE_X)) + 0.5);
     clPtPos.y = (int)((point.y * ((double)g_clModelData[m_nUnit].m_nHeight / (double)CCD1_DISP_SIZE_Y)) + 0.5);
     //
-    for (i = 0; i < MAX_FOV_COUNT; i++)
+    for (i = 0; i < VEC_FOV_COUNT; i++)
     {
 		clRect.left = m_clPtFovOffset[i].x;
 		clRect.top = m_clPtFovOffset[i].y;
@@ -1233,7 +1241,7 @@ int CVisionStatic::GetSelectedCursor(CPoint point)
 
 	if (g_pCarAABonderDlg->m_clVisionStaticCcd[m_nUnit].m_FovSetMode == true)
 	{
-		for (i = 0; i < MAX_FOV_COUNT; i++)
+		for (i = 0; i < VEC_FOV_COUNT; i++)
 		{
 			clRectBox.left = m_clPtFovOffset[i].x;
 			clRectBox.top = m_clPtFovOffset[i].y;
@@ -2081,7 +2089,7 @@ void CVisionStatic::SetSnrRoi()
 void CVisionStatic::SetFovRoi()
 {
     int i;
-    for (i = 0; i < MAX_FOV_COUNT; i++)
+    for (i = 0; i < VEC_FOV_COUNT; i++)
     {
         m_clRectFov[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_clRectFov[i];
     }
@@ -2107,7 +2115,7 @@ void CVisionStatic::SetSfrRoi()
 	}
 
 
-	for (i = 0; i < MAX_FOV_COUNT; i++)
+	for (i = 0; i < VEC_FOV_COUNT; i++)
 	{
 		m_clPtFovOffset[i] = g_clModelData[m_nUnit].m_clSfrInfo.m_clPtFovOffset[i];
 	}
@@ -2123,116 +2131,184 @@ void CVisionStatic::InitFovRoi()
 	int i;
 	double dOffsetX, dOffsetY;
 	int nCount = 0;
-	nCount = MAX_FOV_COUNT;
+	nCount = VEC_FOV_COUNT;
 	for (i = 0; i < nCount; i++)
 	{
 		m_clPtFovOffset[i].x = m_clPtFovOffset[i].y = 0;
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-		if (i < 4)
+//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
+//		//if (i < 4)
+//		//{
+//		//	m_nFovSizeX[i] = 270;
+//		//	m_nFovSizeY[i] = 230;
+//		//}
+//		//else if (i < 8)
+//		//{
+//		//	m_nFovSizeX[i] = 170;
+//		//	m_nFovSizeY[i] = 175;
+//		//}
+//		//else
+//		//{
+//		//	m_nFovSizeX[i] = 80;
+//		//	m_nFovSizeY[i] = 130;
+//		//}
+//		//switch (i)
+//		//{
+//		//case 0:		dOffsetX = 2.98;	dOffsetY = 9.1;		break;	//LT
+//		//case 1:		dOffsetX = 1.51;	dOffsetY = 9.1;		break;	//R T
+//		//case 2:		dOffsetX = 2.98;	dOffsetY = 1.125;	break;	//B L
+//		//case 3:		dOffsetX = 1.51;	dOffsetY = 1.125;	break;	//B R
+//		//															
+//		//case 4:		dOffsetX = 6.7;		dOffsetY = 9.5;		break;
+//		//case 5:		dOffsetX = 1.17;	dOffsetY = 9.5;		break;
+//		//case 6:		dOffsetX = 6.7;		dOffsetY = 1.12;	break;
+//		//case 7:		dOffsetX = 1.17;	dOffsetY = 1.12;	break;//
+//		///*case 4:		dOffsetX = 7.15;	dOffsetY = 9.5;		break;
+//		//case 5:		dOffsetX = 1.17;	dOffsetY = 9.5;		break;
+//		//case 6:		dOffsetX = 7.15;	dOffsetY = 1.12;	break;
+//		//case 7:		dOffsetX = 1.17;	dOffsetY = 1.12;	break;*/
+//		//	//
+//		//case 8:		dOffsetX = 40.5;	dOffsetY = 15.5;		break;
+//		//case 9:		dOffsetX = 1.024;	dOffsetY = 15.5;		break;
+//		//case 10:	dOffsetX = 40.5;	dOffsetY = 1.07;	break;
+//		//case 11:	dOffsetX = 1.024;	dOffsetY = 1.07;	break;
+//		//}
+//
+//#else
+//#ifdef KUMI_TEST_MODE
+//
+//
+//		if (i < 4)
+//		{
+//			m_nFovSizeX[i] = 130;// 115;
+//			m_nFovSizeY[i] = 140;// 125;
+//		}
+//		else
+//		{
+//			m_nFovSizeX[i] = 160;// 145;
+//			m_nFovSizeY[i] = 190;// 175;
+//		}
+//
+//		switch (i)
+//		{
+//		case 0:		dOffsetX = 3.88;	dOffsetY = 4.25;		break;	//LT
+//		case 1:		dOffsetX = 1.35;	dOffsetY = 4.25;		break;	//R T
+//		case 2:		dOffsetX = 3.88;	dOffsetY = 1.31;		break;	//B L
+//		case 3:		dOffsetX = 1.35;	dOffsetY = 1.31;		break;	//B R
+//		//
+//		case 4:		dOffsetX = 7.0;		dOffsetY = 6.3;			break;
+//		case 5:		dOffsetX = 1.175;	dOffsetY = 6.3;			break;
+//		case 6:		dOffsetX = 7.0;		dOffsetY = 1.2;			break;
+//		case 7:		dOffsetX = 1.175;	dOffsetY = 1.2;			break;
+//		//
+//		case 8:		dOffsetX = 7.4;		dOffsetY = 1.99;		break;
+//		case 9:		dOffsetX = 1.158;	dOffsetY = 1.99;		break;
+//		}
+//#else
+//		if (i < 4)
+//		{
+//			m_nFovSizeX[i] = 140;
+//			m_nFovSizeY[i] = 140;
+//		}
+//		else if (i < 8)
+//		{
+//			m_nFovSizeX[i] = 200;
+//			m_nFovSizeY[i] = 210;
+//		}
+//		else
+//		{
+//			m_nFovSizeX[i] = 210;
+//			m_nFovSizeY[i] = 200;
+//		}
+//
+//		switch (i)
+//		{
+//		case 0:		dOffsetX = 3.78;	dOffsetY = 4.25;		break;	//LT
+//		case 1:		dOffsetX = 1.363;	dOffsetY = 4.25;		break;	//R T
+//		case 2:		dOffsetX = 3.78;	dOffsetY = 1.31;		break;	//B L
+//		case 3:		dOffsetX = 1.363;	dOffsetY = 1.31;		break;	//B R
+//																		//
+//		case 4:		dOffsetX = 8.0;		dOffsetY = 7.7;			break;
+//		case 5:		dOffsetX = 1.14;	dOffsetY = 7.7;			break;
+//		case 6:		dOffsetX = 8.0;		dOffsetY = 1.135;			break;
+//		case 7:		dOffsetX = 1.14;	dOffsetY = 1.135;			break;
+//		/*case 4:		dOffsetX = 8.3;		dOffsetY = 8.44;			break;
+//		case 5:		dOffsetX = 1.141;	dOffsetY = 8.44;			break;
+//		case 6:		dOffsetX = 8.3;		dOffsetY = 1.135;			break;
+//		case 7:		dOffsetX = 1.141;	dOffsetY = 1.135;			break;*/
+//			//
+//		case 8:		dOffsetX = 8.0;		dOffsetY = 1.99;		break;
+//		case 9:		dOffsetX = 1.147;	dOffsetY = 1.99;		break;
+//		}
+//#endif
+//#endif
+
+		if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 		{
-			m_nFovSizeX[i] = 270;
-			m_nFovSizeY[i] = 230;
-		}
-		else if (i < 8)
-		{
-			m_nFovSizeX[i] = 170;
-			m_nFovSizeY[i] = 175;
-		}
-		else
-		{
-			m_nFovSizeX[i] = 80;
-			m_nFovSizeY[i] = 130;
-		}
-		switch (i)
-		{
-		case 0:		dOffsetX = 2.98;	dOffsetY = 9.1;		break;	//LT
-		case 1:		dOffsetX = 1.51;	dOffsetY = 9.1;		break;	//R T
-		case 2:		dOffsetX = 2.98;	dOffsetY = 1.125;	break;	//B L
-		case 3:		dOffsetX = 1.51;	dOffsetY = 1.125;	break;	//B R
+			if (i < 4)
+			{
+				m_nFovSizeX[i] = 270;
+				m_nFovSizeY[i] = 230;
+			}
+			else if (i < 8)
+			{
+				m_nFovSizeX[i] = 170;
+				m_nFovSizeY[i] = 175;
+			}
+			else
+			{
+				m_nFovSizeX[i] = 80;
+				m_nFovSizeY[i] = 130;
+			}
+			switch (i)
+			{
+			case 0:		dOffsetX = 2.98;	dOffsetY = 9.1;		break;	//LT
+			case 1:		dOffsetX = 1.51;	dOffsetY = 9.1;		break;	//R T
+			case 2:		dOffsetX = 2.98;	dOffsetY = 1.125;	break;	//B L
+			case 3:		dOffsetX = 1.51;	dOffsetY = 1.125;	break;	//B R
 																	
-		case 4:		dOffsetX = 6.7;		dOffsetY = 9.5;		break;
-		case 5:		dOffsetX = 1.17;	dOffsetY = 9.5;		break;
-		case 6:		dOffsetX = 6.7;		dOffsetY = 1.12;	break;
-		case 7:		dOffsetX = 1.17;	dOffsetY = 1.12;	break;//
-		/*case 4:		dOffsetX = 7.15;	dOffsetY = 9.5;		break;
-		case 5:		dOffsetX = 1.17;	dOffsetY = 9.5;		break;
-		case 6:		dOffsetX = 7.15;	dOffsetY = 1.12;	break;
-		case 7:		dOffsetX = 1.17;	dOffsetY = 1.12;	break;*/
-			//
-		case 8:		dOffsetX = 40.5;	dOffsetY = 15.5;		break;
-		case 9:		dOffsetX = 1.024;	dOffsetY = 15.5;		break;
-		case 10:	dOffsetX = 40.5;	dOffsetY = 1.07;	break;
-		case 11:	dOffsetX = 1.024;	dOffsetY = 1.07;	break;
-		}
-
-#else
-#ifdef KUMI_TEST_MODE
-
-
-		if (i < 4)
-		{
-			m_nFovSizeX[i] = 130;// 115;
-			m_nFovSizeY[i] = 140;// 125;
+			case 4:		dOffsetX = 6.7;		dOffsetY = 9.5;		break;
+			case 5:		dOffsetX = 1.17;	dOffsetY = 9.5;		break;
+			case 6:		dOffsetX = 6.7;		dOffsetY = 1.12;	break;
+			case 7:		dOffsetX = 1.17;	dOffsetY = 1.12;	break;//
+			case 8:		dOffsetX = 40.5;	dOffsetY = 15.5;		break;
+			case 9:		dOffsetX = 1.024;	dOffsetY = 15.5;		break;
+			case 10:	dOffsetX = 40.5;	dOffsetY = 1.07;	break;
+			case 11:	dOffsetX = 1.024;	dOffsetY = 1.07;	break;
+			}
 		}
 		else
 		{
-			m_nFovSizeX[i] = 160;// 145;
-			m_nFovSizeY[i] = 190;// 175;
-		}
+			if (i < 4)
+			{
+				m_nFovSizeX[i] = 140;
+				m_nFovSizeY[i] = 140;
+			}
+			else if (i < 8)
+			{
+				m_nFovSizeX[i] = 200;
+				m_nFovSizeY[i] = 210;
+			}
+			else
+			{
+				m_nFovSizeX[i] = 210;
+				m_nFovSizeY[i] = 200;
+			}
 
-		switch (i)
-		{
-		case 0:		dOffsetX = 3.88;	dOffsetY = 4.25;		break;	//LT
-		case 1:		dOffsetX = 1.35;	dOffsetY = 4.25;		break;	//R T
-		case 2:		dOffsetX = 3.88;	dOffsetY = 1.31;		break;	//B L
-		case 3:		dOffsetX = 1.35;	dOffsetY = 1.31;		break;	//B R
-		//
-		case 4:		dOffsetX = 7.0;		dOffsetY = 6.3;			break;
-		case 5:		dOffsetX = 1.175;	dOffsetY = 6.3;			break;
-		case 6:		dOffsetX = 7.0;		dOffsetY = 1.2;			break;
-		case 7:		dOffsetX = 1.175;	dOffsetY = 1.2;			break;
-		//
-		case 8:		dOffsetX = 7.4;		dOffsetY = 1.99;		break;
-		case 9:		dOffsetX = 1.158;	dOffsetY = 1.99;		break;
+			switch (i)
+			{
+			case 0:		dOffsetX = 3.78;	dOffsetY = 4.25;		break;	//LT
+			case 1:		dOffsetX = 1.363;	dOffsetY = 4.25;		break;	//R T
+			case 2:		dOffsetX = 3.78;	dOffsetY = 1.31;		break;	//B L
+			case 3:		dOffsetX = 1.363;	dOffsetY = 1.31;		break;	//B R
+																			//
+			case 4:		dOffsetX = 8.0;		dOffsetY = 7.7;			break;
+			case 5:		dOffsetX = 1.14;	dOffsetY = 7.7;			break;
+			case 6:		dOffsetX = 8.0;		dOffsetY = 1.135;			break;
+			case 7:		dOffsetX = 1.14;	dOffsetY = 1.135;			break;
+			case 8:		dOffsetX = 8.0;		dOffsetY = 1.99;		break;
+			case 9:		dOffsetX = 1.147;	dOffsetY = 1.99;		break;
+			}
 		}
-#else
-		if (i < 4)
-		{
-			m_nFovSizeX[i] = 140;
-			m_nFovSizeY[i] = 140;
-		}
-		else if (i < 8)
-		{
-			m_nFovSizeX[i] = 200;
-			m_nFovSizeY[i] = 210;
-		}
-		else
-		{
-			m_nFovSizeX[i] = 210;
-			m_nFovSizeY[i] = 200;
-		}
-
-		switch (i)
-		{
-		case 0:		dOffsetX = 3.78;	dOffsetY = 4.25;		break;	//LT
-		case 1:		dOffsetX = 1.363;	dOffsetY = 4.25;		break;	//R T
-		case 2:		dOffsetX = 3.78;	dOffsetY = 1.31;		break;	//B L
-		case 3:		dOffsetX = 1.363;	dOffsetY = 1.31;		break;	//B R
-																		//
-		case 4:		dOffsetX = 8.0;		dOffsetY = 7.7;			break;
-		case 5:		dOffsetX = 1.14;	dOffsetY = 7.7;			break;
-		case 6:		dOffsetX = 8.0;		dOffsetY = 1.135;			break;
-		case 7:		dOffsetX = 1.14;	dOffsetY = 1.135;			break;
-		/*case 4:		dOffsetX = 8.3;		dOffsetY = 8.44;			break;
-		case 5:		dOffsetX = 1.141;	dOffsetY = 8.44;			break;
-		case 6:		dOffsetX = 8.3;		dOffsetY = 1.135;			break;
-		case 7:		dOffsetX = 1.141;	dOffsetY = 1.135;			break;*/
-			//
-		case 8:		dOffsetX = 8.0;		dOffsetY = 1.99;		break;
-		case 9:		dOffsetX = 1.147;	dOffsetY = 1.99;		break;
-		}
-#endif
-#endif
 
 		m_clPtFovOffset[i].x = (LONG)((double)g_clModelData[m_nUnit].m_nWidth / dOffsetX) - (m_nFovSizeX[i] / 2);
 		m_clPtFovOffset[i].y = (LONG)((double)g_clModelData[m_nUnit].m_nHeight / dOffsetY) - (m_nFovSizeY[i] / 2);
@@ -2266,39 +2342,76 @@ void CVisionStatic::InitSfrRoi()
 	m_nCenterSfrSizeY = 150;
 	for (i = 0; i < nCount; i++)
 	{
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-		if (i == 0)
+//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
+//		if (i == 0)
+//		{
+//			m_nSfrSizeX[i] = 390;
+//			m_nSfrSizeY[i] = 360;
+//		}
+//		else if (i < 5)
+//		{
+//			m_nSfrSizeX[i] = 160;
+//			m_nSfrSizeY[i] = 160;
+//		}
+//		else
+//		{
+//			m_nSfrSizeX[i] = 160;
+//			m_nSfrSizeY[i] = 160;
+//		}
+//#else
+//		if (i == 0)
+//		{
+//			m_nSfrSizeX[i] = 270;
+//			m_nSfrSizeY[i] = 270;
+//		}
+//		else if (i < 5)
+//		{
+//			m_nSfrSizeX[i] = 190;
+//			m_nSfrSizeY[i] = 190;
+//		}
+//		else
+//		{
+//			m_nSfrSizeX[i] = 150;
+//			m_nSfrSizeY[i] = 170;
+//		}
+//#endif
+
+		if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 		{
-			m_nSfrSizeX[i] = 390;
-			m_nSfrSizeY[i] = 360;
-		}
-		else if (i < 5)
-		{
-			m_nSfrSizeX[i] = 160;
-			m_nSfrSizeY[i] = 160;
+			if (i == 0)
+			{
+				m_nSfrSizeX[i] = 390;
+				m_nSfrSizeY[i] = 360;
+			}
+			else if (i < 5)
+			{
+				m_nSfrSizeX[i] = 160;
+				m_nSfrSizeY[i] = 160;
+			}
+			else
+			{
+				m_nSfrSizeX[i] = 160;
+				m_nSfrSizeY[i] = 160;
+			}
 		}
 		else
 		{
-			m_nSfrSizeX[i] = 160;
-			m_nSfrSizeY[i] = 160;
+			if (i == 0)
+			{
+				m_nSfrSizeX[i] = 270;
+				m_nSfrSizeY[i] = 270;
+			}
+			else if (i < 5)
+			{
+				m_nSfrSizeX[i] = 190;
+				m_nSfrSizeY[i] = 190;
+			}
+			else
+			{
+				m_nSfrSizeX[i] = 150;
+				m_nSfrSizeY[i] = 170;
+			}
 		}
-#else
-		if (i == 0)
-		{
-			m_nSfrSizeX[i] = 270;
-			m_nSfrSizeY[i] = 270;
-		}
-		else if (i < 5)
-		{
-			m_nSfrSizeX[i] = 190;
-			m_nSfrSizeY[i] = 190;
-		}
-		else
-		{
-			m_nSfrSizeX[i] = 150;
-			m_nSfrSizeY[i] = 170;
-		}
-#endif
 	}
 
 
@@ -2306,38 +2419,71 @@ void CVisionStatic::InitSfrRoi()
 	for (i = 0; i < nCount; i++)
 	{
 		m_clPtSfrOffset[i].x = m_clPtSfrOffset[i].y = 0;
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-		switch (i)
+//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
+//		switch (i)
+//		{
+//		case 0:		dOffsetX = 2.0;		dOffsetY = 2.0;		break;
+//		//
+//		case 1:		dOffsetX = 2.8;		dOffsetY = 1.17;		break;	//LT
+//		case 2:		dOffsetX = 1.57;	dOffsetY = 1.17;		break;	//R T
+//		case 3:		dOffsetX = 2.8;		dOffsetY = 7.3;	break;	//B L
+//		case 4:		dOffsetX = 1.57;	dOffsetY = 7.3;	break;	//B R
+//		//
+//		case 5:		dOffsetX = 7.0;		dOffsetY = 1.12;		break;
+//		case 6:		dOffsetX = 1.175;	dOffsetY = 1.12;		break;
+//		case 7:		dOffsetX = 7.0;		dOffsetY = 8.8;	break;
+//		case 8:		dOffsetX = 1.175;	dOffsetY = 8.8;	break;
+//		}
+//#else
+//		switch (i)
+//		{
+//		case 0:		dOffsetX = 2.0;		dOffsetY = 2.0;		break;
+//			//
+//		case 1:		dOffsetX = 2.6;		dOffsetY = 4.5;		break;
+//		case 2:		dOffsetX = 1.63;	dOffsetY = 4.5;		break;
+//		case 3:		dOffsetX = 2.6;		dOffsetY = 1.27;	break;
+//		case 4:		dOffsetX = 1.63;	dOffsetY = 1.27;	break;
+//			//
+//		case 5:		dOffsetX = 7.0;		dOffsetY = 6.5;		break;
+//		case 6:		dOffsetX = 1.17;	dOffsetY = 6.5;		break;
+//		case 7:		dOffsetX = 7.0;		dOffsetY = 1.19;	break;
+//		case 8:		dOffsetX = 1.17;	dOffsetY = 1.19;	break;
+//		}
+//#endif
+		if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 		{
-		case 0:		dOffsetX = 2.0;		dOffsetY = 2.0;		break;
-		//
-		case 1:		dOffsetX = 2.8;		dOffsetY = 1.17;		break;	//LT
-		case 2:		dOffsetX = 1.57;	dOffsetY = 1.17;		break;	//R T
-		case 3:		dOffsetX = 2.8;		dOffsetY = 7.3;	break;	//B L
-		case 4:		dOffsetX = 1.57;	dOffsetY = 7.3;	break;	//B R
-		//
-		case 5:		dOffsetX = 7.0;		dOffsetY = 1.12;		break;
-		case 6:		dOffsetX = 1.175;	dOffsetY = 1.12;		break;
-		case 7:		dOffsetX = 7.0;		dOffsetY = 8.8;	break;
-		case 8:		dOffsetX = 1.175;	dOffsetY = 8.8;	break;
+			switch (i)
+			{
+				case 0:		dOffsetX = 2.0;		dOffsetY = 2.0;		break;
+					//
+				case 1:		dOffsetX = 2.8;		dOffsetY = 1.17;		break;	//LT
+				case 2:		dOffsetX = 1.57;	dOffsetY = 1.17;		break;	//R T
+				case 3:		dOffsetX = 2.8;		dOffsetY = 7.3;	break;	//B L
+				case 4:		dOffsetX = 1.57;	dOffsetY = 7.3;	break;	//B R
+																		//
+				case 5:		dOffsetX = 7.0;		dOffsetY = 1.12;		break;
+				case 6:		dOffsetX = 1.175;	dOffsetY = 1.12;		break;
+				case 7:		dOffsetX = 7.0;		dOffsetY = 8.8;	break;
+				case 8:		dOffsetX = 1.175;	dOffsetY = 8.8;	break;
+			}
 		}
-#else
-		switch (i)
+		else
 		{
-		case 0:		dOffsetX = 2.0;		dOffsetY = 2.0;		break;
-			//
-		case 1:		dOffsetX = 2.6;		dOffsetY = 4.5;		break;
-		case 2:		dOffsetX = 1.63;	dOffsetY = 4.5;		break;
-		case 3:		dOffsetX = 2.6;		dOffsetY = 1.27;	break;
-		case 4:		dOffsetX = 1.63;	dOffsetY = 1.27;	break;
-			//
-		case 5:		dOffsetX = 7.0;		dOffsetY = 6.5;		break;
-		case 6:		dOffsetX = 1.17;	dOffsetY = 6.5;		break;
-		case 7:		dOffsetX = 7.0;		dOffsetY = 1.19;	break;
-		case 8:		dOffsetX = 1.17;	dOffsetY = 1.19;	break;
+			switch (i)
+			{
+				case 0:		dOffsetX = 2.0;		dOffsetY = 2.0;		break;
+					//
+				case 1:		dOffsetX = 2.6;		dOffsetY = 4.5;		break;
+				case 2:		dOffsetX = 1.63;	dOffsetY = 4.5;		break;
+				case 3:		dOffsetX = 2.6;		dOffsetY = 1.27;	break;
+				case 4:		dOffsetX = 1.63;	dOffsetY = 1.27;	break;
+					//
+				case 5:		dOffsetX = 7.0;		dOffsetY = 6.5;		break;
+				case 6:		dOffsetX = 1.17;	dOffsetY = 6.5;		break;
+				case 7:		dOffsetX = 7.0;		dOffsetY = 1.19;	break;
+				case 8:		dOffsetX = 1.17;	dOffsetY = 1.19;	break;
+			}
 		}
-#endif
-
 		m_clPtSfrOffset[i].x = (LONG)((double)g_clModelData[m_nUnit].m_nWidth / dOffsetX) - (m_nSfrSizeX[i] / 2);
 		m_clPtSfrOffset[i].y = (LONG)((double)g_clModelData[m_nUnit].m_nHeight / dOffsetY) - (m_nSfrSizeY[i] / 2);
 
@@ -2353,52 +2499,99 @@ void CVisionStatic::InitSfrRoi()
 	
     //
     //
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	int dCircleSizeX = 170;
-	int dCircleSizeY = 140;
-	m_clRectCircle[0].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.37);
-	m_clRectCircle[0].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.19);
-	m_clRectCircle[0].right = (LONG)((double)m_clRectCircle[0].left + dCircleSizeX);
-	m_clRectCircle[0].bottom = (LONG)((double)m_clRectCircle[0].top + dCircleSizeY);
+	int dCircleSizeX = 0;
+	int dCircleSizeY = 0;
+//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
+//	dCircleSizeX = 170;
+//	dCircleSizeY = 140;
+//	m_clRectCircle[0].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.37);
+//	m_clRectCircle[0].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.19);
+//	m_clRectCircle[0].right = (LONG)((double)m_clRectCircle[0].left + dCircleSizeX);
+//	m_clRectCircle[0].bottom = (LONG)((double)m_clRectCircle[0].top + dCircleSizeY);
+//
+//	m_clRectCircle[1].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.54);
+//	m_clRectCircle[1].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.19);
+//	m_clRectCircle[1].right = (LONG)((double)m_clRectCircle[1].left + dCircleSizeX);
+//	m_clRectCircle[1].bottom = (LONG)((double)m_clRectCircle[1].top + dCircleSizeY);
+//
+//	m_clRectCircle[2].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.37);
+//	m_clRectCircle[2].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.68);
+//	m_clRectCircle[2].right = (LONG)((double)m_clRectCircle[2].left + dCircleSizeX);
+//	m_clRectCircle[2].bottom = (LONG)((double)m_clRectCircle[2].top + dCircleSizeY);
+//
+//	m_clRectCircle[3].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.54);
+//	m_clRectCircle[3].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.68);
+//	m_clRectCircle[3].right = (LONG)((double)m_clRectCircle[3].left + dCircleSizeX);
+//	m_clRectCircle[3].bottom = (LONG)((double)m_clRectCircle[3].top + dCircleSizeY);																																											//LT_FOV_PIONT = 0, RT_FOV_PIONT, BL_FOV_PIONT, BR_FOV_PIONT, CIRCLE_FOV_PIONT,
+//#else
+//	dCircleSizeX = 130;
+//	dCircleSizeY = 110;
+//	m_clRectCircle[0].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.41);
+//	m_clRectCircle[0].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.29);
+//	m_clRectCircle[0].right = (LONG)((double)m_clRectCircle[0].left + dCircleSizeX);
+//	m_clRectCircle[0].bottom = (LONG)((double)m_clRectCircle[0].top + dCircleSizeY);
+//
+//	m_clRectCircle[1].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.52);
+//	m_clRectCircle[1].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.29);
+//	m_clRectCircle[1].right = (LONG)((double)m_clRectCircle[1].left + dCircleSizeX);
+//	m_clRectCircle[1].bottom = (LONG)((double)m_clRectCircle[1].top + dCircleSizeY);
+//
+//	m_clRectCircle[2].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.41);
+//	m_clRectCircle[2].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.62);
+//	m_clRectCircle[2].right = (LONG)((double)m_clRectCircle[2].left + dCircleSizeX);
+//	m_clRectCircle[2].bottom = (LONG)((double)m_clRectCircle[2].top + dCircleSizeY);
+//
+//	m_clRectCircle[3].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.52);
+//	m_clRectCircle[3].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.62);
+//	m_clRectCircle[3].right = (LONG)((double)m_clRectCircle[3].left + dCircleSizeX);
+//	m_clRectCircle[3].bottom = (LONG)((double)m_clRectCircle[3].top + dCircleSizeY);
+//#endif
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		dCircleSizeX = 170;
+		dCircleSizeY = 140;
+		m_clRectCircle[0].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.37);
+		m_clRectCircle[0].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.19);
+		m_clRectCircle[0].right = (LONG)((double)m_clRectCircle[0].left + dCircleSizeX);
+		m_clRectCircle[0].bottom = (LONG)((double)m_clRectCircle[0].top + dCircleSizeY);
 
-	m_clRectCircle[1].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.54);
-	m_clRectCircle[1].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.19);
-	m_clRectCircle[1].right = (LONG)((double)m_clRectCircle[1].left + dCircleSizeX);
-	m_clRectCircle[1].bottom = (LONG)((double)m_clRectCircle[1].top + dCircleSizeY);
+		m_clRectCircle[1].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.54);
+		m_clRectCircle[1].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.19);
+		m_clRectCircle[1].right = (LONG)((double)m_clRectCircle[1].left + dCircleSizeX);
+		m_clRectCircle[1].bottom = (LONG)((double)m_clRectCircle[1].top + dCircleSizeY);
 
-	m_clRectCircle[2].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.37);
-	m_clRectCircle[2].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.68);
-	m_clRectCircle[2].right = (LONG)((double)m_clRectCircle[2].left + dCircleSizeX);
-	m_clRectCircle[2].bottom = (LONG)((double)m_clRectCircle[2].top + dCircleSizeY);
+		m_clRectCircle[2].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.37);
+		m_clRectCircle[2].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.68);
+		m_clRectCircle[2].right = (LONG)((double)m_clRectCircle[2].left + dCircleSizeX);
+		m_clRectCircle[2].bottom = (LONG)((double)m_clRectCircle[2].top + dCircleSizeY);
 
-	m_clRectCircle[3].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.54);
-	m_clRectCircle[3].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.68);
-	m_clRectCircle[3].right = (LONG)((double)m_clRectCircle[3].left + dCircleSizeX);
-	m_clRectCircle[3].bottom = (LONG)((double)m_clRectCircle[3].top + dCircleSizeY);																																											//LT_FOV_PIONT = 0, RT_FOV_PIONT, BL_FOV_PIONT, BR_FOV_PIONT, CIRCLE_FOV_PIONT,
-#else
-	int dCircleSizeX = 130;
-	int dCircleSizeY = 110;
-	m_clRectCircle[0].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.41);
-	m_clRectCircle[0].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.29);
-	m_clRectCircle[0].right = (LONG)((double)m_clRectCircle[0].left + dCircleSizeX);
-	m_clRectCircle[0].bottom = (LONG)((double)m_clRectCircle[0].top + dCircleSizeY);
+		m_clRectCircle[3].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.54);
+		m_clRectCircle[3].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.68);
+		m_clRectCircle[3].right = (LONG)((double)m_clRectCircle[3].left + dCircleSizeX);
+		m_clRectCircle[3].bottom = (LONG)((double)m_clRectCircle[3].top + dCircleSizeY);
+	}
+	else
+	{
+		m_clRectCircle[0].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.41);
+		m_clRectCircle[0].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.29);
+		m_clRectCircle[0].right = (LONG)((double)m_clRectCircle[0].left + dCircleSizeX);
+		m_clRectCircle[0].bottom = (LONG)((double)m_clRectCircle[0].top + dCircleSizeY);
 
-	m_clRectCircle[1].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.52);
-	m_clRectCircle[1].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.29);
-	m_clRectCircle[1].right = (LONG)((double)m_clRectCircle[1].left + dCircleSizeX);
-	m_clRectCircle[1].bottom = (LONG)((double)m_clRectCircle[1].top + dCircleSizeY);
+		m_clRectCircle[1].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.52);
+		m_clRectCircle[1].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.29);
+		m_clRectCircle[1].right = (LONG)((double)m_clRectCircle[1].left + dCircleSizeX);
+		m_clRectCircle[1].bottom = (LONG)((double)m_clRectCircle[1].top + dCircleSizeY);
 
-	m_clRectCircle[2].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.41);
-	m_clRectCircle[2].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.62);
-	m_clRectCircle[2].right = (LONG)((double)m_clRectCircle[2].left + dCircleSizeX);
-	m_clRectCircle[2].bottom = (LONG)((double)m_clRectCircle[2].top + dCircleSizeY);
+		m_clRectCircle[2].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.41);
+		m_clRectCircle[2].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.62);
+		m_clRectCircle[2].right = (LONG)((double)m_clRectCircle[2].left + dCircleSizeX);
+		m_clRectCircle[2].bottom = (LONG)((double)m_clRectCircle[2].top + dCircleSizeY);
 
-	m_clRectCircle[3].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.52);
-	m_clRectCircle[3].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.62);
-	m_clRectCircle[3].right = (LONG)((double)m_clRectCircle[3].left + dCircleSizeX);
-	m_clRectCircle[3].bottom = (LONG)((double)m_clRectCircle[3].top + dCircleSizeY);
-#endif
-
+		m_clRectCircle[3].left = (LONG)((double)g_clModelData[m_nUnit].m_nWidth * 0.52);
+		m_clRectCircle[3].top = (LONG)((double)(g_clModelData[m_nUnit].m_nHeight) * 0.62);
+		m_clRectCircle[3].right = (LONG)((double)m_clRectCircle[3].left + dCircleSizeX);
+		m_clRectCircle[3].bottom = (LONG)((double)m_clRectCircle[3].top + dCircleSizeY);
+	}
     this->DrawRectSfr(999);
     
 }
@@ -2472,14 +2665,14 @@ void CVisionStatic::DrawRectFov(int nIndex)
 
     g_clVision.ClearOverlay(m_nUnit);
 
-	for (i = 0; i < MAX_FOV_COUNT; i++)
+	for (i = 0; i < VEC_FOV_COUNT; i++)
 	{
 		m_clRectFov[i].left = m_clPtFovOffset[i].x;
 		m_clRectFov[i].top = m_clPtFovOffset[i].y;
 		m_clRectFov[i].right = m_clRectFov[i].left + m_nFovSizeX[i];
 		m_clRectFov[i].bottom = m_clRectFov[i].top + m_nFovSizeY[i];
 	}
-    for (i = 0; i < MAX_FOV_COUNT; i++)
+    for (i = 0; i < VEC_FOV_COUNT; i++)
     {
 		if (nIndex == i) 
 		{
@@ -2660,7 +2853,7 @@ void CVisionStatic::MoveRectFov(int nMoveType, int nType, int nMoveSize)
     if (m_nSelectIndexFOV < 0)
         return;
 
-    nCount = MAX_FOV_COUNT;
+    nCount = VEC_FOV_COUNT;
 
     switch (nType)
     {
@@ -2990,7 +3183,7 @@ void CVisionStatic::RegistFovMark()
     nSizeY = (int)MbufInquire(g_clVision.m_MilCcdProcChild[m_nUnit][1], M_SIZE_Y, M_NULL);
 
 
-    for (i = 0; i < MAX_FOV_COUNT; i++)
+    for (i = 0; i < VEC_FOV_COUNT; i++)
     {
 		if (m_clPtFovOffset[i].x < 1)
 		{
@@ -3049,7 +3242,7 @@ void CVisionStatic::RegistFovMark()
 
 
 
-    for (i = 0; i < MAX_FOV_COUNT; i++)
+    for (i = 0; i < VEC_FOV_COUNT; i++)
     {
 		iWidth = m_nFovSizeX[i];
 		iHeight = m_nFovSizeY[i];

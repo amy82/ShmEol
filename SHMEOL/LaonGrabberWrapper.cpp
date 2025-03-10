@@ -1899,11 +1899,20 @@ bool CLaonGrabberWrapper::ImageEncode()		//raw -> jxl 로 압축
 	::GetLocalTime(&stSysTime);
 
 	TCHAR m_szModel[SIZE_OF_100BYTE];
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("100"));
-#else
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("150"));
-#endif
+//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
+//	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("100"));
+//#else
+//	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("150"));
+//#endif
+
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("100"));
+	}
+	else
+	{
+		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("150"));
+	}
 
 
 	//_stprintf_s(szFileName, SIZE_OF_1K, _T("%s_%s.raw"), strRawFileName[YUV_CHART], m_szModel);			//확장자 삭제
@@ -2150,12 +2159,23 @@ void CLaonGrabberWrapper::RawImageSave(CString nType , BYTE* LoadImg, int index,
 	//index
 	//strRawFileName[index]
 	_stprintf_s(strRawFileName[index], SIZE_OF_1K, _T("%s_%s_%02d%02d%02d"), cnamePath, nType, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_100.raw"), szPath, strRawFileName[index]);// cnamePath, nType, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
-#else
-	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_150.raw"), szPath, strRawFileName[index]);
-#endif
+
+
+//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
+//	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_100.raw"), szPath, strRawFileName[index]);// cnamePath, nType, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
+//#else
+//	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_150.raw"), szPath, strRawFileName[index]);
+//#endif
 	
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_100.raw"), szPath, strRawFileName[index]);
+	}
+	else
+	{
+		_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_150.raw"), szPath, strRawFileName[index]);
+	}
+
 	CFile           savefile;
 	CFileException  e;
 
@@ -2175,13 +2195,20 @@ void CLaonGrabberWrapper::RawImageSave(CString nType , BYTE* LoadImg, int index,
 
 	if (mJpgSaveUse == true)
 	{
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-		_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%02d%02d%02d_100.jpg"), szPath, cnamePath, nType, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
-#else
-		_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%02d%02d%02d_150.jpg"), szPath, cnamePath, nType, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
-#endif
+//#if (____MACHINE_NAME == MODEL_FRONT_100)		//ok
+//		_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%02d%02d%02d_100.jpg"), szPath, cnamePath, nType, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
+//#else
+//		_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%02d%02d%02d_150.jpg"), szPath, cnamePath, nType, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
+//#endif
 		
-
+		if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+		{
+			_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%02d%02d%02d_100.jpg"), szPath, cnamePath, nType, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
+		}
+		else
+		{
+			_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%02d%02d%02d_150.jpg"), szPath, cnamePath, nType, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
+		}
 
 		std::string strPath = std::string(szFilePath);
 		Mat jpgImage(g_clModelData[m_nUnit].m_nHeight, g_clModelData[m_nUnit].m_nWidth, CV_8UC3);

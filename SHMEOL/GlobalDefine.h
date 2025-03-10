@@ -33,7 +33,8 @@
 
 //YMEAN_N_MAX_RECURSIVE_COUNT  레시피 이름 수정 YMEAN_MAX_RECURSIVE_COUNT
 //====================================================================================================
-#define				VER_STR										_T("250226_1")				//MES TEST 완료후 적용
+#define				VER_STR										_T("250307_1")			//모델 통합중
+//#define				VER_STR										_T("250226_1")				//MES TEST 완료후 적용
 //#define				VER_STR										_T("250225_1")					//EstablishCommunication 추가
 //#define				VER_STR										_T("250224_2")				////cstring = cstring 대입 사용 금지
 //#define				VER_STR										_T("250224_1")			//OQA 와 동일하게 수정
@@ -148,9 +149,9 @@
 	//#define ON_LINE_LASER
 	//#define ON_LINE_DIO
 	//#define ON_LINE_LIGHT
-	//#define ON_LINE_CAM
-	//#define ON_LINE_MIL
-	//#define ON_LINE_GRABBER
+	#define ON_LINE_CAM
+	#define ON_LINE_MIL
+	#define ON_LINE_GRABBER
 	
 #else
 	#ifdef ON_LINE_MODE
@@ -192,39 +193,28 @@
 //	Program Path
 //
 
-	//EOL , GP12 
-#ifdef KUMI_TEST_MODE
-	#if (____MACHINE_NAME ==  MODEL_FRONT_100)
-	#define BASE_PATH					_T("D:\\EVMS\\TEST_IMAGE_FRONT_100")
-	#define BASE_DATA_PATH				_T("D:\\EVMS\\TEST_IMAGE_FRONT_100\\Data")
-	#define BASE_ALARM_PATH				_T("D:\\EVMS\\TEST_IMAGE_FRONT_100\\Alarm")
-	#define	MIU_DIR				        _T("D:\\EVMS\\TEST_IMAGE_FRONT_100\\Initialize")
 
-#else
-	#define BASE_PATH					_T("D:\\EVMS\\TEST_IMAGE_OHC_150")
-	#define BASE_DATA_PATH				_T("D:\\EVMS\\TEST_IMAGE_OHC_150\\Data")
-	#define BASE_ALARM_PATH				_T("D:\\EVMS\\TEST_IMAGE_OHC_150\\Alarm")
-	#define	MIU_DIR				        _T("D:\\EVMS\\TEST_IMAGE_OHC_150\\Initialize")
 
-	#endif
-#else
-#if (____MACHINE_NAME ==  MODEL_FRONT_100)
-	#define BASE_PATH					_T("D:\\EVMS\\SHM_EOL_FRONT_100")
-	#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Data")
-	#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Alarm")
-	#define	MIU_DIR						_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Initialize")
-	#define	FW_DIR						_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Firmware")
 
-#else
-	#define BASE_PATH					_T("D:\\EVMS\\SHM_EOL_OHC_150")
-	#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_EOL_OHC_150\\Data")
-	#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_EOL_OHC_150\\Alarm")
-	#define	MIU_DIR						_T("D:\\EVMS\\SHM_EOL_OHC_150\\Initialize")
-	#define	FW_DIR						_T("D:\\EVMS\\SHM_EOL_OHC_150\\Firmware")
-	
-	
-#endif
-#endif
+//#if (____MACHINE_NAME ==  MODEL_FRONT_100)
+//
+//#define BASE_PATH					_T("D:\\EVMS\\SHM_EOL_FRONT_100")
+//#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Data")
+//#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Alarm")
+//#define	MIU_DIR						_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Initialize")
+//#define	FW_DIR						_T("D:\\EVMS\\SHM_EOL_FRONT_100\\Firmware")
+//
+//#else
+//
+//#define BASE_PATH					_T("D:\\EVMS\\SHM_EOL_OHC_150")
+//#define BASE_DATA_PATH				_T("D:\\EVMS\\SHM_EOL_OHC_150\\Data")
+//#define BASE_ALARM_PATH				_T("D:\\EVMS\\SHM_EOL_OHC_150\\Alarm")
+//#define	MIU_DIR						_T("D:\\EVMS\\SHM_EOL_OHC_150\\Initialize")
+//#define	FW_DIR						_T("D:\\EVMS\\SHM_EOL_OHC_150\\Firmware")
+//
+//#endif
+
+
 #define	BASE_SECSGEM_PATH			_T("D:\\EVMS\\SecsGem")
 #define	BASE_UBISAM_PATH			_T("D:\\EVMS\\SecsGem\\ugc")
 #define	BASE_RECIPE_PATH			_T("D:\\EVMS\\SecsGem\\Recipe")
@@ -243,7 +233,24 @@
 
 
 
-
+//EOL , GP12 
+//#ifdef KUMI_TEST_MODE
+//	#if (____MACHINE_NAME ==  MODEL_FRONT_100)
+//	#define BASE_PATH					_T("D:\\EVMS\\TEST_IMAGE_FRONT_100")
+//	#define BASE_DATA_PATH				_T("D:\\EVMS\\TEST_IMAGE_FRONT_100\\Data")
+//	#define BASE_ALARM_PATH				_T("D:\\EVMS\\TEST_IMAGE_FRONT_100\\Alarm")
+//	#define	MIU_DIR				        _T("D:\\EVMS\\TEST_IMAGE_FRONT_100\\Initialize")
+//
+//#else
+//	#define BASE_PATH					_T("D:\\EVMS\\TEST_IMAGE_OHC_150")
+//	#define BASE_DATA_PATH				_T("D:\\EVMS\\TEST_IMAGE_OHC_150\\Data")
+//	#define BASE_ALARM_PATH				_T("D:\\EVMS\\TEST_IMAGE_OHC_150\\Alarm")
+//	#define	MIU_DIR				        _T("D:\\EVMS\\TEST_IMAGE_OHC_150\\Initialize")
+//
+//	#endif
+//#else
+//
+//#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 #define		MES_VERIFY_SPEC_COUNT		45//42
@@ -693,13 +700,15 @@ static TCHAR* RECIPE_PARAM_NAME[g_RecipeParamCount] =
 #define MAX_DEFECT_COUNT				10
 
 
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	#define MAX_FOV_COUNT				12		//8//12		//8개 원만 8개
-	#define MAX_FOV_FIND_COUNT			16
-#else
-	#define MAX_FOV_COUNT				10		//8//10		//8개 2=원, 6 = 꼭짓점
-	#define MAX_FOV_FIND_COUNT			14
-#endif
+//#if (____MACHINE_NAME == MODEL_FRONT_100)
+//	#define MAX_FOV_COUNT				12		//8//12		//8개 원만 8개
+//	#define MAX_FOV_FIND_COUNT			16
+//#else
+//	#define MAX_FOV_COUNT				10		//8//10		//8개 2=원, 6 = 꼭짓점
+//	#define MAX_FOV_FIND_COUNT			14
+//#endif
+
+
 //#define MAX_FOV_COUNT				8       //
 //기존 샘플 100도 = 12 , 150 = 10개
 

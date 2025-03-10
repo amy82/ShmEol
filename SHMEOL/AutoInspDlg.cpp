@@ -572,7 +572,7 @@ void CAutoInspDlg::InitializeService()
     TCHAR szLog[SIZE_OF_1K];
     //CString sMsg = _T("");
     int i;
-
+	g_nRunMode = 0;
     // 메인 다이얼로그 포인터
     g_pCarAABonderDlg = this;
 	m_clLogThread.StartThread();
@@ -583,17 +583,12 @@ void CAutoInspDlg::InitializeService()
 	ModelList.RecipeModelLoad();
 
 
-
-	//g_clModelType.mTLoad();
-
-	
-
     // 시스템 데이터 로드
 	g_clSysData.sDLoad();
 	g_clSysData.commonDataLoad();
 	g_clSysData.OcOffsetLoad();
-	//Spec Load
-	MesDataLoad();
+
+
 
 	
 
@@ -608,6 +603,7 @@ void CAutoInspDlg::InitializeService()
     {
 		// 모델 데이터 로드
 		g_clModelData[i].SetUnit(i);
+
 		g_clModelData[i].LoadTeachData(g_clSysData.m_szModelName);
 		g_clModelData[i].Load(g_clSysData.m_szModelName); 
 		//g_clModelData[i].EpoxyDataLoad(g_clSysData.m_szModelName);
@@ -649,6 +645,8 @@ void CAutoInspDlg::InitializeService()
 		//My 스레드 시작
 		m_clCustomThread[i].SetUnit(i);
 
+
+		g_clMandoInspLog[i].ModelChange_Mando();
     }
 
     // MIL 라이브러리 초기화
@@ -1482,7 +1480,7 @@ void CAutoInspDlg::InitCtrl()
         m_clColorStaticBcr[i].SetFontBold(TRUE).SetBkColor(RGB_COLOR_WHITE);
 		m_clColorStaticBcrVal[i].SetBkColor(RGB_COLOR_WHITE);
 		m_clColorStaticBcrVal[i].SetFont(&m_clFontMid);
-		m_clColorStaticBcrVal[i].SetFontSize(16);
+		m_clColorStaticBcrVal[i].SetFontSize(15);
 		GetDlgItem(IDC_STATIC_MAIN_BCR_VAL1 + i)->GetWindowRect(&vvv);
 		BcrPosX1[i] = vvv.left;
 
@@ -1560,15 +1558,28 @@ void CAutoInspDlg::InitCtrl()
 
 
 
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	strtemp.Format("SHM Front 100 %s %s", szData, VER_STR);
-	m_clColorStaticVersion[0].SetWindowText(strtemp);
+//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
+//	strtemp.Format("SHM Front 100 %s %s", szData, VER_STR);
+//	m_clColorStaticVersion[0].SetWindowText(strtemp);
+//
+//#elif (____MACHINE_NAME == MODEL_OHC_150)			//ok
+//	strtemp.Format("SHM OHC 150 %s %s", szData, VER_STR);
+//	m_clColorStaticVersion[0].SetWindowText(strtemp);
+//
+//#endif
 
-#elif (____MACHINE_NAME == MODEL_OHC_150)		//MODEL_FOV_IP)
-	strtemp.Format("SHM OHC 150 %s %s", szData, VER_STR);
-	m_clColorStaticVersion[0].SetWindowText(strtemp);
+	
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		MainTitleSet(1);
+		
+	}
+	else
+	{
+		MainTitleSet(2);
+		
+	}
 
-#endif
 	TCHAR szLog[SIZE_OF_1K];
 
 
@@ -1632,7 +1643,21 @@ void CAutoInspDlg::InitCtrl()
     m_clColorButtonMinimize.state = 200;
     m_clColorButtonExit.state = 200;
 }
-
+void CAutoInspDlg::MainTitleSet(int index)
+{
+	CString strtemp;
+	if (index == 1)
+	{
+		strtemp.Format("SHM Front EOL %s", VER_STR);		//100
+		m_clColorStaticVersion[0].SetWindowText(strtemp);
+	}
+	else
+	{
+		strtemp.Format("SHM OHC EOL %s", VER_STR);			//150
+		m_clColorStaticVersion[0].SetWindowText(strtemp);
+	}
+	m_clColorStaticVersion[0].Invalidate();
+}
 //-----------------------------------------------------------------------------
 //
 //	그래프 생성
@@ -1886,6 +1911,7 @@ void CAutoInspDlg::InitMilLib()
 		dZoomFac = (double)((double)(CCD1_DISP_SIZE_X) / (double)(g_clLaonGrabberWrapper[i].m_stMIUDevice.nWidth));
 
         m_clVisionStaticCcd[i].SetInit(i, dZoomFac, clPt);
+		m_clVisionStaticCcd[i].Vision_RoiSet();
         m_clVisionStaticCcd[i].m_nDragType = MOUSE_DRAG;
         m_clVisionStaticCcd[i].m_bDrag = false;
 
@@ -6176,7 +6202,11 @@ void CAutoInspDlg::OnBnClickedButtonMainManual()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainTeaching()
 {
-
+	if (g_nRunMode == 0)
+	{
+		g_ShowMsgPopup(_T("WARNING"), _T("엔지니어 모드만 접근 가능합니다."), RGB_COLOR_RED);
+		return;
+	}
 	m_nCurrentDlg = DLG_TEACH;
 	this->ShowDialog(m_nCurrentDlg);
 }
@@ -6232,6 +6262,11 @@ void CAutoInspDlg::OnBnClickedButtonMainAlarm()
 //-----------------------------------------------------------------------------
 void CAutoInspDlg::OnBnClickedButtonMainConfig()
 {
+	if (g_nRunMode == 0)
+	{
+		g_ShowMsgPopup(_T("WARNING"), _T("엔지니어 모드만 접근 가능합니다."), RGB_COLOR_RED);
+		return;
+	}
 	m_nCurrentDlg = DLG_CONFIG;
 	this->ShowDialog(m_nCurrentDlg);
 }
@@ -6280,7 +6315,7 @@ void CAutoInspDlg::OnBnClickedButtonMainExit()
 #endif
 	this->FinishService();
 	// 메모리 누수 보고서 출력
-	_CrtDumpMemoryLeaks();
+	//_CrtDumpMemoryLeaks();
 	PostMessage(WM_CLOSE, NULL, NULL);
 }
 
@@ -6423,13 +6458,24 @@ void CAutoInspDlg::OnStnClickedStaticMainVersion1()
 	//g_pCarAABonderDlg->m_clMessageLot.setContent(g_clReportData.rCtrlOp_Call.OpCall_Text);
 
 
+	g_clPriInsp[0].func_ModelLotCheck(_T("ACD02C001X0001241002"));
+	TCHAR pszModel[10];
+
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_tcscpy(pszModel, _T("Front100"));
+	}
+	else
+	{
+		_tcscpy(pszModel, _T("Ohc150"));
+	}
 
 	//g_pCarAABonderDlg->m_clMessageLot.ShowWindow(SW_SHOW);		//test
 
 	//g_clMesCommunication[0].m_dEqupOperationMode[0] = 1;	//1 = Full-Auto Mode, 9 = Manual Mode
 	//g_clMesCommunication[0].m_dEqupOperationMode[1] = 2;
 	//m_clUbiGemDlg.EventReportSendFn(EQUIPMENT_OPERATION_MODE_CHANGED_REPORT);
-	SetTimer(WM_IDLE_REASON_TIMER, 1000, NULL);		//30000 Step
+	//SetTimer(WM_IDLE_REASON_TIMER, 1000, NULL);		//30000 Step
 
 	return;
 	int m_nUnit = 0;
@@ -6583,6 +6629,8 @@ void CAutoInspDlg::FinishService()
 {
 	int i = 0;
 	g_pCarAABonderDlg->m_clUbiGemDlg.UbiGemInit = true;
+	g_pCarAABonderDlg->m_clUbiGemDlg.Finalexit();
+	
 	g_clLaonGrabberWrapper[UNIT_AA1].CloseDevice();
 	
 	TopChartControl[UNIT_AA1].dpctrlLedVolume(LIGHT_CHART_CH_1, 0);
@@ -7433,11 +7481,11 @@ void CAutoInspDlg::OnBnClickedButtonMainCcdChange2()
 
 void CAutoInspDlg::OnBnClickedButtonMainMes1()
 {
-	if (g_clTaskWork[UNIT_AA1].m_nAutoFlag == MODE_AUTO)
+	/*if (g_clTaskWork[UNIT_AA1].m_nAutoFlag == MODE_AUTO)
 	{
 		AddLog(_T("[INFO] 자동운전중 사용 불가"), 1, UNIT_AA2);
 		return;
-	}
+	}*/
 	//m_clUbiGemDlg.ShowWindow(SW_SHOW);
 
 	/*if (m_bMesConnect == true)

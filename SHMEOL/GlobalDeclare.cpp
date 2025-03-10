@@ -18,6 +18,8 @@ CMessageInput* m_clTeminalMessageDlg[MAX_TERMINAL_COUNT];
 CMessagePopupDlg* g_pMessageClosePopupDlg;
 int g_nPopupIndex;
 int g_nTerminalIindex;
+int g_nRunMode;		//0 = op ,1 = 엔지니어
+
 
 CModelList ModelList;
 //CModelType g_clModelType;
@@ -63,6 +65,16 @@ CLightControl		LightRightChartControl[MAX_UNIT_COUNT];		//Right Side Chart
 //CQueue<STRUC_LOG_NODE*> g_clLogQueue;
 bool MesSpecLoadCheck;
 bool bCurrentConnect;
+
+
+int VEC_FOV_COUNT;
+int VEC_FOV_FIND_COUNT;
+
+TCHAR BASE_PATH[SIZE_OF_1K];
+TCHAR BASE_DATA_PATH[SIZE_OF_1K];
+TCHAR BASE_ALARM_PATH[SIZE_OF_1K];
+TCHAR MIU_DIR[SIZE_OF_1K];
+TCHAR FW_DIR[SIZE_OF_1K];
 
 //-----------------------------------------------------------------------------
 //
@@ -123,12 +135,22 @@ bool MesDataSave(int nUnit)
 	_stprintf_s(szLog, SIZE_OF_1K, _T("[설비 SPEC SAVE]"));
 	AddLog(szLog, 0, 0);
 
-#if (____MACHINE_NAME ==  MODEL_FRONT_100)
+//#if (____MACHINE_NAME ==  MODEL_FRONT_100)			//ok
+//
+//	strPathIni.Format("%s\\spec\\SPEC_SHM_100.txt", BASE_PATH);
+//#else
+//	strPathIni.Format("%s\\spec\\SPEC_SHM_150.txt", BASE_PATH);
+//#endif
 
-	strPathIni.Format("%s\\spec\\SPEC_SHM_100.txt", BASE_PATH);
-#else
-	strPathIni.Format("%s\\spec\\SPEC_SHM_150.txt", BASE_PATH);
-#endif
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		strPathIni.Format("%s\\spec\\SPEC_SHM_100.txt", BASE_PATH);
+	}
+	else
+	{
+		strPathIni.Format("%s\\spec\\SPEC_SHM_150.txt", BASE_PATH);
+	}
+
 
 	FILE *out;
 	if (fopen_s(&out, strPathIni, "w"))
@@ -703,12 +725,20 @@ void LogSave(CString logStr , int nUnit)
 	}
 
 	TCHAR m_szModel[SIZE_OF_100BYTE];
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("100"));
-#else
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("150"));
-#endif
+//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
+//	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("100"));
+//#else
+//	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("150"));
+//#endif
 
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("100"));
+	}
+	else
+	{
+		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("150"));
+	}
 
 	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%04d%02d%02d%02d_LogData_%s.txt"), szPath, time.wYear, time.wMonth, time.wDay, time.wHour, m_szModel);
 	if (!fopen_s(&out, szFilePath, "a"))
@@ -1915,7 +1945,7 @@ bool g_FindFovPos(int nUnit, unsigned char* pImage, int nPitch, int nSizeX, int 
 	//g_clVision.DrawMOverlayBox(nUnit,m_clRectFovTemp,M_COLOR_DARK_YELLOW, 1, FALSE, PS_SOLID);
 	//g_clVision.DrawOverlayAll(nUnit);
 
-    for (int i = 0; i < MAX_FOV_COUNT; i++)
+    for (int i = 0; i < VEC_FOV_COUNT; i++)
     {
 		clRectRoi[i].left += offsetX; 
 		clRectRoi[i].top += offsetY;
@@ -4086,28 +4116,46 @@ bool findSmallSfrRectPos(int nUnit, unsigned char* ucImage, int pitch, int sizeX
 		3,5,7,9,11,13,15,17,19
 	};
 	//Top = 0 , Bottom = 1 , Left = 2 , Right = 3
-#if (____MACHINE_NAME == MODEL_FRONT_100)
 
-#ifdef KUMI_TEST_MODE
-	int roiPos[MAX_SFR_INSP_COUNT] = {
-		0,1,2,3,			//CENTER  
-		1,3,1,2,0,3,0,2,	//4F
-		0,2,0,3,1,2,1,3
-	};
-#else
-	int roiPos[MAX_SFR_INSP_COUNT] = {
-		1,0,2,3,			//CENTER  0,1,2,3,
-		0,3,0,2,1,3,1,2,	//4F//1,3,1,2,0,3,0,2,	//4F
-		1,2,1,3,0,2,0,3//0,2,0,3,1,2,1,3
-};	
-#endif
-#else
-	int roiPos[MAX_SFR_INSP_COUNT] = {
-		0,1,2,3,			//CENTER
-		0,2,0,3,1,2,1,3,	//4F
-		1,3,1,2,0,3,0,2 };	//7F
-#endif
 	
+//#if (____MACHINE_NAME == MODEL_FRONT_100)		//ok
+//
+//#ifdef KUMI_TEST_MODE
+//	int roiPos[MAX_SFR_INSP_COUNT] = {
+//		0,1,2,3,			//CENTER  
+//		1,3,1,2,0,3,0,2,	//4F
+//		0,2,0,3,1,2,1,3
+//	};
+//#else
+//	int roiPos[MAX_SFR_INSP_COUNT] = {
+//		1,0,2,3,			//CENTER  0,1,2,3,
+//		0,3,0,2,1,3,1,2,	//4F//1,3,1,2,0,3,0,2,	//4F
+//		1,2,1,3,0,2,0,3//0,2,0,3,1,2,1,3
+//};	
+//#endif
+//#else
+//	int roiPos[MAX_SFR_INSP_COUNT] = {
+//		0,1,2,3,			//CENTER
+//		0,2,0,3,1,2,1,3,	//4F
+//		1,3,1,2,0,3,0,2 };	//7F
+//#endif
+
+	std::vector<int> roiPos;
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		roiPos = {
+			1,0,2,3,			//CENTER  0,1,2,3,
+			0,3,0,2,1,3,1,2,	//4F//1,3,1,2,0,3,0,2,	//4F
+			1,2,1,3,0,2,0,3		//0,2,0,3,1,2,1,3
+		};
+	}
+	else
+	{
+		roiPos = {
+			0,1,2,3,			//CENTER
+			0,2,0,3,1,2,1,3,	//4F
+			1,3,1,2,0,3,0,2 };	//7F
+	}
 
 
     if (nIndex == 0)
@@ -6045,14 +6093,21 @@ bool g_SaveLGITLog(int nUnit, TCHAR *lgitName, string lgitTitle, string lgitData
         CreateDirectory(szPath, NULL);
 
 	//.c_str()
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%04d%02d%02d_%02d%02d%02d_100.csv"), szPath, lgitName, szTempLotid, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
-
-#else
-	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%04d%02d%02d_%02d%02d%02d_150.csv"), szPath, lgitName, szTempLotid, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
-
-#endif
-
+//#if (____MACHINE_NAME == MODEL_FRONT_100)		//ok
+//	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%04d%02d%02d_%02d%02d%02d_100.csv"), szPath, lgitName, szTempLotid, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
+//
+//#else
+//	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%04d%02d%02d_%02d%02d%02d_150.csv"), szPath, lgitName, szTempLotid, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
+//
+//#endif
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%04d%02d%02d_%02d%02d%02d_100.csv"), szPath, lgitName, szTempLotid, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
+	}
+	else
+	{
+		_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\%s_%s_%04d%02d%02d_%02d%02d%02d_150.csv"), szPath, lgitName, szTempLotid, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
+	}
     if (clFinder.FindFile(szFilePath) == TRUE)
     {
         if (clFile.Open(szFilePath, CFile::modeRead) == FALSE)
