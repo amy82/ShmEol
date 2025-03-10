@@ -1172,14 +1172,15 @@ void CMainDlg::OnBnClickedButtonMainModelLoad()
 		AddLog(_T("[INFO] 일시 정지 중 사용 불가"), 1, m_nUnit);
 		return;
 	}
-
-
-	ModelList.m_nCurrentNo = ModelCurCol;
-
-	CString sData = _T("");
 	TCHAR szLog[SIZE_OF_1K];
+	CString sData = _T("");
 	sData = m_clGridModel.GetItemText(ModelCurCol, 1);
+	_stprintf_s(szLog, SIZE_OF_1K, _T("[%s] 모델 변경 하시겠습니까?"), sData);
 
+	if (g_ShowMsgModal(_T("확인"), szLog, RGB_COLOR_RED) == false) 
+	{
+		return;
+	}
 	if (SHM_OHC_150_MODEL != sData && SHM_FRONT_100_MODEL != sData)
 	{
 		//설정된 100/150 모델명이 아닙니다.
@@ -1189,25 +1190,49 @@ void CMainDlg::OnBnClickedButtonMainModelLoad()
 		return;
 	}
 
+	ModelList.m_nCurrentNo = ModelCurCol;
+
 	ModelList.ModelListSave();
 	ModelList.ModelListLoad();		//<-----경로 변경
 
 	ShowGridData();
+	
+
+
+	ModelList.RecipeModelLoad();
+	g_pCarAABonderDlg->m_clMainDlg.setRecipeComboBox();	//Recipe 콤보박스 갱신
+
+	//Recipe ini Load
+	g_clMesCommunication[m_nUnit].vPPRecipeSpecEquip = g_clMesCommunication[m_nUnit].RecipeIniLoad(g_clMesCommunication[0].m_sMesPPID);
+
+	if (g_clMesCommunication[m_nUnit].vPPRecipeSpecEquip.size() < 1)
+	{
+		_stprintf_s(szLog, SIZE_OF_1K, _T("(%s) RECIPE LOAD FAIL"), g_clMesCommunication[0].m_sMesPPID);
+		g_ShowMsgPopup(_T("ERROR"), szLog, RGB_COLOR_RED);
+		return;
+	}
+	showRecipeGrid();		//레시피 파라미터 갱신
+
+
+
+	
 
 
 	//strLog.Format(_T("[MODEL] %s/%d - Load 완료") , modelList.curModelName , ModelCurCol);
 	
 	_stprintf_s(szLog, SIZE_OF_1K, _T("[MODEL] CURRENT MODEL :(%s)"), ModelList.m_szCurrentModel);
 	AddLog(szLog, 0, 0);
-	
+	g_clLaonGrabberWrapper[m_nUnit].CloseDevice();
+	Sleep(100);
 
 	//모델 변경 점 250307
 	//모델별 설정 다시 로드
-	ModelList.RecipeModelLoad();
-	g_pCarAABonderDlg->m_clMainDlg.setRecipeComboBox();	//Recipe 콤보박스 갱신
+	
+
+
 	g_clSysData.sDLoad();
-	g_clSysData.commonDataLoad();
 	g_clSysData.OcOffsetLoad();
+
 	for (int i = 0; i < 1; i++)//MAX_UNIT_COUNT; i++)
 	{
 		//fov resize
@@ -1225,7 +1250,6 @@ void CMainDlg::OnBnClickedButtonMainModelLoad()
 		g_clLaonGrabberWrapper[i].UiconfigLoad(INI_RAW_IMAGE);		//pg start
 		g_clLaonGrabberWrapper[i].SelectSensor();
 
-		g_clMesCommunication[i].vPPRecipeSpecEquip = g_clMesCommunication[i].RecipeIniLoad(g_clMesCommunication[i].m_sMesPPID);
 		g_clMarkData[i].LoadData(g_clSysData.m_szModelName);
 
 		g_clTaskWork[i].LoadData();
@@ -1560,7 +1584,7 @@ void CMainDlg::OnBnClickedButtonMainRecipeLoad()
 
 	//현재 모델 변경해야된다.
 
-	//ini Load
+	//Recipe ini Load
 	g_clMesCommunication[m_nUnit].vPPRecipeSpecEquip = g_clMesCommunication[m_nUnit].RecipeIniLoad(sData);
 
 	if (g_clMesCommunication[m_nUnit].vPPRecipeSpecEquip.size() < 1)

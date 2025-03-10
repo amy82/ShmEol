@@ -1648,12 +1648,12 @@ void CAutoInspDlg::MainTitleSet(int index)
 	CString strtemp;
 	if (index == 1)
 	{
-		strtemp.Format("SHM Front EOL %s", VER_STR);		//100
+		strtemp.Format("FRONT EOL %s", VER_STR);		//100
 		m_clColorStaticVersion[0].SetWindowText(strtemp);
 	}
 	else
 	{
-		strtemp.Format("SHM OHC EOL %s", VER_STR);			//150
+		strtemp.Format("OHC EOL %s", VER_STR);			//150
 		m_clColorStaticVersion[0].SetWindowText(strtemp);
 	}
 	m_clColorStaticVersion[0].Invalidate();
@@ -6469,7 +6469,8 @@ void CAutoInspDlg::OnStnClickedStaticMainVersion1()
 	{
 		_tcscpy(pszModel, _T("Ohc150"));
 	}
-
+	_stprintf_s(g_clTaskWork[0].m_szChipID, SIZE_OF_100BYTE, _T("98765000000000000000000000000000000000000000000000000000000012345"));
+	ShowBarcode(0);
 	//g_pCarAABonderDlg->m_clMessageLot.ShowWindow(SW_SHOW);		//test
 
 	//g_clMesCommunication[0].m_dEqupOperationMode[0] = 1;	//1 = Full-Auto Mode, 9 = Manual Mode

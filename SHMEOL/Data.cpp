@@ -153,6 +153,10 @@ void CModelList::ModelListLoad()
 		ModelListSave();
 	}
 
+	TCHAR szLog[SIZE_OF_1K];
+	_stprintf_s(szLog, SIZE_OF_1K, _T("[MODEL] %s Load"), ModelList.m_szCurrentModel);
+	AddLog(szLog, 0, 0);
+
 	//if (ModelList.m_szCurrentModel == SHM_FRONT_100_MODEL)
 	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 	{

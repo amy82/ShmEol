@@ -13,20 +13,19 @@
 //
 //
 //
-//#define         KUMI_TEST_MODE			//150만 왜곡 , 100는 동일 영상 (구미샘플 맞추려는 의도)
-//
-//
-//
-#define  MODEL_FRONT_100					21000			//SHM100  OHC = 150
-#define  MODEL_OHC_150						32000			//SHM150  FRONT = 100
 //
 //
 #define SHM_FRONT_100_MODEL					_T("ACD02C002X.KM0X")
 #define SHM_OHC_150_MODEL					_T("ACD02C001X.KM0X")
-
-
-#define ____MACHINE_NAME					MODEL_FRONT_100
-
+//
+//
+//
+//
+//
+//#define         KUMI_TEST_MODE			//150만 왜곡 , 100는 동일 영상 (구미샘플 맞추려는 의도)
+//#define  MODEL_FRONT_100					21000			//SHM100  OHC = 150
+//#define  MODEL_OHC_150						32000			//SHM150  FRONT = 100
+//#define ____MACHINE_NAME					MODEL_FRONT_100
 //versionList
 //oqa 좌측이 0번ch in , 우측이 1번 out신호
 //ProcessProgramParsing
