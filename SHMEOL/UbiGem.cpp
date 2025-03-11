@@ -257,8 +257,9 @@ void CUbiGem::OnGEMDisconnected(LPCTSTR strIpAddress, int nPortNo)
 	strLog.Format(_T("OnGEMDisconnected : [IP=%s,Port=%d]"), strIpAddress, nPortNo);
 
 	UbisamAddLog(strLog);
-
 	UpdateDialogTitle();
+
+	g_pCarAABonderDlg->m_clMainDlg.setControlState(-1);
 }
 void CUbiGem::OnGEMSelected(LPCTSTR strIpAddress, int nPortNo)
 {

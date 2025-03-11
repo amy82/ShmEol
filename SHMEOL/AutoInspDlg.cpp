@@ -1454,7 +1454,7 @@ void CAutoInspDlg::InitCtrl()
         m_clColorStaticVersion[i].SetFontBold(TRUE);
         m_clColorStaticVersion[i].SetFont(&m_clFontMid);
         m_clColorStaticVersion[i].SetBorder(FALSE);
-        m_clColorStaticVersion[i].SetFontSize(20);
+        m_clColorStaticVersion[i].SetFontSize(18);
 
 		//m_clColorStaticVersion[i].SetWindowText(VER_STR);
 
@@ -1648,12 +1648,12 @@ void CAutoInspDlg::MainTitleSet(int index)
 	CString strtemp;
 	if (index == 1)
 	{
-		strtemp.Format("FRONT EOL %s", VER_STR);		//100
+		strtemp.Format("[100]FRONT EOL %s", VER_STR);		//100
 		m_clColorStaticVersion[0].SetWindowText(strtemp);
 	}
 	else
 	{
-		strtemp.Format("OHC EOL %s", VER_STR);			//150
+		strtemp.Format("[150]OHC EOL %s", VER_STR);			//150
 		m_clColorStaticVersion[0].SetWindowText(strtemp);
 	}
 	m_clColorStaticVersion[0].Invalidate();
@@ -7388,33 +7388,33 @@ void CAutoInspDlg::CAMChangeHandler(int Unit, int Mode)
 bool CAutoInspDlg::ConnectMes()
 {
 	//
-	TCHAR szLog[SIZE_OF_1K];
-	if (m_bMesConnect == true)
-		return true;
+	//TCHAR szLog[SIZE_OF_1K];
+	//if (m_bMesConnect == true)
+	//	return true;
 
-	g_clSysData.sDLoad();
-	// 소켓 생성
-	m_clMesConnSocket.Create();
-	// MES 연결
-	if (m_clMesConnSocket.Connect(g_clSysData.m_szMesIp, g_clSysData.m_nMesPort) == FALSE)
-	{
-		m_clButtonMes[0].state = 0;
-		m_clButtonMes[0].Invalidate();
-		m_clMesConnSocket.Close();
-		m_bMesConnect = false;
-		//m_clButtonExMes.SetPress(3);
-		_stprintf_s(szLog, SIZE_OF_1K, _T("[SOCKET] MES(%s:%d) 연결 실패"), g_clSysData.m_szMesIp, g_clSysData.m_nMesPort);
-		AddLog(szLog, 1, UNIT_AA1, true);
-		return false;
-	}
+	//g_clSysData.sDLoad();
+	//// 소켓 생성
+	//m_clMesConnSocket.Create();
+	//// MES 연결
+	//if (m_clMesConnSocket.Connect(g_clSysData.m_szMesIp, g_clSysData.m_nMesPort) == FALSE)
+	//{
+	//	m_clButtonMes[0].state = 0;
+	//	m_clButtonMes[0].Invalidate();
+	//	m_clMesConnSocket.Close();
+	//	m_bMesConnect = false;
+	//	//m_clButtonExMes.SetPress(3);
+	//	_stprintf_s(szLog, SIZE_OF_1K, _T("[SOCKET] MES(%s:%d) 연결 실패"), g_clSysData.m_szMesIp, g_clSysData.m_nMesPort);
+	//	AddLog(szLog, 1, UNIT_AA1, true);
+	//	return false;
+	//}
 
-	m_clButtonMes[0].state = 1;
-	m_clButtonMes[0].Invalidate();
-	m_clMesConnSocket.IDENTITY = MES_SOCKET;
-	m_clMesConnSocket.SetMainDlgPtr(this);
-	m_bMesConnect = true;
-	_stprintf_s(szLog, SIZE_OF_1K, _T("[SOCKET] MES 연결 완료\n(MES Connection)"));
-	AddLog(szLog, 0, UNIT_AA1, false);
+	//m_clButtonMes[0].state = 1;
+	//m_clButtonMes[0].Invalidate();
+	//m_clMesConnSocket.IDENTITY = MES_SOCKET;
+	//m_clMesConnSocket.SetMainDlgPtr(this);
+	//m_bMesConnect = true;
+	//_stprintf_s(szLog, SIZE_OF_1K, _T("[SOCKET] MES 연결 완료\n(MES Connection)"));
+	//AddLog(szLog, 0, UNIT_AA1, false);
 
 	//g_clSysData.m_nMesUse = 1;	//20181004
 	//m_clButtonExMes.SetPress(1);

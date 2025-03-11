@@ -7,7 +7,7 @@
 #define __GLOBALDEFINE_H__
 
 
-#define         NORINDA_MODE
+//#define         NORINDA_MODE
 //
 //
 //
@@ -32,7 +32,8 @@
 
 //YMEAN_N_MAX_RECURSIVE_COUNT  레시피 이름 수정 YMEAN_MAX_RECURSIVE_COUNT
 //====================================================================================================
-#define				VER_STR										_T("250311_1")				//통합 1차 완료
+#define				VER_STR										_T("250311_1")				//배포
+//#define				VER_STR										_T("250311_1")				//통합 1차 완료
 //#define				VER_STR										_T("250307_1")			//모델 통합중
 //#define				VER_STR										_T("250226_1")				//MES TEST 완료후 적용
 //#define				VER_STR										_T("250225_1")					//EstablishCommunication 추가
