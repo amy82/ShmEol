@@ -1483,7 +1483,11 @@ void CMainDlg::OnBnClickedButtonMainRecipeDel()
 		AddLog(_T("[INFO] 일시 정지 중 사용 불가"), 1, m_nUnit);
 		return;
 	}
-
+	if (g_nRunMode == 0)
+	{
+		g_ShowMsgPopup(_T("WARNING"), _T("엔지니어 모드만 접근 가능합니다."), RGB_COLOR_RED);
+		return;
+	}
 
 	//S6F11
 	//Event = Process Program State Changed Report)
