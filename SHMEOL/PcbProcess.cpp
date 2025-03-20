@@ -1538,7 +1538,6 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 	case 30700:	//ok
 		if (g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start == 0) 
 		{
-			//g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start = -1;
 			//Recv LGIT_LOT_START
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Id Start Recv [STEP : %d]"), nStep);
 			AddLog(szLog, 0, m_nUnit);

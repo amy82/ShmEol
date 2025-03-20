@@ -3957,7 +3957,7 @@ void CUbiGem::ReportFn(CString strCENumber, CString param)
 		UbiGEMWrapper::Structure::VariableInfo* dataMainList;
 		UbiGEMWrapper::Structure::VariableInfo* dataValue;
 
-		dataMainList = m_pWrapper->CreateVariable(_T("10011"), UbiGEMWrapper::Structure::GEMSECSFormat_L, _T("ProcerssStateInfo"));
+		dataMainList = m_pWrapper->CreateVariable(_T("10011"), UbiGEMWrapper::Structure::GEMSECSFormat_L, _T("ProcessStateInfo"));
 		
 		//<Process State Code Definition>
 		//1 = INIT
