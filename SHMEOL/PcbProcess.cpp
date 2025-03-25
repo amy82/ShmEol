@@ -1706,6 +1706,8 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 			g_clTaskWork[m_nUnit].bRecv_S6F12_PP_Selected = -1;
 			g_clTaskWork[m_nUnit].bRecv_S7F25_Formatted_Process_Program = -1;		//<--미리 초기화
 			g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start = -1;		//미리 초기화
+			g_clTaskWork[m_nUnit].bRecv_S2F49_PP_UpLoad_Confirm = -1;
+
 
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PP-Selected Report [STEP : %d]"), nStep);
 			AddLog(szLog, 0, m_nUnit);
@@ -1771,9 +1773,30 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Formatted Process Program Request [STEP : %d]"), nStep);
 			AddLog(szLog, 0, m_nUnit);
 			//수신 대기 S7F25 - Formatted Process Program Request
-			g_clTaskWork[m_nUnit].bRecv_S2F49_PP_UpLoad_Confirm = -1;
+			
 			g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
 			nRetStep = 31200;
+		}
+		else if (g_clTaskWork[m_nUnit].bRecv_S2F49_PP_UpLoad_Confirm == 1)	//LGIT_PP_UPLOAD_FAIL 확인필요 250112
+		{
+			//LGIT_PP_UPLOAD_FAIL 오고 S2F50보낸뒤,  NG (Recipe Body Cancel by Host)
+			g_clTaskWork[m_nUnit].bRecv_S2F49_PP_UpLoad_Confirm = -1;
+
+			_stprintf_s(szLog, SIZE_OF_1K, _T("RECIPE ID:%s \nLGIT_PP_UPLOAD_FAIL\nCode :%s\nText:%s\n재시도 하시겠습니까?"),
+				g_clMesCommunication[m_nUnit].m_sRecipeId, g_clMesCommunication[m_nUnit].m_sErcmdCode, g_clMesCommunication[m_nUnit].m_sErcmdText);
+			if (g_ShowMsgModal(_T("[INFO]"), szLog, RGB_COLOR_BLUE, _T("RETRY"), _T("PAUSE")) == true)
+			{
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PP Upload Fail Retry [STEP : %d]"), nStep);
+				AddLog(szLog, 0, m_nUnit);
+				nRetStep = 30600;
+			}
+			else
+			{
+				nRetStep = -30600;
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO](%s) PP Upload Fail Pause [STEP : %d]"), g_clTaskWork[m_nUnit].m_szChipID, nStep);
+				AddLog(szLog, 1, m_nUnit, true);
+				break;
+			}
 		}
 		else if (g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start == 0)
 		{

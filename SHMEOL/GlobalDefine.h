@@ -32,7 +32,8 @@
 
 //YMEAN_N_MAX_RECURSIVE_COUNT  레시피 이름 수정 YMEAN_MAX_RECURSIVE_COUNT
 //====================================================================================================
-#define				VER_STR										_T("250320_1")			//_T("ProcessStateInfo")); 철자 수정
+#define				VER_STR										_T("250325_1")				//bRecv_S2F49_PP_UpLoad_Confirm 하나더 추가
+//#define				VER_STR										_T("250320_1")			//_T("ProcessStateInfo")); 철자 수정
 //#define				VER_STR										_T("250311_1")				//배포
 //#define				VER_STR										_T("250311_1")				//통합 1차 완료
 //#define				VER_STR										_T("250307_1")			//모델 통합중
