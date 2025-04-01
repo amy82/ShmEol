@@ -115,6 +115,10 @@ void CCcdMarkViewDlg::InitCtrl()
 	m_clMaskViewDlg.ShowWindow(SW_HIDE);
 }
 
+void CCcdMarkViewDlg::ChangeMarkViewDlg()
+{
+	this->DisplayMarkView(m_nUnit, m_nMarkNo, m_clMaskViewDlg.m_iMarkSetSizeX, m_clMaskViewDlg.m_iMarkSetSizeY);
+}
 //-----------------------------------------------------------------------------
 //
 //	마크뷰 초기화
@@ -137,20 +141,15 @@ void CCcdMarkViewDlg::InitMarkViewDlg()
 	g_clModelFinder.m_clPtSmallMarkDispSize.x = dSizeX;
 	g_clModelFinder.m_clPtSmallMarkDispSize.y = dSizeY;
 
-	//MbufAllocColor(g_clVision.m_MilSystem[0], 3, dSizeX, dSizeY, 8 + M_UNSIGNED, M_IMAGE + M_DISP + M_PROC, &g_clModelFinder.m_MilMarkImage[0]);
+
+
 	MbufAllocColor(g_clVision.m_MilSystem[0], 1L, dSizeX, dSizeY, (8 + M_UNSIGNED), M_IMAGE + M_DISP + M_PROC, &g_clModelFinder.m_MilMarkImage[0]);
 
 	if (g_clModelFinder.m_MilMarkImage[0] != M_NULL)
 	{
-		//MdispAlloc(g_clVision.m_MilSystem[0], M_DEFAULT, _T("M_DEFAULT"), M_DEFAULT, &g_clModelFinder.m_MilMarkDisplay[0]);
-
-		//g_clModelFinder.m_MilMarkDisplay[0] = MdispAlloc(g_clVision.m_MilSystem[0], M_DEV0, M_DISPLAY_SETUP, M_DEFAULT, M_NULL);
 		g_clModelFinder.m_MilMarkDisplay[0] = MdispAlloc(g_clVision.m_MilSystem[0], M_DEV0, MIL_TEXT("M_DEFAULT"), M_DEFAULT, M_NULL);
 
 		MIL_INT DisplayType = MdispInquire(g_clModelFinder.m_MilMarkDisplay[0], M_DISPLAY_TYPE, M_NULL);
-		//if (MdispInquire(m_MilCamDisplay[nDispIndex][i], M_DISPLAY_TYPE, M_NULL) == M_WINDOWED)
-		//if (DisplayType == (M_WINDOWED | M_USER_WINDOW))
-		//if (MdispInquire(g_clModelFinder.m_MilMarkDisplay[0], M_DISPLAY_TYPE, M_NULL) != M_WINDOWED)
 		if (DisplayType != M_WINDOWED)
 		{
 			MdispFree(g_clModelFinder.m_MilMarkDisplay[0]);
@@ -160,8 +159,8 @@ void CCcdMarkViewDlg::InitMarkViewDlg()
 
 	g_clModelFinder.m_clPtMarkDispSize.x = wndpl.rcNormalPosition.right - wndpl.rcNormalPosition.left;
 	g_clModelFinder.m_clPtMarkDispSize.y = wndpl.rcNormalPosition.bottom - wndpl.rcNormalPosition.top;
-	g_clModelFinder.m_clPtMarkMaxSize.x = g_clModelFinder.m_clPtMarkDispSize.x;// MAX_MARK_SIZE_X;
-	g_clModelFinder.m_clPtMarkMaxSize.y = g_clModelFinder.m_clPtMarkDispSize.y;// MAX_MARK_SIZE_Y;
+	g_clModelFinder.m_clPtMarkMaxSize.x = g_clModelFinder.m_clPtMarkDispSize.x;
+	g_clModelFinder.m_clPtMarkMaxSize.y = g_clModelFinder.m_clPtMarkDispSize.y;
 
 	if (g_clModelFinder.m_MilMarkDisplay[0] != M_NULL)
 	{

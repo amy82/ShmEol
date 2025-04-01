@@ -32,7 +32,9 @@
 
 //YMEAN_N_MAX_RECURSIVE_COUNT  레시피 이름 수정 YMEAN_MAX_RECURSIVE_COUNT
 //====================================================================================================
-#define				VER_STR										_T("250325_1")				//bRecv_S2F49_PP_UpLoad_Confirm 하나더 추가
+#define				VER_STR										_T("250401_1")				////바코드 체크 삭제 조현선 선임 요청 250401 , 모델 변경시 마크 변경안돼서 수정 
+//spec load 버튼 삭제
+//#define				VER_STR										_T("250325_1")				//bRecv_S2F49_PP_UpLoad_Confirm 하나더 추가
 //#define				VER_STR										_T("250320_1")			//_T("ProcessStateInfo")); 철자 수정
 //#define				VER_STR										_T("250311_1")				//배포
 //#define				VER_STR										_T("250311_1")				//통합 1차 완료
@@ -424,7 +426,7 @@ enum MARK_MODE { SENSOR_ALIGN_MARK = 0, MAX_MARK_COUNT };//HOLDER_ALIGN_POS, LEN
 
 static TCHAR* MARK_ALIGN_NAME[1] =
 {
-	_T("Sensor Align")
+	_T("Lens Align")
 };
 static TCHAR* OC_LIGHT_NAME[2] = { _T("5000K"), _T("6500K") };
 

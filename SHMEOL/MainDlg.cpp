@@ -1268,7 +1268,8 @@ void CMainDlg::OnBnClickedButtonMainModelLoad()
 		g_clPriInsp[i].func_Insp_Firmware_BinFile_Read(false);		//pg start
 	}
 
-	
+	g_clModelFinder.LoadMark(g_clSysData.m_szModelName);
+	g_pCarAABonderDlg->m_clManualDlg.m_clMarkViewDlg.ChangeMarkViewDlg();
 
 }
 

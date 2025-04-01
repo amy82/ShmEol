@@ -2186,13 +2186,9 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 		break;
 	case 32750:		//jump sTep Offline
 		// 바코드값 수신
+#if 0			//바코드 체크 삭제 조현선 선임 요청 250401
 		if (g_clPriInsp[m_nUnit].func_ModelLotCheck(g_clTaskWork[m_nUnit].m_szChipID) == 0)
 		{
-//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
-//			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO]BCR 확인 완료:%s[002]"), g_clTaskWork[m_nUnit].m_szChipID);
-//#else
-//			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO]BCR 확인 완료:%s[001]"), g_clTaskWork[m_nUnit].m_szChipID);
-//#endif
 			if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 			{
 				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO]BCR 확인 완료:%s[002]"), g_clTaskWork[m_nUnit].m_szChipID);
@@ -2205,11 +2201,6 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 		}
 		else
 		{
-//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
-//			_stprintf_s(szLog, SIZE_OF_1K, _T("[BCR] 100H 프로그램입니다. 모델 확인 바랍니다. (002)\n계속 진행하시겠습니까?"));
-//#else
-//			_stprintf_s(szLog, SIZE_OF_1K, _T("[BCR] 150H 프로그램입니다. 모델 확인 바랍니다. (001)\n계속 진행하시겠습니까?"));
-//#endif
 			if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
 			{
 				_stprintf_s(szLog, SIZE_OF_1K, _T("[BCR] 100H 프로그램입니다. 모델 확인 바랍니다. (002)\n계속 진행하시겠습니까?"));
@@ -2233,7 +2224,7 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO]BCR CHECK PASS"));
 			AddLog(szLog, 0, m_nUnit);
 		}
-		
+#endif
 
 		g_pCarAABonderDlg->ShowBarcode(m_nUnit);
 		g_clModelData[m_nUnit].LotDataSave();
