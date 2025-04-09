@@ -598,7 +598,14 @@ static TCHAR* LOT_APD_INFO[g_LotApdInfoCount] =
 	_T("FW_ORIGINAL_FILE"),
 	_T("FW_JUDGE"),
 	_T("LASER_TILT_X"),
-	_T("LASER_TILT_Y")
+	_T("LASER_TILT_Y"),
+	//250419 Add 6°³
+	_T("CUSTOMER_PN"),
+	_T("CUSTOMER_SW_PN"),
+	_T("LGIT_PN"),
+	_T("HW_VER"),
+	_T("DATE"),
+	_T("SN")
 };
 
 #endif

@@ -4808,7 +4808,17 @@ int CPcbProcess::AutoEOLFinalSFR(int nStep)
 		nRetStep = 114100;
 		break;
 	case 114100:
+		
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Flashing Verify 시작 [STEP : %d]"), nStep);
+		AddLog(szLog, 0, m_nUnit);
 
+		g_clPriInsp[m_nUnit].func_Insp_Flashing(true);
+
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Flashing Verify 완료 [STEP : %d]"), nStep);
+		AddLog(szLog, 0, m_nUnit);
+		nRetStep = 114200;
+		break;
+	case 114200:
 		_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Firmware Verify 시작 [STEP : %d]"), nStep);
 		AddLog(szLog, 0, m_nUnit);
 

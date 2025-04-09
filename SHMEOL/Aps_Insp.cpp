@@ -4036,6 +4036,258 @@ bool CAps_Insp::func_Insp_Firmware_BinFile_Read(bool bAutoMode)
 }
 
 
+bool CAps_Insp::Test_func_Insp_Flashing_Write()
+{
+	TCHAR szLog[SIZE_OF_1K];
+	int errorCode = 0;
+
+	//WP Disable
+	if (g_clLaonGrabberWrapper[m_nUnit].m_pBoard->SetWPDisable() == false)	//Flash ACCESS Unlock CMD.
+	{
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[F/W] Flash Unlock Fail!"));
+		AddLog(szLog, 0, m_nUnit);
+		return false;
+	}
+	_stprintf_s(szLog, SIZE_OF_1K, _T("[F/W] SetWPDisable Ok"));
+	AddLog(szLog, 0, m_nUnit);
+
+	unsigned char category = 0x02;	//Flash Read CMD
+	const int bufferSize = 51;		//Flash 최대 Read 가능 크기 256 Bytes
+
+	unsigned char addrBuf[4];
+	addrBuf[0] = 0x00;
+	addrBuf[1] = 0x08;
+	addrBuf[2] = 0x30;
+	addrBuf[3] = 0x00;
+
+	unsigned char CustomerBuf[51];
+
+
+	memcpy(CustomerBuf, "8A6253NAA011M18A6283NAA510M1ACD02C001XA002412200001", bufferSize);
+	Sleep(15);
+	if (!g_clLaonGrabberWrapper[m_nUnit].m_pBoard->SetCatMultiRegister(category, SHM_FLASH_ADDR_SIZE, addrBuf, bufferSize, CustomerBuf)) // 256 bytes 씩 최대로 Read
+	{
+		return false;
+	}
+
+	//WP Enable
+	if (g_clLaonGrabberWrapper[m_nUnit].m_pBoard->SetWPEnable() == false)	//Flash ACCESS Lock CMD.
+	{
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[F/W] Flash Lock Fail!"));
+		AddLog(szLog, 0, m_nUnit);
+		return false;
+	}
+
+	_stprintf_s(szLog, SIZE_OF_1K, _T("[F/W] SetWPEnable Ok"));
+	AddLog(szLog, 0, m_nUnit);
+
+
+	
+}
+//-----------------------------------------------------------------------------
+//
+//	func_Insp_Flashing
+//
+//-----------------------------------------------------------------------------
+bool CAps_Insp::func_Insp_Flashing(bool bAutoMode)
+{
+	int i = 0;
+	TCHAR szLog[SIZE_OF_1K];
+	bool bFlashingRtn = true;
+	int errorCode = 0;
+
+	//WP Disable
+	if (g_clLaonGrabberWrapper[m_nUnit].m_pBoard->SetWPDisable() == false)	//Flash ACCESS Unlock CMD.
+	{
+		g_clMesCommunication[m_nUnit].m_dEqpDefectCode.Format(_T("38"));
+		//Flash Unlock Fail!
+		g_clMesCommunication[m_nUnit].m_nMesFinalResult = 0;
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[Flashing] Flash Unlock Fail!"));
+		AddLog(szLog, 0, m_nUnit);
+		return false;
+	}
+	_stprintf_s(szLog, SIZE_OF_1K, _T("[Flashing] SetWPDisable Ok"));
+	AddLog(szLog, 0, m_nUnit);
+
+	//Read
+	unsigned char category = 0x01;	//Flash Read CMD
+	const int bufferSize = 51;					//Flash 최대 Read 가능 크기 256 Bytes
+
+	unsigned char readFlashingData[MAX_PATH];
+	memset(readFlashingData, 0x00, sizeof(readFlashingData));
+
+	unsigned char addrBuf[4];
+	addrBuf[0] = 0x00;
+	addrBuf[1] = 0x08;
+	addrBuf[2] = 0x30;
+	addrBuf[3] = 0x00;
+
+	if (!g_clLaonGrabberWrapper[m_nUnit].m_pBoard->GetCatMultiRegister(category, SHM_FLASH_ADDR_SIZE, addrBuf, bufferSize, readFlashingData))
+	{
+		g_clMesCommunication[m_nUnit].m_dEqpDefectCode.Format(_T("38"));
+		g_clMesCommunication[m_nUnit].m_nMesFinalResult = 0;
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[Flashing] Read1 Flash Fail!"));
+		AddLog(szLog, 0, m_nUnit);
+
+		return false;
+	}
+
+	//const TCHAR* barcode = (const TCHAR*)readFlashingData;
+
+	TCHAR Customer_PN[15];     // 14 + 1
+	TCHAR Customer_SW_PN[15];  // 14 + 1
+	TCHAR LGIT_PN[11];         // 10 + 1
+	TCHAR HW_VER[4];           // 3 + 1
+	TCHAR DATE[7];             // 6 + 1
+	TCHAR SN[5];               // 4 + 1
+
+	TCHAR e_Customer_PN[15];     // 14 + 1
+	TCHAR e_Customer_SW_PN[15];  // 14 + 1
+	TCHAR e_LGIT_PN[11];         // 10 + 1
+	TCHAR e_HW_VER[4];           // 3 + 1
+	TCHAR e_DATE[7];             // 6 + 1
+	TCHAR e_SN[5];               // 4 + 1
+
+	strncpy_s(e_Customer_PN, (const char*)(readFlashingData), 14);
+	strncpy_s(e_Customer_SW_PN, (const char*)(readFlashingData+14), 14);
+	strncpy_s(e_LGIT_PN, (const char*)(readFlashingData+28), 10);
+	strncpy_s(e_HW_VER, (const char*)(readFlashingData+38), 3);
+	strncpy_s(e_DATE, (const char*)(readFlashingData+41), 6);
+	strncpy_s(e_SN, (const char*)(readFlashingData+47), 4);
+
+	g_clMesCommunication[m_nUnit].vMesApdData.push_back(e_Customer_PN);
+	g_clMesCommunication[m_nUnit].vMesApdData.push_back(e_Customer_SW_PN);
+	g_clMesCommunication[m_nUnit].vMesApdData.push_back(e_LGIT_PN);
+	g_clMesCommunication[m_nUnit].vMesApdData.push_back(e_HW_VER);
+	g_clMesCommunication[m_nUnit].vMesApdData.push_back(e_DATE);
+	g_clMesCommunication[m_nUnit].vMesApdData.push_back(e_SN);
+	//
+
+	_tcsncpy_s(Customer_PN, g_clTaskWork[m_nUnit].m_szChipID, 14);
+	_tcsncpy_s(Customer_SW_PN, g_clTaskWork[m_nUnit].m_szChipID + 14, 14);
+	_tcsncpy_s(LGIT_PN, g_clTaskWork[m_nUnit].m_szChipID + 28, 10);
+	_tcsncpy_s(HW_VER, g_clTaskWork[m_nUnit].m_szChipID + 38, 3);
+	_tcsncpy_s(DATE, g_clTaskWork[m_nUnit].m_szChipID + 41, 6);
+	_tcsncpy_s(SN, g_clTaskWork[m_nUnit].m_szChipID + 47, 4);
+	bool isEqual = false;
+
+	
+	isEqual = (memcmp(Customer_PN, readFlashingData, 14) == 0);
+	if (isEqual)
+	{
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[Customer_PN] Verify Ok [bcr:%s / e:%s]"), Customer_PN, e_Customer_PN);
+		AddLog(szLog, 0, m_nUnit);
+	}
+	else
+	{
+		bFlashingRtn = false;
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[Customer_PN] Verify Fail [bcr:%s / e:%s]"), Customer_PN, e_Customer_PN);
+		AddLog(szLog, 0, m_nUnit);
+	}
+	isEqual = (memcmp(Customer_SW_PN, readFlashingData + 14, 14) == 0);
+	if (isEqual)
+	{
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[Customer_SW_PN] Verify Ok [bcr:%s / e:%s]"), Customer_SW_PN, e_Customer_SW_PN);
+		AddLog(szLog, 0, m_nUnit);
+	}
+	else
+	{
+		bFlashingRtn = false;
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[Customer_SW_PN] Verify Fail [bcr:%s / e:%s]"), Customer_SW_PN, e_Customer_SW_PN);
+		AddLog(szLog, 0, m_nUnit);
+	}
+	isEqual = (memcmp(LGIT_PN, readFlashingData + 28, 10) == 0);
+	if (isEqual)
+	{
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[LGIT_PN] Verify Ok [bcr:%s / e:%s]"), LGIT_PN, e_LGIT_PN);
+		AddLog(szLog, 0, m_nUnit);
+	}
+	else
+	{
+		bFlashingRtn = false;
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[LGIT_PN] Verify Fail [bcr:%s / e:%s]"), LGIT_PN, e_LGIT_PN);
+		AddLog(szLog, 0, m_nUnit);
+	}
+	isEqual = (memcmp(HW_VER, readFlashingData + 38, 3) == 0);
+	if (isEqual)
+	{
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[HW_VER] Verify Ok [bcr:%s / e:%s]"), HW_VER, e_HW_VER);
+		AddLog(szLog, 0, m_nUnit);
+	}
+	else
+	{
+		bFlashingRtn = false;
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[HW_VER] Verify Fail [bcr:%s / e:%s]"), HW_VER, e_HW_VER);
+		AddLog(szLog, 0, m_nUnit);
+	}
+	isEqual = (memcmp(DATE, readFlashingData + 41, 6) == 0);
+	if (isEqual)
+	{
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[DATE] Verify Ok [bcr:%s / e:%s]"), DATE, e_DATE);
+		AddLog(szLog, 0, m_nUnit);
+	}
+	else
+	{
+		bFlashingRtn = false;
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[DATE] Verify Fail [bcr:%s / e:%s]"), DATE, e_DATE);
+		AddLog(szLog, 0, m_nUnit);
+	}
+	isEqual = (memcmp(SN, readFlashingData + 47, 4) == 0);
+	if (isEqual)
+	{
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[SN] Verify Ok [bcr:%s / e:%s]"), SN, e_SN);
+		AddLog(szLog, 0, m_nUnit);
+	}
+	else
+	{
+		bFlashingRtn = false;
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[SN] Verify Fail [bcr:%s / e:%s]"), SN, e_SN);
+		AddLog(szLog, 0, m_nUnit);
+	}
+
+
+	//WP Enable
+	if (g_clLaonGrabberWrapper[m_nUnit].m_pBoard->SetWPEnable() == false)	//Flash ACCESS Lock CMD.
+	{
+		//Flash Unlock Fail!
+		g_clMesCommunication[m_nUnit].m_dEqpDefectCode.Format(_T("38"));
+		g_clMesCommunication[m_nUnit].m_nMesFinalResult = 0;
+
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[Flashing] Flash Lock Fail!"));
+		AddLog(szLog, 0, m_nUnit);
+		return false;
+	}
+
+	_stprintf_s(szLog, SIZE_OF_1K, _T("[Flashing] SetWPEnable Ok"));
+	AddLog(szLog, 0, m_nUnit);
+
+
+
+	if (bFlashingRtn == false)
+	{
+		g_clMesCommunication[m_nUnit].m_nMesFinalResult = 0;
+		g_clMesCommunication[m_nUnit].m_dEqpDefectCode.Format(_T("38"));
+		g_clMandoInspLog[m_nUnit].m_sNGList += _T(" [FLASHING VERIFY NG]");
+		if (g_clMandoInspLog[m_nUnit].m_nNGCnt < 30)
+		{
+			g_clMandoInspLog[m_nUnit].m_sDispNG[g_clMandoInspLog[m_nUnit].m_nNGCnt].Format(_T("FLASHING VERIFY"));
+			g_clMandoInspLog[m_nUnit].m_nNGCnt++;
+		}
+
+
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[Flashing] Verify NG"));
+		AddLog(szLog, 0, m_nUnit);
+	}
+	else
+	{
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[Flashing] Verify OK"));
+		AddLog(szLog, 0, m_nUnit);
+	}
+
+	return bFlashingRtn;
+
+}
+
 
 
 //-----------------------------------------------------------------------------

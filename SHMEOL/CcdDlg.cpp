@@ -157,6 +157,8 @@ void CCcdDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_CCD_DYNAMIC_RANGE, m_clColorButtonDynamicRange);
 
 	DDX_Control(pDX, IDC_BUTTON_CCD_I2C, m_clColorButtonI2C);
+	DDX_Control(pDX, IDC_BUTTON_CCD_FLASHING, m_clColorButtonFlashing);
+	
 	DDX_Control(pDX, IDC_BUTTON_CCD_DISTORTION, m_clColorButtonDistortion);
 	
 	DDX_Control(pDX, IDC_BUTTON_CCD_I2C_PATTERN, m_clColorButtonI2cTestPattern);
@@ -292,6 +294,7 @@ BEGIN_MESSAGE_MAP(CCcdDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_CCD_FOV_INIT, &CCcdDlg::OnBnClickedButtonCcdFovInit)
 	ON_BN_CLICKED(IDC_BUTTON_CCD_SENSOR_VOLTAGE, &CCcdDlg::OnBnClickedButtonCcdSensorVoltage)
 	ON_BN_CLICKED(IDC_BUTTON_CCD_JXL_DECODE, &CCcdDlg::OnBnClickedButtonCcdJxlDecode)
+	ON_BN_CLICKED(IDC_BUTTON_CCD_FLASHING, &CCcdDlg::OnBnClickedButtonCcdFlashing)
 END_MESSAGE_MAP()
 
 
@@ -4190,4 +4193,39 @@ void CCcdDlg::OnBnClickedButtonCcdJxlDecode()
 
 		delete pDlg;
 	}
+}
+
+
+void CCcdDlg::OnBnClickedButtonCcdFlashing()
+{
+	// TODO: Add your control notification handler code here
+	TCHAR szLog[SIZE_OF_1K];
+	bool nRetVal = false;
+
+	// GRABBER 상태 체크
+	if (g_clTaskWork[m_nUnit].m_nAutoFlag == MODE_AUTO)
+	{
+		AddLog(_T("[수동검사] 자동 운전 중 사용 불가"), 1, m_nUnit);
+		return;
+	}
+
+	if (g_clTaskWork[m_nUnit].m_nAutoFlag == MODE_PAUSE)
+	{
+		AddLog(_T("[수동검사] 일시 정지 중 사용 불가"), 1, m_nUnit);
+		return;
+	}
+
+#ifdef ON_LINE_GRABBER
+	if (g_clLaonGrabberWrapper[m_nUnit].GetDeviceOpen() == false)
+	{
+		AddLog(_T("[수동검사] FRAME GRABBER 연결 해제 상태"), 1, m_nUnit);
+		return;
+	}
+
+	AddLog(_T("[수동검사] Flashing Verify Start"), 0, m_nUnit, false, false);
+
+	g_clPriInsp[m_nUnit].func_Insp_Flashing(false);
+
+	AddLog(_T("[수동검사] Flashing Verify End"), 0, m_nUnit);
+#endif
 }

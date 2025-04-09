@@ -206,6 +206,7 @@ public:
 	CButtonCT m_clColorButtonI2cTestPattern;
 
 	CButtonCT m_clColorButtonI2C;
+	CButtonCT m_clColorButtonFlashing;
 	CButtonCT m_clColorButtonDistortion;
 
 
@@ -303,4 +304,5 @@ public:
 	afx_msg void OnBnClickedButtonCcdFovInit();
 	afx_msg void OnBnClickedButtonCcdSensorVoltage();
 	afx_msg void OnBnClickedButtonCcdJxlDecode();
+	afx_msg void OnBnClickedButtonCcdFlashing();
 };

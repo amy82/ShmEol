@@ -6447,7 +6447,38 @@ void CAutoInspDlg::OnStnClickedStaticMainVersion1()
 
 
 #ifdef NORINDA_MODE
-	CString strValue;
+	/*
+	[Customer_PN] 0x00083000 : 8A6253NAA011M1(14 Bytes)
+	[Customer_SW_PN] 0x0008300E : 8A6283NAA510M1(14 Bytes)
+	[LGIT_PN] 0x0008301C : ACD02C001X(10 Bytes)
+	[HW_VER] 0x00083026 : A00(3 Bytes)
+	[DATE] 0x00083029 : 241220 (6 Bytes)
+	[SN] 0x0008302F : 0001 (4 Bytes)
+
+	*/
+
+	TCHAR Customer_PN[15];     // 14 + 1
+
+	_stprintf_s(g_clTaskWork[0].m_szChipID, SIZE_OF_100BYTE, _T("8A6253NAA011M18A6283NAA510M1ACD02C001XA002412200001")); //bcr 초기화
+	_stprintf_s(g_clTaskWork[0].m_szChipID, SIZE_OF_100BYTE, _T("7A6253NAA011M18A6283NAA510M1ACD02C001XA002412200001")); //bcr 초기화
+	_stprintf_s(g_clTaskWork[0].m_szChipID, SIZE_OF_100BYTE, _T("8A6253NAA011M17A6283NAA510M1ACD02C001XA002412200001")); //bcr 초기화 
+	_stprintf_s(g_clTaskWork[0].m_szChipID, SIZE_OF_100BYTE, _T("8A6253NAA011M18A6283NAA510M1ADD02C001XA002412200001")); //bcr 초기화
+	_stprintf_s(g_clTaskWork[0].m_szChipID, SIZE_OF_100BYTE, _T("8A6253NAA011M18A6283NAA510M1ACD02C001XA012412200001")); //bcr 초기화
+	_stprintf_s(g_clTaskWork[0].m_szChipID, SIZE_OF_100BYTE, _T("8A6253NAA011M18A6283NAA510M1ACD02C001XA002413200002")); //bcr 초기화
+
+	int opCallType = 0;
+	/*_tcsncpy_s(Customer_PN, g_clTaskWork[0].m_szChipID, 14);
+
+	unsigned char CustomerBuf[14]; 
+	memcpy(CustomerBuf, "8A6253NAA011M1", 14);
+
+	bool isEqual = (memcmp(Customer_PN, CustomerBuf, 14) == 0);*/
+
+	 
+
+	//isEqual = g_clPriInsp[0].Test_func_Insp_Flashing_Write();
+
+	//CString strValue;
 	//int opCallType = 0;
 	//strValue.Format(_T("[LGIT_OP_CALL] %s/%d"), g_clReportData.rCtrlOp_Call.OpCall_Code, opCallType);
 	//g_ShowMsgPopup(strValue, g_clReportData.rCtrlOp_Call.OpCall_Text, RGB_COLOR_RED, 0, opCallType);
@@ -6458,7 +6489,7 @@ void CAutoInspDlg::OnStnClickedStaticMainVersion1()
 	//g_pCarAABonderDlg->m_clMessageLot.setContent(g_clReportData.rCtrlOp_Call.OpCall_Text);
 
 
-	g_clPriInsp[0].func_ModelLotCheck(_T("ACD02C001X0001241002"));
+	/*g_clPriInsp[0].func_ModelLotCheck(_T("ACD02C001X0001241002"));
 	TCHAR pszModel[10];
 
 	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
@@ -6468,9 +6499,9 @@ void CAutoInspDlg::OnStnClickedStaticMainVersion1()
 	else
 	{
 		_tcscpy(pszModel, _T("Ohc150"));
-	}
-	_stprintf_s(g_clTaskWork[0].m_szChipID, SIZE_OF_100BYTE, _T("98765000000000000000000000000000000000000000000000000000000012345"));
-	ShowBarcode(0);
+	}*/
+	//_stprintf_s(g_clTaskWork[0].m_szChipID, SIZE_OF_100BYTE, _T("98765000000000000000000000000000000000000000000000000000000012345"));
+	//ShowBarcode(0);
 	//g_pCarAABonderDlg->m_clMessageLot.ShowWindow(SW_SHOW);		//test
 
 	//g_clMesCommunication[0].m_dEqupOperationMode[0] = 1;	//1 = Full-Auto Mode, 9 = Manual Mode

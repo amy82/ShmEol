@@ -167,11 +167,11 @@ public:
 	
 	CString SetDir_Check(CString sPath);
 	
-	
+	bool Test_func_Insp_Flashing_Write();
 
 	//사용안하는 코드?
 	bool func_Insp_Firmware_BinFile_Read(bool bAutoMode = true);		//원본 바이너리 파일 읽기
-
+	bool func_Insp_Flashing(bool bAutoMode = true);
 	bool func_Insp_FirmwareVerify(bool bAutoMode = true);
 	bool func_Insp_Distortion(BYTE* img, bool bAutoMode = false);
 	bool func_Insp_ErrorFlag_Read(bool bAutoMode = true);
