@@ -141,16 +141,23 @@ public:
 
     CRect m_clRectCircle[4];
 
+    CRect m_clRectDrawSnr[MAX_SNR_COUNT];
+
+
 
 	//FOV
-	CPoint m_clPtFovOffset[MAX_FOV_COUNT];
-    CRect m_clRectFov[MAX_FOV_COUNT];
-
-
-
-    CRect m_clRectDrawSnr[MAX_SNR_COUNT];
-	
+	//CPoint m_clPtFovOffset[MAX_FOV_COUNT];
+	//CRect m_clRectFov[MAX_FOV_COUNT];
+	//int m_nFovSizeX[MAX_FOV_COUNT];
+	//int m_nFovSizeY[MAX_FOV_COUNT];
+	void ModelChange_Vision();
+	void Vision_RoiSet();
+	std::vector<CPoint> m_clPtFovOffset;
+	std::vector<CRect> m_clRectFov;
+	std::vector<int> m_nFovSizeX;
+	std::vector<int> m_nFovSizeY;
 private:
+
     int	m_nSelectIndexCCD;
     int	m_nSelectIndexFOV;
     int	m_nSelectIndexSNR;
@@ -158,8 +165,6 @@ private:
 	int m_nSfrSizeX[MAX_LAST_INSP_COUNT];
 	int m_nSfrSizeY[MAX_LAST_INSP_COUNT];
 
-	int m_nFovSizeX[MAX_FOV_COUNT];
-	int m_nFovSizeY[MAX_FOV_COUNT];
 
 	int m_nCenterSfrSizeX;	//센터 차트는 사각형 두개라서 
 	int m_nCenterSfrSizeY;

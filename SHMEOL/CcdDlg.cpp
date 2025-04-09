@@ -4017,6 +4017,12 @@ void CCcdDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 	{
 		//this->setSfrRoi();
 	}
+	else
+	{
+		g_pCarAABonderDlg->m_clVisionStaticCcd[m_nUnit].m_FovSetMode = false;
+		m_clColorButtonFovMarkView.state = 0;
+		m_clColorButtonFovMarkView.Invalidate();
+	}
 }
 
 
@@ -4036,6 +4042,14 @@ void CCcdDlg::OnBnClickedButtonCcdIniLoad()
 		AddLog(_T("[INFO] 일시 정지 중 사용 불가"), 1, m_nUnit);
 		return;
 	}
+
+	if (g_clLaonGrabberWrapper[m_nUnit].m_pBoard->IsGrabStarted())
+	{
+		AddLog(_T("[INFO] 영상 그랩 중 사용 불가"), 1, m_nUnit);
+		return;
+	}
+
+
 	CFileDialog* pDlg = new CFileDialog(TRUE, NULL, NULL, OFN_EXPLORER | OFN_HIDEREADONLY, _T("ini 파일(*.ini) | *.ini||"));
 
 	CString inipath;

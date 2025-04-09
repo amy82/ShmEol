@@ -739,11 +739,20 @@ bool CMesCommunication::g_Grr____Align(int nUnit)
 
 	TCHAR m_szModel[SIZE_OF_100BYTE];
 
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
-#else
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
-#endif
+//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
+//	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
+//#else
+//	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
+//#endif
+
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
+	}
+	else
+	{
+		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
+	}
 
 	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\GrrAlignLog_%s_%04d%02d%02d.csv"), szPath, m_szModel, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay);
 
@@ -852,11 +861,21 @@ bool CMesCommunication::g_Grr____LaserMotorPos(int nUnit)
 
 	TCHAR m_szModel[SIZE_OF_100BYTE];
 
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
-#else
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
-#endif
+//#if (____MACHINE_NAME == MODEL_FRONT_100)		//ok
+//	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
+//#else
+//	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
+//#endif
+
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
+	}
+	else
+	{
+		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
+	}
+
 
 	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\GrrLog_%s_%04d%02d%02d.csv"), szPath, m_szModel, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay);
 
@@ -999,11 +1018,21 @@ bool CMesCommunication::g_FovVertexLog(int nUnit)
 
 	TCHAR m_szModel[SIZE_OF_100BYTE];
 
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
-#else
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
-#endif
+//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
+//	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
+//#else
+//	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
+//#endif
+
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
+}
+	else
+	{
+		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
+	}
+
 
 #ifdef KUMI_TEST_MODE
 	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\Test_EolLog_Vertex_%s_%04d%02d%02d.csv"), szPath, m_szModel, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay);
@@ -1029,51 +1058,66 @@ bool CMesCommunication::g_FovVertexLog(int nUnit)
 	sFileMode = _T("w");
 #endif
 
+	int roiCount = 0;
+//#if (____MACHINE_NAME == MODEL_FRONT_100)		//ok
+//	roiCount = 16;
+//	TCHAR* pszCol[] = {
+//		_T("VFOV_0") ,_T("VFOV_1") ,
+//		_T("VFOV_2") ,_T("VFOV_3") ,
+//		_T("VFOV_4") ,_T("VFOV_5") ,
+//		_T("VFOV_6") ,_T("VFOV_7") ,
+//
+//		_T("HFOV_0") ,_T("HFOV_1") ,
+//		_T("HFOV_2") ,_T("HFOV_3") ,
+//		_T("HFOV_4") ,_T("HFOV_5") ,
+//		_T("HFOV_6") ,_T("HFOV_7")
+//	};
+//#else
+//	roiCount = 14;
+//	TCHAR* pszCol[] = {
+//		_T("VFOV_0") ,_T("VFOV_1") ,
+//		_T("VFOV_2") ,_T("VFOV_3") ,
+//		_T("VFOV_4") ,_T("VFOV_5") ,
+//		_T("VFOV_6") ,_T("VFOV_7") ,
+//
+//		_T("HFOV_0") ,_T("HFOV_1") ,
+//		_T("HFOV_2") ,_T("HFOV_3") ,
+//		_T("HFOV_4") ,_T("HFOV_5")
+//	};
+//#endif
 
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	int roiCount = 16;
-	TCHAR* pszCol[] = {
-		_T("VFOV_0") ,_T("VFOV_1") ,
-		_T("VFOV_2") ,_T("VFOV_3") ,
-		_T("VFOV_4") ,_T("VFOV_5") ,
-		_T("VFOV_6") ,_T("VFOV_7") ,
+	std::vector<std::basic_string<TCHAR>> pszCol;
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		roiCount = 16;
+		pszCol = {
+			_T("VFOV_0"), _T("VFOV_1"),
+			_T("VFOV_2"), _T("VFOV_3"),
+			_T("VFOV_4"), _T("VFOV_5"),
+			_T("VFOV_6"), _T("VFOV_7"),
 
-		_T("HFOV_0") ,_T("HFOV_1") ,
-		_T("HFOV_2") ,_T("HFOV_3") ,
-		_T("HFOV_4") ,_T("HFOV_5") ,
-		_T("HFOV_6") ,_T("HFOV_7")
-		/*_T("TOP_CHART_LT_L") ,_T("TOP_CHART_LT_R") ,
-		_T("TOP_CHART_RT_L") ,_T("TOP_CHART_RT_R") ,
-		_T("TOP_CHART_BL_L") ,_T("TOP_CHART_BL_R") ,
-		_T("TOP_CHART_BR_L") ,_T("TOP_CHART_BR_R") ,
-		_T("LEFT_SIDE_CHART_4F_T") ,_T("LEFT_SIDE_CHART_4F_B") ,
-		_T("LEFT_SIDE_CHART_7F_T") ,_T("LEFT_SIDE_CHART_7F_B") ,
-		_T("RIGHT_SIDE_CHART_4F_T") ,_T("RIGHT_SIDE_CHART_4F_B"),
-		_T("RIGHT_SIDE_CHART_7F_T"),_T("RIGHT_SIDE_CHART_7F_B")*/
-	};
-#else
-	int roiCount = 14;
-	TCHAR* pszCol[] = {
-		_T("VFOV_0") ,_T("VFOV_1") ,
-		_T("VFOV_2") ,_T("VFOV_3") ,
-		_T("VFOV_4") ,_T("VFOV_5") ,
-		_T("VFOV_6") ,_T("VFOV_7") ,
+			_T("HFOV_0"), _T("HFOV_1"),
+			_T("HFOV_2"), _T("HFOV_3"),
+			_T("HFOV_4"), _T("HFOV_5"),
+			_T("HFOV_6"), _T("HFOV_7")
+		};
+	}
+	else
+	{
+		roiCount = 14;
+		pszCol = {
+			_T("VFOV_0"), _T("VFOV_1"),
+			_T("VFOV_2"), _T("VFOV_3"),
+			_T("VFOV_4"), _T("VFOV_5"),
+			_T("VFOV_6"), _T("VFOV_7"),
 
-		_T("HFOV_0") ,_T("HFOV_1") ,
-		_T("HFOV_2") ,_T("HFOV_3") ,
-		_T("HFOV_4") ,_T("HFOV_5")
-		/*_T("LEFT_SIDE_CHART_4F_T_BL") ,_T("LEFT_SIDE_CHART_4F_T_TR") ,
-		_T("LEFT_SIDE_CHART_4F_B_TL") ,_T("LEFT_SIDE_CHART_4F_B_BR") ,
-		_T("LEFT_SIDE_CHART_7F_T") ,
-		_T("LEFT_SIDE_CHART_7F_M") ,
-		_T("LEFT_SIDE_CHART_7F_B") ,
-		_T("RIGHT_SIDE_CHART_4F_T_TL") ,_T("RIGHT_SIDE_CHART_4F_T_BR") ,
-		_T("RIGHT_SIDE_CHART_4F_B_BL") ,_T("RIGHT_SIDE_CHART_4F_B_TR") ,
-		_T("RIGHT_SIDE_CHART_7F_T") ,
-		_T("RIGHT_SIDE_CHART_7F_M") ,
-		_T("RIGHT_SIDE_CHART_7F_B") ,*/
-	};
-#endif
+			_T("HFOV_0"), _T("HFOV_1"),
+			_T("HFOV_2"), _T("HFOV_3"),
+			_T("HFOV_4"), _T("HFOV_5")
+		};
+	}
+
+
 	// 파일이 없으면 헤더를 만든다.
 	if (clFinder.FindFile(szFilePath) == FALSE)
 	{
@@ -1081,7 +1125,7 @@ bool CMesCommunication::g_FovVertexLog(int nUnit)
 		if (fp != NULL)
 		{
 			_ftprintf_s(fp, _T(",,,,,"));
-			for (i = 0; i < MAX_FOV_FIND_COUNT; i++)
+			for (i = 0; i < VEC_FOV_FIND_COUNT; i++)
 			{
 				if (i > 0)
 				{
@@ -1094,7 +1138,8 @@ bool CMesCommunication::g_FovVertexLog(int nUnit)
 			fprintf_s(fp, "Date,Time ");
 			fprintf_s(fp, ",SW Version,Model");
 			fprintf_s(fp, ",BarcodeID");
-			for (i = 0; i < MAX_FOV_FIND_COUNT; i++)
+
+			for (i = 0; i < VEC_FOV_FIND_COUNT; i++)
 			{
 				_ftprintf_s(fp, _T(",x,y"));
 			}
@@ -1117,7 +1162,7 @@ bool CMesCommunication::g_FovVertexLog(int nUnit)
 		_ftprintf_s(fp, _T("'%02d:%02d:%02d,"), stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond);
 		_ftprintf_s(fp, _T("VER.%s, %s,"), VER_STR, m_szModel);
 		_ftprintf_s(fp, _T("%s,"), g_clTaskWork[nUnit].m_szChipID);
-		for (i = 0; i < MAX_FOV_FIND_COUNT; i++)
+		for (i = 0; i < VEC_FOV_FIND_COUNT; i++)
 		{
 			fprintf_s(fp, "%d,%d,", g_clMandoInspLog[nUnit].m_ShmFovPoint[i].x, g_clMandoInspLog[nUnit].m_ShmFovPoint[i].y);
 		}
@@ -1181,11 +1226,23 @@ bool CMesCommunication::g_FinalEolLog(int nUnit)
 
 
 
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
-#else
-	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
-#endif
+//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
+//	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
+//#else
+//	_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
+//#endif
+
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM100"));
+	}
+	else
+	{
+		_stprintf_s(m_szModel, SIZE_OF_100BYTE, _T("SHM150"));
+	}
+
+
+
 #ifdef KUMI_TEST_MODE
 	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\Test_FinalEolLog_%s_%04d%02d%02d.csv"), szPath, m_szModel, stSysTime.wYear, stSysTime.wMonth, stSysTime.wDay);
 #else

@@ -45,7 +45,7 @@ CUbiGem::~CUbiGem()
 	OnMnuStop();
 	if (m_pWrapper != nullptr)
 	{
-		m_pWrapper->Terminate();
+		
 		delete m_pWrapper;
 		m_pWrapper = nullptr;
 	}
@@ -132,6 +132,11 @@ BOOL CUbiGem::OnInitDialog()
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
+}
+void CUbiGem::Finalexit()
+{
+	OnMnuStop();
+	m_pWrapper->Terminate();
 }
 void CUbiGem::InitCtrl()
 {
@@ -252,8 +257,9 @@ void CUbiGem::OnGEMDisconnected(LPCTSTR strIpAddress, int nPortNo)
 	strLog.Format(_T("OnGEMDisconnected : [IP=%s,Port=%d]"), strIpAddress, nPortNo);
 
 	UbisamAddLog(strLog);
-
 	UpdateDialogTitle();
+
+	g_pCarAABonderDlg->m_clMainDlg.setControlState(-1);
 }
 void CUbiGem::OnGEMSelected(LPCTSTR strIpAddress, int nPortNo)
 {
@@ -3951,7 +3957,7 @@ void CUbiGem::ReportFn(CString strCENumber, CString param)
 		UbiGEMWrapper::Structure::VariableInfo* dataMainList;
 		UbiGEMWrapper::Structure::VariableInfo* dataValue;
 
-		dataMainList = m_pWrapper->CreateVariable(_T("10011"), UbiGEMWrapper::Structure::GEMSECSFormat_L, _T("ProcerssStateInfo"));
+		dataMainList = m_pWrapper->CreateVariable(_T("10011"), UbiGEMWrapper::Structure::GEMSECSFormat_L, _T("ProcessStateInfo"));
 		
 		//<Process State Code Definition>
 		//1 = INIT

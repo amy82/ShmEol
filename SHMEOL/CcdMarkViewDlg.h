@@ -27,6 +27,7 @@ protected:
 
 public:
 	void DisplayMarkView(int nUnit, int nMarkNo, double dZoomMarkWidth, double dZoomMarkHeight);
+	void ChangeMarkViewDlg();
 private:
 	void InitCtrl();
 

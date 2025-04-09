@@ -71,6 +71,11 @@ void CMainDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_MAIN_CONTROL_OFFLINE_REQ, m_clColorButtonMainControlOfflineReq);
 	DDX_Control(pDX, IDC_BUTTON_MAIN_CONTROL_ONLINE_REMOTE_REQ, m_clColorButtonMainControlOnlineRemoteReq);
 	
+
+
+	DDX_Control(pDX, IDC_BUTTON_MAIN_OP, m_clColorButtonMainOp);
+	DDX_Control(pDX, IDC_BUTTON_MAIN_ENGINNER, m_clColorButtonMainEn);
+	
 	
 	CDialogEx::DoDataExchange(pDX);
 }
@@ -104,6 +109,8 @@ BEGIN_MESSAGE_MAP(CMainDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_MAIN_MATERIAL_ID_REPORT, &CMainDlg::OnBnClickedButtonMainMaterialIdReport)
 	ON_BN_CLICKED(IDC_BUTTON_MAIN_CONTROL_OFFLINE_REQ, &CMainDlg::OnBnClickedButtonMainControlOfflineReq)
 	ON_BN_CLICKED(IDC_BUTTON_MAIN_CONTROL_ONLINE_REMOTE_REQ, &CMainDlg::OnBnClickedButtonMainControlOnlineRemoteReq)
+	ON_BN_CLICKED(IDC_BUTTON_MAIN_OP, &CMainDlg::OnBnClickedButtonMainOp)
+	ON_BN_CLICKED(IDC_BUTTON_MAIN_ENGINNER, &CMainDlg::OnBnClickedButtonMainEnginner)
 END_MESSAGE_MAP()
 
 
@@ -1165,21 +1172,105 @@ void CMainDlg::OnBnClickedButtonMainModelLoad()
 		AddLog(_T("[INFO] 일시 정지 중 사용 불가"), 1, m_nUnit);
 		return;
 	}
+	TCHAR szLog[SIZE_OF_1K];
+	CString sData = _T("");
+	sData = m_clGridModel.GetItemText(ModelCurCol, 1);
+	_stprintf_s(szLog, SIZE_OF_1K, _T("[%s] 모델 변경 하시겠습니까?"), sData);
 
+	if (g_ShowMsgModal(_T("확인"), szLog, RGB_COLOR_RED) == false) 
+	{
+		return;
+	}
+	if (SHM_OHC_150_MODEL != sData && SHM_FRONT_100_MODEL != sData)
+	{
+		//설정된 100/150 모델명이 아닙니다.
+
+		_stprintf_s(szLog, SIZE_OF_1K, _T("설정된 [%s / %s] 모델명이 아닙니다."), SHM_FRONT_100_MODEL, SHM_OHC_150_MODEL);
+		AddLog(szLog, 1, 0);
+		return;
+	}
 
 	ModelList.m_nCurrentNo = ModelCurCol;
 
-
 	ModelList.ModelListSave();
-	ModelList.ModelListLoad();
+	ModelList.ModelListLoad();		//<-----경로 변경
 
 	ShowGridData();
+	
+
+
+	ModelList.RecipeModelLoad();
+	g_pCarAABonderDlg->m_clMainDlg.setRecipeComboBox();	//Recipe 콤보박스 갱신
+
+	//Recipe ini Load
+	g_clMesCommunication[m_nUnit].vPPRecipeSpecEquip = g_clMesCommunication[m_nUnit].RecipeIniLoad(g_clMesCommunication[0].m_sMesPPID);
+
+	if (g_clMesCommunication[m_nUnit].vPPRecipeSpecEquip.size() < 1)
+	{
+		_stprintf_s(szLog, SIZE_OF_1K, _T("(%s) RECIPE LOAD FAIL"), g_clMesCommunication[0].m_sMesPPID);
+		g_ShowMsgPopup(_T("ERROR"), szLog, RGB_COLOR_RED);
+		return;
+	}
+	showRecipeGrid();		//레시피 파라미터 갱신
+
+
+
+	
 
 
 	//strLog.Format(_T("[MODEL] %s/%d - Load 완료") , modelList.curModelName , ModelCurCol);
-	TCHAR szLog[SIZE_OF_1K];
+	
 	_stprintf_s(szLog, SIZE_OF_1K, _T("[MODEL] CURRENT MODEL :(%s)"), ModelList.m_szCurrentModel);
 	AddLog(szLog, 0, 0);
+	g_clLaonGrabberWrapper[m_nUnit].CloseDevice();
+	Sleep(100);
+
+	//모델 변경 점 250307
+	//모델별 설정 다시 로드
+	
+
+
+	g_clSysData.sDLoad();
+	g_clSysData.OcOffsetLoad();
+
+	for (int i = 0; i < 1; i++)//MAX_UNIT_COUNT; i++)
+	{
+		//fov resize
+		//순서 1 <--resize 라서 먼저 진행
+		g_clModelData[i].ModelChange_ModelData();
+		g_clTaskWork[i].ModelChange_TaskWork();
+		g_pCarAABonderDlg->m_clVisionStaticCcd[i].ModelChange_Vision();
+		g_clMandoInspLog[i].ModelChange_Mando();
+
+
+		//순서2 바뀌면안됨
+		g_clModelData[i].LoadTeachData(g_clSysData.m_szModelName);
+		g_clModelData[i].Load(g_clSysData.m_szModelName);
+
+		g_clLaonGrabberWrapper[i].UiconfigLoad(INI_RAW_IMAGE);		//pg start
+		g_clLaonGrabberWrapper[i].SelectSensor();
+
+		g_clMarkData[i].LoadData(g_clSysData.m_szModelName);
+
+		g_clTaskWork[i].LoadData();
+		g_clTaskWork[i].PinLoadData();
+
+		g_pCarAABonderDlg->m_clVisionGrabThread[i].SetUnit(i);
+
+		g_clMandoSfrSpec[i].Load();
+		g_clModelData[i].PatternLoad(g_clSysData.m_szModelName);        //패턴 이미지 로드
+		g_clModelData[i].AcmisDataLoad(g_clSysData.m_szModelName);
+		
+
+		g_pCarAABonderDlg->m_clVisionStaticCcd[i].Vision_RoiSet();
+
+
+		g_clPriInsp[i].func_Insp_Firmware_BinFile_Read(false);		//pg start
+	}
+
+	g_clModelFinder.LoadMark(g_clSysData.m_szModelName);
+	g_pCarAABonderDlg->m_clManualDlg.m_clMarkViewDlg.ChangeMarkViewDlg();
+
 }
 
 
@@ -1197,6 +1288,8 @@ void CMainDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 		ShowGridData();
 
 		showRecipeGrid();
+
+		RunModeChange(g_nRunMode);
 	}
 }
 void CMainDlg::OnCbnSelchangeComboRecipeIdVal()
@@ -1391,7 +1484,11 @@ void CMainDlg::OnBnClickedButtonMainRecipeDel()
 		AddLog(_T("[INFO] 일시 정지 중 사용 불가"), 1, m_nUnit);
 		return;
 	}
-
+	if (g_nRunMode == 0)
+	{
+		g_ShowMsgPopup(_T("WARNING"), _T("엔지니어 모드만 접근 가능합니다."), RGB_COLOR_RED);
+		return;
+	}
 
 	//S6F11
 	//Event = Process Program State Changed Report)
@@ -1492,7 +1589,7 @@ void CMainDlg::OnBnClickedButtonMainRecipeLoad()
 
 	//현재 모델 변경해야된다.
 
-	//ini Load
+	//Recipe ini Load
 	g_clMesCommunication[m_nUnit].vPPRecipeSpecEquip = g_clMesCommunication[m_nUnit].RecipeIniLoad(sData);
 
 	if (g_clMesCommunication[m_nUnit].vPPRecipeSpecEquip.size() < 1)
@@ -1685,6 +1782,12 @@ void CMainDlg::OnBnClickedButtonMainControlOfflineReq()
 		return;
 	}
 
+	if (g_nRunMode == 0)
+	{
+		g_ShowMsgPopup(_T("WARNING"), _T("엔지니어 모드만 접근 가능합니다."), RGB_COLOR_RED);
+		return;
+	}
+
 	CString sMsg;
 	sMsg.Format(_T("설비 오프라인 전환하시겠습니까? "));
 
@@ -1725,4 +1828,68 @@ void CMainDlg::OnBnClickedButtonMainControlOnlineRemoteReq()
 	AddLog(_T("[INFO] Online Remote Req"), 0, m_nUnit);
 	g_pCarAABonderDlg->m_clUbiGemDlg.OnBnClickedButtonUbigemCsOnlineRemote();
 	sMsg.Empty();
+}
+
+void CMainDlg::RunModeChange(int nMode)
+{
+	g_nRunMode = nMode;
+	m_clColorButtonMainOp.state = 0;
+	m_clColorButtonMainEn.state = 0;
+		
+	if (nMode == 0)
+	{
+		m_clColorButtonMainOp.state = 1;
+	}
+	else
+	{
+		m_clColorButtonMainEn.state = 1;
+	}
+
+	m_clColorButtonMainOp.Invalidate();
+	m_clColorButtonMainEn.Invalidate();
+}
+void CMainDlg::OnBnClickedButtonMainOp()
+{
+	// TODO: Add your control notification handler code here
+	if (g_ShowMsgModal(_T("확인"), _T("Operation Mode On?"), RGB_COLOR_RED) == false)
+	{
+		return;
+	}
+	RunModeChange(0);
+}
+
+
+void CMainDlg::OnBnClickedButtonMainEnginner()
+{
+	// TODO: Add your control notification handler code here
+
+	CKeyBoardDlg* pDlg = new CKeyBoardDlg(20, true);
+	if (pDlg != NULL)
+	{
+		if (pDlg->DoModal() == IDOK)
+		{
+			if (_tcscmp(g_clSysData.m_szPassword, (TCHAR*)(LPCTSTR)pDlg->GetReturnValue()))
+			{
+				AddLog(_T("비밀번호가 일치하지 않습니다."), 1, m_nUnit);
+				delete pDlg;
+
+				return;
+			}
+		}
+		else
+		{
+			delete pDlg;
+			return;
+		}
+
+		delete pDlg;
+	}
+
+	if (g_ShowMsgModal(_T("확인"), _T("Engineer Mode On?"), RGB_COLOR_RED) == false)
+	{
+		return;
+	}
+
+
+	RunModeChange(1);
 }

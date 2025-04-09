@@ -204,11 +204,17 @@ int CAps_Insp::func_ModelLotCheck(TCHAR *BcrLot)
 	{
 		return -1;
 	}
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	const TCHAR compareStr[] = _T("002");
-#else
-	const TCHAR compareStr[] = _T("001");
-#endif
+	TCHAR compareStr[4];
+
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_tcscpy(compareStr, _T("002"));
+	}
+	else
+	{
+		_tcscpy(compareStr, _T("001"));
+	}
+
 	int nRtn = 0;
 	nRtn = _tcsncmp(&BcrLot[6], compareStr, 3);		//0이면 일치
 	
@@ -877,35 +883,81 @@ bool CAps_Insp::FnShmFastCornerFind(BYTE* ChartRawImage, bool bAutoMode)
 	int offsetY = ((g_clModelData[m_nUnit].m_nHeight / 2) - (g_clTaskWork[m_nUnit].m_clPtCircle[0].y + g_clTaskWork[m_nUnit].m_clPtCircle[1].y + g_clTaskWork[m_nUnit].m_clPtCircle[2].y + g_clTaskWork[m_nUnit].m_clPtCircle[3].y) / 4) * -1;
 
 	// Shi-Tomasi 코너 검출 파라미터 설정
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	//100도는 8개 전부 원형 마크
-	//new 16개 꼭짓점
-	FOV_AREA_CHECK nFovMode[MAX_FOV_FIND_COUNT] = {
-		LT_FOV_PIONT, RT_FOV_PIONT,
-		LT_FOV_PIONT, BR_FOV_PIONT,
-		LT_FOV_PIONT, BR_FOV_PIONT,
-		BL_FOV_PIONT, RT_FOV_PIONT,
-		LT_FOV_PIONT, RT_FOV_PIONT,BL_FOV_PIONT, BR_FOV_PIONT,
-		BR_FOV_PIONT, BL_FOV_PIONT,RT_FOV_PIONT, LT_FOV_PIONT,
-	};
-	int maxCorners = 6;					//검출할 코너의 최대 개수입니다.
-#else
-	//150도는 2개 원형 , 6개 꼭짓점
-	//new 14개 꼭짓점
-	FOV_AREA_CHECK nFovMode[MAX_FOV_FIND_COUNT] = {
-		BL_FOV_PIONT, RT_FOV_PIONT,
-		LT_FOV_PIONT, BR_FOV_PIONT,
-		LT_FOV_PIONT, BR_FOV_PIONT,
-		BL_FOV_PIONT, RT_FOV_PIONT,
-		BL_FOV_PIONT, BR_FOV_PIONT,LT_FOV_PIONT, RT_FOV_PIONT,
-		LT_FOV_PIONT, BR_FOV_PIONT };// , LT_FOV_PIONT, BR_FOV_PIONT
-	int maxCorners = 4;					//검출할 코너의 최대 개수입니다.
-#endif
+	int maxCorners = 0;					//검출할 코너의 최대 개수입니다.
+
+	std::vector<FOV_AREA_CHECK> nFovMode;
+	nFovMode.resize(VEC_FOV_FIND_COUNT);  // 초기 크기 설정
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		nFovMode[0] = LT_FOV_PIONT;
+		nFovMode[1] = RT_FOV_PIONT;
+		nFovMode[2] = LT_FOV_PIONT;
+		nFovMode[3] = BR_FOV_PIONT;
+		nFovMode[4] = LT_FOV_PIONT;
+		nFovMode[5] = BR_FOV_PIONT;
+		nFovMode[6] = BL_FOV_PIONT;
+		nFovMode[7] = RT_FOV_PIONT;
+		nFovMode[8] = LT_FOV_PIONT;
+		nFovMode[9] = RT_FOV_PIONT;
+		nFovMode[10] = BL_FOV_PIONT;
+		nFovMode[11] = BR_FOV_PIONT;
+		nFovMode[12] = BR_FOV_PIONT;
+		nFovMode[13] = BL_FOV_PIONT;
+		nFovMode[14] = RT_FOV_PIONT;
+		nFovMode[15] = LT_FOV_PIONT;
+		maxCorners = 6;					//검출할 코너의 최대 개수입니다.
+	}
+	else
+	{
+		nFovMode[0] = BL_FOV_PIONT;
+		nFovMode[1] = RT_FOV_PIONT;
+		nFovMode[2] = LT_FOV_PIONT;
+		nFovMode[3] = BR_FOV_PIONT;
+		nFovMode[4] = LT_FOV_PIONT;
+		nFovMode[5] = BR_FOV_PIONT;
+		nFovMode[6] = BL_FOV_PIONT;
+		nFovMode[7] = RT_FOV_PIONT;
+		nFovMode[8] = BL_FOV_PIONT;
+		nFovMode[9] = BR_FOV_PIONT;
+		nFovMode[10] = LT_FOV_PIONT;
+		nFovMode[11] = RT_FOV_PIONT;
+		nFovMode[12] = LT_FOV_PIONT;
+		nFovMode[13] = BR_FOV_PIONT;
+		maxCorners = 4;					//검출할 코너의 최대 개수입니다.
+	}
+
+//#if (____MACHINE_NAME == MODEL_FRONT_100)		//ok
+//	//100도는 8개 전부 원형 마크
+//	//new 16개 꼭짓점
+//	FOV_AREA_CHECK nFovMode[MAX_FOV_FIND_COUNT] = {
+//		LT_FOV_PIONT, RT_FOV_PIONT,
+//		LT_FOV_PIONT, BR_FOV_PIONT,
+//		LT_FOV_PIONT, BR_FOV_PIONT,
+//		BL_FOV_PIONT, RT_FOV_PIONT,
+//		LT_FOV_PIONT, RT_FOV_PIONT,BL_FOV_PIONT, BR_FOV_PIONT,
+//		BR_FOV_PIONT, BL_FOV_PIONT,RT_FOV_PIONT, LT_FOV_PIONT
+//	};
+//	maxCorners = 6;					//검출할 코너의 최대 개수입니다.
+//#else
+//	//150도는 2개 원형 , 6개 꼭짓점
+//	//new 14개 꼭짓점
+//	FOV_AREA_CHECK nFovMode[MAX_FOV_FIND_COUNT] = {
+//		BL_FOV_PIONT, RT_FOV_PIONT,
+//		LT_FOV_PIONT, BR_FOV_PIONT,
+//		LT_FOV_PIONT, BR_FOV_PIONT,
+//
+//		BL_FOV_PIONT, RT_FOV_PIONT,
+//		BL_FOV_PIONT, BR_FOV_PIONT,LT_FOV_PIONT, RT_FOV_PIONT,
+//		LT_FOV_PIONT, BR_FOV_PIONT };// , LT_FOV_PIONT, BR_FOV_PIONT
+//	maxCorners = 4;					//검출할 코너의 최대 개수입니다.
+//#endif
 	
 	int nIndex = 0;
 	Mat grayImg;
-	CPoint m_clPtFov[MAX_FOV_COUNT];
+	//CPoint m_clPtFov[MAX_FOV_COUNT];
 
+	std::vector<CPoint> m_clPtFov;
+	m_clPtFov.resize(VEC_FOV_COUNT);  // 초기 크기 설정
 
 
 	double qualityLevel = 0.05;//0.05;			//코너 품질을 평가하는 값입니다. 일반적으로 0과 1 사이의 값을 사용
@@ -919,10 +971,11 @@ bool CAps_Insp::FnShmFastCornerFind(BYTE* ChartRawImage, bool bAutoMode)
 
 
 
-	for (int k = 0; k < MAX_FOV_COUNT; k++)
+	for (int k = 0; k < VEC_FOV_COUNT; k++)
 	{
 		mRoiX = g_clModelData[m_nUnit].m_clSfrInfo.m_clPtFovOffset[k].x + offsetX;
 		mRoiY = g_clModelData[m_nUnit].m_clSfrInfo.m_clPtFovOffset[k].y + offsetY;
+
 		if (mRoiX < 0) mRoiX = 0;
 		if (mRoiY < 0) mRoiY = 0;
 
@@ -965,7 +1018,11 @@ bool CAps_Insp::FnShmFastCornerFind(BYTE* ChartRawImage, bool bAutoMode)
 			}
 			int msize = corners.size();
 			if (msize < 1) msize = 1;
-			CPoint m_clPtCornerTemp[MAX_FOV_FIND_COUNT];
+
+			//CPoint m_clPtCornerTemp[MAX_FOV_FIND_COUNT];
+			std::vector<CPoint> m_clPtCornerTemp;
+			m_clPtCornerTemp.resize(VEC_FOV_FIND_COUNT);  // 초기 크기 설정
+
 			//sort(corners.begin(), corners.end(), [](const Point2f& p1, const Point2f& p2) {
 				//return p1.x < p2.x;
 			//});
@@ -995,7 +1052,7 @@ bool CAps_Insp::FnShmFastCornerFind(BYTE* ChartRawImage, bool bAutoMode)
 					bottomLeft = corners[i];
 				}
 				circle(img_corners, corners[i], 5, Scalar(0, 255, 0), 2, 8, 0);
-				if (i < MAX_FOV_FIND_COUNT)
+				if (i < VEC_FOV_FIND_COUNT)
 				{
 					m_clPtCornerTemp[i].x = corners[i].x;
 					m_clPtCornerTemp[i].y = corners[i].y;
@@ -1187,7 +1244,7 @@ bool CAps_Insp::FnShmCornerFind(BYTE* ChartRawImage, bool bAutoMode)
 
 	int k = 0;
 	int thresh = 245;
-	for (k = 0; k < MAX_FOV_COUNT; k++)
+	for (k = 0; k < VEC_FOV_COUNT; k++)
 	{
 		mRoiX = g_clModelData[m_nUnit].m_clSfrInfo.m_clPtFovOffset[k].x;
 		mRoiY = g_clModelData[m_nUnit].m_clSfrInfo.m_clPtFovOffset[k].y;
@@ -1353,7 +1410,7 @@ bool CAps_Insp::FnShmEdgeFind(BYTE* ChartRawImage, bool bAutoMode)
 	
 
 	int k = 0;
-	for (k = 0; k < MAX_FOV_COUNT; k++)
+	for (k = 0; k < VEC_FOV_COUNT; k++)
 	{
 		mRoiX = g_clModelData[m_nUnit].m_clSfrInfo.m_clPtFovOffset[k].x;
 		mRoiY = g_clModelData[m_nUnit].m_clSfrInfo.m_clPtFovOffset[k].y;
@@ -1424,73 +1481,6 @@ bool CAps_Insp::FnShmEdgeFind(BYTE* ChartRawImage, bool bAutoMode)
 
 
 	
-//#if (____MACHINE_NAME == MODEL_FRONT_100)
-//	minSize = 50;
-//	maxSize = 1000;
-//	xLimit = 0;
-//	yLimit = 0;
-//	boundWidMax = 300;
-//
-//	//top
-//	topStart.x = 0;
-//	topStart.y = 0;
-//	topEnd.x = mRoiWidth;
-//	topEnd.y = 0;
-//	line(binaryImage, topStart, topEnd, white, linewidth);
-//	//bottom
-//	topStart.x = 0;
-//	topStart.y = mRoiHeight - linewidth;
-//	topEnd.x = mRoiWidth;
-//	topEnd.y = mRoiHeight - linewidth;
-//	line(binaryImage, topStart, topEnd, white, linewidth);
-//	//left
-//	topStart.x = 0;
-//	topStart.y = 0;
-//	topEnd.x = 0;
-//	topEnd.y = mRoiHeight;
-//	line(binaryImage, topStart, topEnd, white, linewidth);
-//	//right
-//	topStart.x = mRoiWidth - 1;
-//	topStart.y = 0;
-//	topEnd.x = mRoiWidth - 1;
-//	topEnd.y = mRoiHeight;
-//	line(binaryImage, topStart, topEnd, white, linewidth);
-//#else
-//	minSize = 200;
-//	maxSize = 650;
-//	xLimit = 0;
-//	yLimit = 0;
-//	boundWidMax = 300;
-//
-//
-//	//LT
-//	topStart.x = 200;
-//	topStart.y = 200;//190;
-//	topEnd.x = 400;
-//	topEnd.y = 190;
-//	line(binaryImage, topStart, topEnd, white, linewidth);
-//
-//	//RT
-//	topStart.x = 1550;
-//	topStart.y = 200;
-//	topEnd.x = 1750;
-//	topEnd.y = 200;
-//	line(binaryImage, topStart, topEnd, white, linewidth);
-//	//BL
-//	topStart.x = 200;
-//	topStart.y = 880;//884;
-//	topEnd.x = 400;
-//	topEnd.y = 880;//884;
-//	line(binaryImage, topStart, topEnd, white, linewidth);
-//	//BR
-//	topStart.x = 1550;
-//	topStart.y = 890;
-//	topEnd.x = 1750;
-//	topEnd.y = 890;
-//	line(binaryImage, topStart, topEnd, white, linewidth);
-//#endif
-
-
 	
 #if 1
 	//size_t mcircleSize = 0;
@@ -1677,14 +1667,23 @@ bool CAps_Insp::func_Insp_Shm_Fov_Distortion(BYTE* img, bool bAutoMode)
 	spec.nAlgorithmIndex = FOV_METHOD_SHM_CORNER;
 
 
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	//spec.vParam = { 50.46, 61.65, 91.42, 108.61, 99.66, 55.69, 114.81 };		//100
-	std::vector<double> vParam = { 50.46, 61.65, 91.42, 108.61, 99.66, 55.69, 114.81 };
-#else
-	//spec.vParam = { 82.83, 84.4, 118.11, 122.58, 133.8, 83.8, 145.7 };		//150
-
-	std::vector<double> vParam = { 82.83, 84.4, 118.11, 122.58, 133.8, 83.8, 145.7 };
-#endif
+//#if (____MACHINE_NAME == MODEL_FRONT_100)		//ok
+//	//spec.vParam = { 50.46, 61.65, 91.42, 108.61, 99.66, 55.69, 114.81 };		//100
+//	std::vector<double> vParam = { 50.46, 61.65, 91.42, 108.61, 99.66, 55.69, 114.81 };
+//#else
+//	//spec.vParam = { 82.83, 84.4, 118.11, 122.58, 133.8, 83.8, 145.7 };		//150
+//
+//	std::vector<double> vParam = { 82.83, 84.4, 118.11, 122.58, 133.8, 83.8, 145.7 };
+//#endif
+	std::vector<double> vParam;
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		vParam = { 50.46, 61.65, 91.42, 108.61, 99.66, 55.69, 114.81 };
+	}
+	else
+	{
+		vParam = { 82.83, 84.4, 118.11, 122.58, 133.8, 83.8, 145.7 };
+	}
 	spec.pVecParamData = vParam.data();
 	spec.nVecParamSize = vParam.size();
 
@@ -1700,18 +1699,29 @@ bool CAps_Insp::func_Insp_Shm_Fov_Distortion(BYTE* img, bool bAutoMode)
 	spec.nMaxROIBoxSize = 0;
 
 
-	std::vector<POINT> vMark(MAX_FOV_FIND_COUNT);
+	std::vector<POINT> vMark(VEC_FOV_FIND_COUNT);
 
+	std::vector<int> forIndex;
+//#if (____MACHINE_NAME == MODEL_FRONT_100)		//ok
+//
+//	//int forIndex[MAX_FOV_FIND_COUNT] = { 1,2,5,6,0,3,4,7,8,9,10,11,12,13,14,15 };
+//	forIndex = { 1,2,5,6,0,3,4,7,8,9,10,11,12,13,14,15 };
+//#else
+//	int forIndex[MAX_FOV_FIND_COUNT] = { 1,2,5,6,0,3,4,7,12,13,8,9,10,11 };
+//	forIndex = { 1,2,5,6,0,3,4,7,12,13,8,9,10,11 };
+//#endif
 
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-
-	int forIndex[MAX_FOV_FIND_COUNT] = { 1,2,5,6,0,3,4,7,8,9,10,11,12,13,14,15 };
-#else
-	int forIndex[MAX_FOV_FIND_COUNT] = { 1,2,5,6,0,3,4,7,12,13,8,9,10,11 };
-#endif
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		forIndex = { 1,2,5,6,0,3,4,7,8,9,10,11,12,13,14,15 };
+	}
+	else
+	{
+		forIndex = { 1,2,5,6,0,3,4,7,12,13,8,9,10,11 };
+	}
 
 	int cnt = 0;
-	for (i = 0; i < MAX_FOV_FIND_COUNT; i++)
+	for (i = 0; i < VEC_FOV_FIND_COUNT; i++)
 	{
 		cnt = forIndex[i];
 
@@ -4283,11 +4293,21 @@ bool CAps_Insp::func_Insp_FirmwareVerify(bool bAutoMode)
 	SYSTEMTIME stSysTime;
 	::GetLocalTime(&stSysTime);
 
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-	const TCHAR pszModel[] = _T("Front100");
-#else
-	const TCHAR pszModel[] = _T("Ohc150");
-#endif
+//#if (____MACHINE_NAME == MODEL_FRONT_100)		//ok
+//	const TCHAR pszModel[] = _T("Front100");
+//#else
+//	const TCHAR pszModel[] = _T("Ohc150");
+//#endif
+	TCHAR pszModel[10];
+
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_tcscpy(pszModel, _T("Front100"));
+	}
+	else
+	{
+		_tcscpy(pszModel, _T("Ohc150"));
+	}
 
 
 	_stprintf_s(szPath, SIZE_OF_1K, _T("%s"), BASE_DUMP_DIR);
@@ -4309,12 +4329,21 @@ bool CAps_Insp::func_Insp_FirmwareVerify(bool bAutoMode)
 	}
 
 
-#if (____MACHINE_NAME ==  MODEL_FRONT_100)
-	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\FlashData_%02d%02d%02d_%s_100.bin"), szPath, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond, g_clTaskWork[m_nUnit].m_szLotID);
-#else
-	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\FlashData_%02d%02d%02d_%s_150.bin"), szPath, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond, g_clTaskWork[m_nUnit].m_szLotID);
+//#if (____MACHINE_NAME ==  MODEL_FRONT_100)		//ok
+//	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\FlashData_%02d%02d%02d_%s_100.bin"), szPath, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond, g_clTaskWork[m_nUnit].m_szLotID);
+//#else
+//	_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\FlashData_%02d%02d%02d_%s_150.bin"), szPath, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond, g_clTaskWork[m_nUnit].m_szLotID);
+//
+//#endif
 
-#endif
+	if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+	{
+		_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\FlashData_%02d%02d%02d_%s_100.bin"), szPath, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond, g_clTaskWork[m_nUnit].m_szLotID);
+	}
+	else
+	{
+		_stprintf_s(szFilePath, SIZE_OF_1K, _T("%s\\FlashData_%02d%02d%02d_%s_150.bin"), szPath, stSysTime.wHour, stSysTime.wMinute, stSysTime.wSecond, g_clTaskWork[m_nUnit].m_szLotID);
+	}
 
 	
 	ofstream output(szFilePath, ios::out | ios::binary);
@@ -5428,61 +5457,122 @@ bool CAps_Insp::func_Insp_LightTest(int mLightIndex, bool bAutoMode)
 	{
 		//chart RGB Light
 		dRoiCount = 8;
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-		//Top Chart LT
-		m_clPtBrightPos[0].x = 610;
-		m_clPtBrightPos[0].y = 260;
-		//Top Chart LB
-		m_clPtBrightPos[1].x = 610;
-		m_clPtBrightPos[1].y = 800;
-		//Top Chart RB
-		m_clPtBrightPos[2].x = 1320;
-		m_clPtBrightPos[2].y = 800;
-		//Top Chart RT
-		m_clPtBrightPos[3].x = 1320;
-		m_clPtBrightPos[3].y = 260;
-		//
-		//
-		//Side Chart LT
-		m_clPtBrightPos[4].x = 150;
-		m_clPtBrightPos[4].y = 240;
-		//Side Chart LB
-		m_clPtBrightPos[5].x = 150;
-		m_clPtBrightPos[5].y = 850;
-		//Side Chart RT
-		m_clPtBrightPos[6].x = 1750;
-		m_clPtBrightPos[6].y = 240;
-		//Side Chart RB
-		m_clPtBrightPos[7].x = 1750;
-		m_clPtBrightPos[7].y = 850;
-#else
-		//Top Chart LT
-		m_clPtBrightPos[0].x = 736;
-		m_clPtBrightPos[0].y = 400;
-		//Top Chart LB
-		m_clPtBrightPos[1].x = 736;
-		m_clPtBrightPos[1].y = 705;
-		//Top Chart RB
-		m_clPtBrightPos[2].x = 1170;
-		m_clPtBrightPos[2].y = 705;
-		//Top Chart RT
-		m_clPtBrightPos[3].x = 1170;
-		m_clPtBrightPos[3].y = 400;
-		//
-		//
-		//Side Chart LT
-		m_clPtBrightPos[4].x = 380;
-		m_clPtBrightPos[4].y = 280;
-		//Side Chart LB
-		m_clPtBrightPos[5].x = 380;
-		m_clPtBrightPos[5].y = 820;
-		//Side Chart RT
-		m_clPtBrightPos[6].x = 1540;
-		m_clPtBrightPos[6].y = 280;
-		//Side Chart RB
-		m_clPtBrightPos[7].x = 1540;
-		m_clPtBrightPos[7].y = 820;
-#endif
+//#if (____MACHINE_NAME == MODEL_FRONT_100)			//ok
+//		//Top Chart LT
+//		m_clPtBrightPos[0].x = 610;
+//		m_clPtBrightPos[0].y = 260;
+//		//Top Chart LB
+//		m_clPtBrightPos[1].x = 610;
+//		m_clPtBrightPos[1].y = 800;
+//		//Top Chart RB
+//		m_clPtBrightPos[2].x = 1320;
+//		m_clPtBrightPos[2].y = 800;
+//		//Top Chart RT
+//		m_clPtBrightPos[3].x = 1320;
+//		m_clPtBrightPos[3].y = 260;
+//		//
+//		//
+//		//Side Chart LT
+//		m_clPtBrightPos[4].x = 150;
+//		m_clPtBrightPos[4].y = 240;
+//		//Side Chart LB
+//		m_clPtBrightPos[5].x = 150;
+//		m_clPtBrightPos[5].y = 850;
+//		//Side Chart RT
+//		m_clPtBrightPos[6].x = 1750;
+//		m_clPtBrightPos[6].y = 240;
+//		//Side Chart RB
+//		m_clPtBrightPos[7].x = 1750;
+//		m_clPtBrightPos[7].y = 850;
+//#else
+//		//Top Chart LT
+//		m_clPtBrightPos[0].x = 736;
+//		m_clPtBrightPos[0].y = 400;
+//		//Top Chart LB
+//		m_clPtBrightPos[1].x = 736;
+//		m_clPtBrightPos[1].y = 705;
+//		//Top Chart RB
+//		m_clPtBrightPos[2].x = 1170;
+//		m_clPtBrightPos[2].y = 705;
+//		//Top Chart RT
+//		m_clPtBrightPos[3].x = 1170;
+//		m_clPtBrightPos[3].y = 400;
+//		//
+//		//
+//		//Side Chart LT
+//		m_clPtBrightPos[4].x = 380;
+//		m_clPtBrightPos[4].y = 280;
+//		//Side Chart LB
+//		m_clPtBrightPos[5].x = 380;
+//		m_clPtBrightPos[5].y = 820;
+//		//Side Chart RT
+//		m_clPtBrightPos[6].x = 1540;
+//		m_clPtBrightPos[6].y = 280;
+//		//Side Chart RB
+//		m_clPtBrightPos[7].x = 1540;
+//		m_clPtBrightPos[7].y = 820;
+//#endif
+
+		if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+		{
+			//Top Chart LT
+			m_clPtBrightPos[0].x = 610;
+			m_clPtBrightPos[0].y = 260;
+			//Top Chart LB
+			m_clPtBrightPos[1].x = 610;
+			m_clPtBrightPos[1].y = 800;
+			//Top Chart RB
+			m_clPtBrightPos[2].x = 1320;
+			m_clPtBrightPos[2].y = 800;
+			//Top Chart RT
+			m_clPtBrightPos[3].x = 1320;
+			m_clPtBrightPos[3].y = 260;
+			//
+			//
+			//Side Chart LT
+			m_clPtBrightPos[4].x = 150;
+			m_clPtBrightPos[4].y = 240;
+			//Side Chart LB
+			m_clPtBrightPos[5].x = 150;
+			m_clPtBrightPos[5].y = 850;
+			//Side Chart RT
+			m_clPtBrightPos[6].x = 1750;
+			m_clPtBrightPos[6].y = 240;
+			//Side Chart RB
+			m_clPtBrightPos[7].x = 1750;
+			m_clPtBrightPos[7].y = 850;
+		}
+		else
+		{
+			//Top Chart LT
+			m_clPtBrightPos[0].x = 736;
+			m_clPtBrightPos[0].y = 400;
+			//Top Chart LB
+			m_clPtBrightPos[1].x = 736;
+			m_clPtBrightPos[1].y = 705;
+			//Top Chart RB
+			m_clPtBrightPos[2].x = 1170;
+			m_clPtBrightPos[2].y = 705;
+			//Top Chart RT
+			m_clPtBrightPos[3].x = 1170;
+			m_clPtBrightPos[3].y = 400;
+			//
+			//
+			//Side Chart LT
+			m_clPtBrightPos[4].x = 380;
+			m_clPtBrightPos[4].y = 280;
+			//Side Chart LB
+			m_clPtBrightPos[5].x = 380;
+			m_clPtBrightPos[5].y = 820;
+			//Side Chart RT
+			m_clPtBrightPos[6].x = 1540;
+			m_clPtBrightPos[6].y = 280;
+			//Side Chart RB
+			m_clPtBrightPos[7].x = 1540;
+			m_clPtBrightPos[7].y = 820;
+		}
+
+
 	}
 	else
 	{

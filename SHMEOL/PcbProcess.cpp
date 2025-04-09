@@ -1538,7 +1538,6 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 	case 30700:	//ok
 		if (g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start == 0) 
 		{
-			//g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start = -1;
 			//Recv LGIT_LOT_START
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Lot Id Start Recv [STEP : %d]"), nStep);
 			AddLog(szLog, 0, m_nUnit);
@@ -1707,6 +1706,8 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 			g_clTaskWork[m_nUnit].bRecv_S6F12_PP_Selected = -1;
 			g_clTaskWork[m_nUnit].bRecv_S7F25_Formatted_Process_Program = -1;		//<--미리 초기화
 			g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start = -1;		//미리 초기화
+			g_clTaskWork[m_nUnit].bRecv_S2F49_PP_UpLoad_Confirm = -1;
+
 
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PP-Selected Report [STEP : %d]"), nStep);
 			AddLog(szLog, 0, m_nUnit);
@@ -1772,9 +1773,30 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Formatted Process Program Request [STEP : %d]"), nStep);
 			AddLog(szLog, 0, m_nUnit);
 			//수신 대기 S7F25 - Formatted Process Program Request
-			g_clTaskWork[m_nUnit].bRecv_S2F49_PP_UpLoad_Confirm = -1;
+			
 			g_clTaskWork[m_nUnit].m_dwPcbTickCount = GetTickCount();
 			nRetStep = 31200;
+		}
+		else if (g_clTaskWork[m_nUnit].bRecv_S2F49_PP_UpLoad_Confirm == 1)	//LGIT_PP_UPLOAD_FAIL 확인필요 250112
+		{
+			//LGIT_PP_UPLOAD_FAIL 오고 S2F50보낸뒤,  NG (Recipe Body Cancel by Host)
+			g_clTaskWork[m_nUnit].bRecv_S2F49_PP_UpLoad_Confirm = -1;
+
+			_stprintf_s(szLog, SIZE_OF_1K, _T("RECIPE ID:%s \nLGIT_PP_UPLOAD_FAIL\nCode :%s\nText:%s\n재시도 하시겠습니까?"),
+				g_clMesCommunication[m_nUnit].m_sRecipeId, g_clMesCommunication[m_nUnit].m_sErcmdCode, g_clMesCommunication[m_nUnit].m_sErcmdText);
+			if (g_ShowMsgModal(_T("[INFO]"), szLog, RGB_COLOR_BLUE, _T("RETRY"), _T("PAUSE")) == true)
+			{
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] PP Upload Fail Retry [STEP : %d]"), nStep);
+				AddLog(szLog, 0, m_nUnit);
+				nRetStep = 30600;
+			}
+			else
+			{
+				nRetStep = -30600;
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO](%s) PP Upload Fail Pause [STEP : %d]"), g_clTaskWork[m_nUnit].m_szChipID, nStep);
+				AddLog(szLog, 1, m_nUnit, true);
+				break;
+			}
 		}
 		else if (g_clTaskWork[m_nUnit].bRecv_S2F49_LG_Lot_Start == 0)
 		{
@@ -2164,22 +2186,30 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 		break;
 	case 32750:		//jump sTep Offline
 		// 바코드값 수신
+#if 0			//바코드 체크 삭제 조현선 선임 요청 250401
 		if (g_clPriInsp[m_nUnit].func_ModelLotCheck(g_clTaskWork[m_nUnit].m_szChipID) == 0)
 		{
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO]BCR 확인 완료:%s[002]"), g_clTaskWork[m_nUnit].m_szChipID);
-#else
-			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO]BCR 확인 완료:%s[001]"), g_clTaskWork[m_nUnit].m_szChipID);
-#endif
+			if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+			{
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO]BCR 확인 완료:%s[002]"), g_clTaskWork[m_nUnit].m_szChipID);
+			}
+			else
+			{
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO]BCR 확인 완료:%s[001]"), g_clTaskWork[m_nUnit].m_szChipID);
+			}
 			AddLog(szLog, 0, m_nUnit);
 		}
 		else
 		{
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-			_stprintf_s(szLog, SIZE_OF_1K, _T("[BCR] 100H 프로그램입니다. 모델 확인 바랍니다. (002)\n계속 진행하시겠습니까?"));
-#else
-			_stprintf_s(szLog, SIZE_OF_1K, _T("[BCR] 150H 프로그램입니다. 모델 확인 바랍니다. (001)\n계속 진행하시겠습니까?"));
-#endif
+			if (_tcscmp(ModelList.m_szCurrentModel, SHM_FRONT_100_MODEL) == 0)
+			{
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[BCR] 100H 프로그램입니다. 모델 확인 바랍니다. (002)\n계속 진행하시겠습니까?"));
+			}
+			else
+			{
+				_stprintf_s(szLog, SIZE_OF_1K, _T("[BCR] 150H 프로그램입니다. 모델 확인 바랍니다. (001)\n계속 진행하시겠습니까?"));
+			}
+
 			if (g_ShowMsgModal(_T("확인"), szLog, RGB_COLOR_BLUE) == false)
 			{
 				g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1047);
@@ -2194,7 +2224,7 @@ int CPcbProcess::Auto_M_PCBLoading(int nStep)
 			_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO]BCR CHECK PASS"));
 			AddLog(szLog, 0, m_nUnit);
 		}
-		
+#endif
 
 		g_pCarAABonderDlg->ShowBarcode(m_nUnit);
 		g_clModelData[m_nUnit].LotDataSave();
@@ -4206,17 +4236,21 @@ int CPcbProcess::AutoChartInsp(int nStep)
 		{
 			thcount = 0.8;
 		}
-#ifdef KUMI_TEST_MODE
-#if (____MACHINE_NAME == MODEL_OHC_150)
-		//100도 제품 180도 회전으로 로테이션 반대
-		///thcount *= -1;
-#endif
-#else
-#if (____MACHINE_NAME == MODEL_FRONT_100)
-		//100도 제품 180도 회전으로 로테이션 반대
-		//thcount *= -1;
-#endif
-#endif
+//#ifdef KUMI_TEST_MODE
+//#if (____MACHINE_NAME == MODEL_OHC_150)		//ok
+//		//100도 제품 180도 회전으로 로테이션 반대
+//		///thcount *= -1;
+//#endif
+//#else
+//#if (____MACHINE_NAME == MODEL_FRONT_100)		//ok 
+//		//100도 제품 180도 회전으로 로테이션 반대
+//		//thcount *= -1;
+//#endif
+//#endif
+
+
+
+
 		if (g_clMotorSet.MovePcbTMotor(m_nUnit, g_clTaskWork[m_nUnit].m_dImgShiftTh * thcount, true) == false)
 		{
 			g_pCarAABonderDlg->m_clUbiGemDlg.AlarmSendFn(1071);
