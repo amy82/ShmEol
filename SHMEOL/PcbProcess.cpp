@@ -4818,6 +4818,7 @@ int CPcbProcess::AutoEOLFinalSFR(int nStep)
 		AddLog(szLog, 0, m_nUnit);
 		nRetStep = 114200;
 		break;
+
 	case 114200:
 		_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Firmware Verify Ω√¿€ [STEP : %d]"), nStep);
 		AddLog(szLog, 0, m_nUnit);

@@ -7,7 +7,7 @@
 #define __GLOBALDEFINE_H__
 
 
-#define         NORINDA_MODE
+//#define         NORINDA_MODE
 //
 //
 //
@@ -32,7 +32,8 @@
 
 //YMEAN_N_MAX_RECURSIVE_COUNT  레시피 이름 수정 YMEAN_MAX_RECURSIVE_COUNT
 //====================================================================================================
-#define				VER_STR										_T("250409_1")			//Flashing 기능 추가 (bcr과 비교) git1
+#define				VER_STR										_T("250411_1")			//검증 , 배포
+//#define				VER_STR										_T("250409_1")			//Flashing 기능 추가 (bcr과 비교) git1
 //#define				VER_STR										_T("250401_1")				////바코드 체크 삭제 조현선 선임 요청 250401 , 모델 변경시 마크 변경안돼서 수정 
 //spec load 버튼 삭제
 //#define				VER_STR										_T("250325_1")				//bRecv_S2F49_PP_UpLoad_Confirm 하나더 추가

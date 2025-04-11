@@ -280,6 +280,15 @@ CMesCommunication::CMesCommunication()
 	{
 		_stprintf_s(vMesModelList[i], SIZE_OF_100BYTE, _T("AABBCC"));
 	}
+	_stprintf_s(m_sMesCustomer_PN, SIZE_OF_100BYTE, _T(""));
+	_stprintf_s(m_sMesCustomer_SW_PN, SIZE_OF_100BYTE, _T(""));
+	_stprintf_s(m_sMesLGIT_PN, SIZE_OF_100BYTE, _T(""));
+	_stprintf_s(m_sHW_VER, SIZE_OF_100BYTE, _T(""));
+	_stprintf_s(m_sMesDATE, SIZE_OF_100BYTE, _T(""));
+	_stprintf_s(m_sMesSN, SIZE_OF_100BYTE, _T(""));
+
+
+
 	m_sMesOperatorID.Format(_T("00000001"));
 	m_sEquipmentID.Format(_T(""));
 	m_sEquipmentName.Format(_T(""));//228.43
@@ -1333,7 +1342,7 @@ bool CMesCommunication::g_FinalEolLog(int nUnit)
 
 			_ftprintf_s(fp, _T("[F/W] ORIGINAL FILE, [F/W] JUDGE,"));
 			_ftprintf_s(fp, _T("[Laser] TiltX, [Laser] TiltY,"));
-
+			_ftprintf_s(fp, _T("[FLASHING] CUSTOMER_PN,[FLASHING] CUSTOMER_SW_PN,[FLASHING] LGIT_PN,[FLASHING] HW_VER,[FLASHING] DATE,[FLASHING] SN,"));
 			_ftprintf_s(fp, _T("NG LIST,JUDGE,"));
 			_ftprintf_s(fp, _T("\n"));
 			fclose(fp);
@@ -1501,6 +1510,22 @@ bool CMesCommunication::g_FinalEolLog(int nUnit)
 
 		g_clMesCommunication[nUnit].vMesApdData.push_back(to_string(g_clMesCommunication[nUnit].m_dMesLaserTilt[0]));
 		g_clMesCommunication[nUnit].vMesApdData.push_back(to_string(g_clMesCommunication[nUnit].m_dMesLaserTilt[1]));
+
+
+		_ftprintf_s(fp, _T("%s,"), g_clMesCommunication[nUnit].m_sMesCustomer_PN);
+		_ftprintf_s(fp, _T("%s,"), g_clMesCommunication[nUnit].m_sMesCustomer_SW_PN);
+		_ftprintf_s(fp, _T("%s,"), g_clMesCommunication[nUnit].m_sMesLGIT_PN);
+		_ftprintf_s(fp, _T("%s,"), g_clMesCommunication[nUnit].m_sHW_VER);
+		_ftprintf_s(fp, _T("%s,"), g_clMesCommunication[nUnit].m_sMesDATE);
+		_ftprintf_s(fp, _T("%s,"), g_clMesCommunication[nUnit].m_sMesSN);
+
+
+		g_clMesCommunication[nUnit].vMesApdData.push_back(g_clMesCommunication[nUnit].m_sMesCustomer_PN);
+		g_clMesCommunication[nUnit].vMesApdData.push_back(g_clMesCommunication[nUnit].m_sMesCustomer_SW_PN);
+		g_clMesCommunication[nUnit].vMesApdData.push_back(g_clMesCommunication[nUnit].m_sMesLGIT_PN);
+		g_clMesCommunication[nUnit].vMesApdData.push_back(g_clMesCommunication[nUnit].m_sHW_VER);
+		g_clMesCommunication[nUnit].vMesApdData.push_back(g_clMesCommunication[nUnit].m_sMesDATE);
+		g_clMesCommunication[nUnit].vMesApdData.push_back(g_clMesCommunication[nUnit].m_sMesSN);
 		//
 		//
 		if (g_clMesCommunication[nUnit].m_nMesFinalResult == 1)		fprintf_s(fp, "%s ,OK,", g_clMandoInspLog[nUnit].m_sNGList);

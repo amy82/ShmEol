@@ -6466,7 +6466,11 @@ void CAutoInspDlg::OnStnClickedStaticMainVersion1()
 	_stprintf_s(g_clTaskWork[0].m_szChipID, SIZE_OF_100BYTE, _T("8A6253NAA011M18A6283NAA510M1ACD02C001XA012412200001")); //bcr 초기화
 	_stprintf_s(g_clTaskWork[0].m_szChipID, SIZE_OF_100BYTE, _T("8A6253NAA011M18A6283NAA510M1ACD02C001XA002413200002")); //bcr 초기화
 
+	m_clColorStaticBcrVal[0].SetWindowText(g_clTaskWork[0].m_szChipID);
+	m_clColorStaticBcrVal[0].Invalidate();
+
 	int opCallType = 0;
+	g_clMesCommunication[0].g_FinalEolLog(0);
 	/*_tcsncpy_s(Customer_PN, g_clTaskWork[0].m_szChipID, 14);
 
 	unsigned char CustomerBuf[14]; 

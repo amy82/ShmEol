@@ -4141,26 +4141,22 @@ bool CAps_Insp::func_Insp_Flashing(bool bAutoMode)
 	TCHAR DATE[7];             // 6 + 1
 	TCHAR SN[5];               // 4 + 1
 
-	TCHAR e_Customer_PN[15];     // 14 + 1
-	TCHAR e_Customer_SW_PN[15];  // 14 + 1
-	TCHAR e_LGIT_PN[11];         // 10 + 1
-	TCHAR e_HW_VER[4];           // 3 + 1
-	TCHAR e_DATE[7];             // 6 + 1
-	TCHAR e_SN[5];               // 4 + 1
+	//TCHAR e_Customer_PN[15];     // 14 + 1
+	//TCHAR e_Customer_SW_PN[15];  // 14 + 1
+	//TCHAR e_LGIT_PN[11];         // 10 + 1
+	//TCHAR e_HW_VER[4];           // 3 + 1
+	//TCHAR e_DATE[7];             // 6 + 1
+	//TCHAR e_SN[5];               // 4 + 1
 
-	strncpy_s(e_Customer_PN, (const char*)(readFlashingData), 14);
-	strncpy_s(e_Customer_SW_PN, (const char*)(readFlashingData+14), 14);
-	strncpy_s(e_LGIT_PN, (const char*)(readFlashingData+28), 10);
-	strncpy_s(e_HW_VER, (const char*)(readFlashingData+38), 3);
-	strncpy_s(e_DATE, (const char*)(readFlashingData+41), 6);
-	strncpy_s(e_SN, (const char*)(readFlashingData+47), 4);
+	strncpy_s(g_clMesCommunication[m_nUnit].m_sMesCustomer_PN, (const char*)(readFlashingData), 14);
+	strncpy_s(g_clMesCommunication[m_nUnit].m_sMesCustomer_SW_PN, (const char*)(readFlashingData+14), 14);
+	strncpy_s(g_clMesCommunication[m_nUnit].m_sMesLGIT_PN, (const char*)(readFlashingData+28), 10);
+	strncpy_s(g_clMesCommunication[m_nUnit].m_sHW_VER, (const char*)(readFlashingData+38), 3);
+	strncpy_s(g_clMesCommunication[m_nUnit].m_sMesDATE, (const char*)(readFlashingData+41), 6);
+	strncpy_s(g_clMesCommunication[m_nUnit].m_sMesSN, (const char*)(readFlashingData+47), 4);
 
-	g_clMesCommunication[m_nUnit].vMesApdData.push_back(e_Customer_PN);
-	g_clMesCommunication[m_nUnit].vMesApdData.push_back(e_Customer_SW_PN);
-	g_clMesCommunication[m_nUnit].vMesApdData.push_back(e_LGIT_PN);
-	g_clMesCommunication[m_nUnit].vMesApdData.push_back(e_HW_VER);
-	g_clMesCommunication[m_nUnit].vMesApdData.push_back(e_DATE);
-	g_clMesCommunication[m_nUnit].vMesApdData.push_back(e_SN);
+
+	
 	//
 
 	_tcsncpy_s(Customer_PN, g_clTaskWork[m_nUnit].m_szChipID, 14);
@@ -4175,73 +4171,73 @@ bool CAps_Insp::func_Insp_Flashing(bool bAutoMode)
 	isEqual = (memcmp(Customer_PN, readFlashingData, 14) == 0);
 	if (isEqual)
 	{
-		_stprintf_s(szLog, SIZE_OF_1K, _T("[Customer_PN] Verify Ok [bcr:%s / e:%s]"), Customer_PN, e_Customer_PN);
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[Customer_PN] Verify Ok [bcr:%s / e:%s]"), Customer_PN, g_clMesCommunication[m_nUnit].m_sMesCustomer_PN);
 		AddLog(szLog, 0, m_nUnit);
 	}
 	else
 	{
 		bFlashingRtn = false;
-		_stprintf_s(szLog, SIZE_OF_1K, _T("[Customer_PN] Verify Fail [bcr:%s / e:%s]"), Customer_PN, e_Customer_PN);
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[Customer_PN] Verify Fail [bcr:%s / e:%s]"), Customer_PN, g_clMesCommunication[m_nUnit].m_sMesCustomer_PN);
 		AddLog(szLog, 0, m_nUnit);
 	}
 	isEqual = (memcmp(Customer_SW_PN, readFlashingData + 14, 14) == 0);
 	if (isEqual)
 	{
-		_stprintf_s(szLog, SIZE_OF_1K, _T("[Customer_SW_PN] Verify Ok [bcr:%s / e:%s]"), Customer_SW_PN, e_Customer_SW_PN);
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[Customer_SW_PN] Verify Ok [bcr:%s / e:%s]"), Customer_SW_PN, g_clMesCommunication[m_nUnit].m_sMesCustomer_SW_PN);
 		AddLog(szLog, 0, m_nUnit);
 	}
 	else
 	{
 		bFlashingRtn = false;
-		_stprintf_s(szLog, SIZE_OF_1K, _T("[Customer_SW_PN] Verify Fail [bcr:%s / e:%s]"), Customer_SW_PN, e_Customer_SW_PN);
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[Customer_SW_PN] Verify Fail [bcr:%s / e:%s]"), Customer_SW_PN, g_clMesCommunication[m_nUnit].m_sMesCustomer_SW_PN);
 		AddLog(szLog, 0, m_nUnit);
 	}
 	isEqual = (memcmp(LGIT_PN, readFlashingData + 28, 10) == 0);
 	if (isEqual)
 	{
-		_stprintf_s(szLog, SIZE_OF_1K, _T("[LGIT_PN] Verify Ok [bcr:%s / e:%s]"), LGIT_PN, e_LGIT_PN);
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[LGIT_PN] Verify Ok [bcr:%s / e:%s]"), LGIT_PN, g_clMesCommunication[m_nUnit].m_sMesLGIT_PN);
 		AddLog(szLog, 0, m_nUnit);
 	}
 	else
 	{
 		bFlashingRtn = false;
-		_stprintf_s(szLog, SIZE_OF_1K, _T("[LGIT_PN] Verify Fail [bcr:%s / e:%s]"), LGIT_PN, e_LGIT_PN);
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[LGIT_PN] Verify Fail [bcr:%s / e:%s]"), LGIT_PN, g_clMesCommunication[m_nUnit].m_sMesLGIT_PN);
 		AddLog(szLog, 0, m_nUnit);
 	}
 	isEqual = (memcmp(HW_VER, readFlashingData + 38, 3) == 0);
 	if (isEqual)
 	{
-		_stprintf_s(szLog, SIZE_OF_1K, _T("[HW_VER] Verify Ok [bcr:%s / e:%s]"), HW_VER, e_HW_VER);
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[HW_VER] Verify Ok [bcr:%s / e:%s]"), HW_VER, g_clMesCommunication[m_nUnit].m_sHW_VER);
 		AddLog(szLog, 0, m_nUnit);
 	}
 	else
 	{
 		bFlashingRtn = false;
-		_stprintf_s(szLog, SIZE_OF_1K, _T("[HW_VER] Verify Fail [bcr:%s / e:%s]"), HW_VER, e_HW_VER);
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[HW_VER] Verify Fail [bcr:%s / e:%s]"), HW_VER, g_clMesCommunication[m_nUnit].m_sHW_VER);
 		AddLog(szLog, 0, m_nUnit);
 	}
 	isEqual = (memcmp(DATE, readFlashingData + 41, 6) == 0);
 	if (isEqual)
 	{
-		_stprintf_s(szLog, SIZE_OF_1K, _T("[DATE] Verify Ok [bcr:%s / e:%s]"), DATE, e_DATE);
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[DATE] Verify Ok [bcr:%s / e:%s]"), DATE, g_clMesCommunication[m_nUnit].m_sMesDATE);
 		AddLog(szLog, 0, m_nUnit);
 	}
 	else
 	{
 		bFlashingRtn = false;
-		_stprintf_s(szLog, SIZE_OF_1K, _T("[DATE] Verify Fail [bcr:%s / e:%s]"), DATE, e_DATE);
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[DATE] Verify Fail [bcr:%s / e:%s]"), DATE, g_clMesCommunication[m_nUnit].m_sMesDATE);
 		AddLog(szLog, 0, m_nUnit);
 	}
 	isEqual = (memcmp(SN, readFlashingData + 47, 4) == 0);
 	if (isEqual)
 	{
-		_stprintf_s(szLog, SIZE_OF_1K, _T("[SN] Verify Ok [bcr:%s / e:%s]"), SN, e_SN);
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[SN] Verify Ok [bcr:%s / e:%s]"), SN, g_clMesCommunication[m_nUnit].m_sMesSN);
 		AddLog(szLog, 0, m_nUnit);
 	}
 	else
 	{
 		bFlashingRtn = false;
-		_stprintf_s(szLog, SIZE_OF_1K, _T("[SN] Verify Fail [bcr:%s / e:%s]"), SN, e_SN);
+		_stprintf_s(szLog, SIZE_OF_1K, _T("[SN] Verify Fail [bcr:%s / e:%s]"), SN, g_clMesCommunication[m_nUnit].m_sMesSN);
 		AddLog(szLog, 0, m_nUnit);
 	}
 

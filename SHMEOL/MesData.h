@@ -304,6 +304,19 @@ public:
 	TCHAR m_sMesI2cSensorID[SIZE_OF_100BYTE];
 	int		m_nMesI2CResult;
 
+
+
+	TCHAR m_sMesCustomer_PN[SIZE_OF_100BYTE];
+	TCHAR m_sMesCustomer_SW_PN[SIZE_OF_100BYTE];
+	TCHAR m_sMesLGIT_PN[SIZE_OF_100BYTE];
+	TCHAR m_sHW_VER[SIZE_OF_100BYTE];
+	TCHAR m_sMesDATE[SIZE_OF_100BYTE];
+	TCHAR m_sMesSN[SIZE_OF_100BYTE];
+
+
+
+
+
 	double	m_dMesShading65FC[2];
 	double	m_dMesShading85FC[2];
 	CString m_sMesI2C;					// I2C
