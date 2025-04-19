@@ -32,7 +32,7 @@
 
 //YMEAN_N_MAX_RECURSIVE_COUNT  레시피 이름 수정 YMEAN_MAX_RECURSIVE_COUNT
 //====================================================================================================
-#define				VER_STR										_T("250419_1")				//hp 노트북 이동 2
+#define				VER_STR										_T("250419_1")				//hp 노트북 이동 2 3
 //#define				VER_STR										_T("250411_1")			//검증 , 배포
 //#define				VER_STR										_T("250409_1")			//Flashing 기능 추가 (bcr과 비교) git1
 //#define				VER_STR										_T("250401_1")				////바코드 체크 삭제 조현선 선임 요청 250401 , 모델 변경시 마크 변경안돼서 수정 
