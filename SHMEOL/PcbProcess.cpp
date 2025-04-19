@@ -4809,7 +4809,7 @@ int CPcbProcess::AutoEOLFinalSFR(int nStep)
 		break;
 	case 114100:
 
-		_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Firmware Verify 시작 [STEP : %d]"), nStep);
+		/*_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Firmware Verify 시작 [STEP : %d]"), nStep);
 		AddLog(szLog, 0, m_nUnit);
 
 		g_clVision.ClearOverlay(m_nUnit);
@@ -4826,7 +4826,7 @@ int CPcbProcess::AutoEOLFinalSFR(int nStep)
 
 
 		_stprintf_s(szLog, SIZE_OF_1K, _T("[AUTO] Firmware Verify 완료 [STEP : %d]"), nStep);
-		AddLog(szLog, 0, m_nUnit);
+		AddLog(szLog, 0, m_nUnit);*/
 
 
 		nRetStep = 114500;
